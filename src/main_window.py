@@ -68,6 +68,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	def clickOnCreate(self):
 		model = self.table_view_session.model()
 		row_inserted = model.insertRow(["Editing...", "output.zip", "0%"])
+		print("index inserted row = ", row_inserted)
+		self.table_view_session.selectRow(row_inserted)
 	
 	# -------------------------------------------------------------------------
 	def clickOnRemove(self):
