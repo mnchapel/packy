@@ -43,11 +43,18 @@ class Session(QtCore.QAbstractTableModel):
 	
     # -------------------------------------------------------------------------
 	def insertRow(self, data)->int:
-		row = self.rowCount() + 1
+		row = self.rowCount()
 		self.rowsAboutToBeInserted.emit(QtCore.QModelIndex(), row, row)
 		self._data.append(data)
 		self.rowsInserted.emit(QtCore.QModelIndex(), row, row)
 		return row
+
+    # -------------------------------------------------------------------------
+	def removeRow(self, row: int):
+		if self.rowCount() > row and row >= 0:
+			self.rowsAboutToBeRemoved.emit(QtCore.QModelIndex(), row, row)
+			self._data.pop(row)
+			self.rowsRemoved.emit(QtCore.QModelIndex(), row, row)
     
     # -------------------------------------------------------------------------
 	#def save():

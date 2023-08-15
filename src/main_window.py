@@ -3,6 +3,7 @@ author: Marie-Neige Chapel
 """
 
 # PyQt
+from queue import Empty
 from PyQt6 import QtWidgets
 from ui_main_window import Ui_MainWindow
 
@@ -66,12 +67,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	# -------------------------------------------------------------------------
 	def clickOnCreate(self):
 		model = self.table_view_session.model()
-		model.insertRow(["a", "b", "c"])
-		model.submit()
+		row_inserted = model.insertRow(["Editing...", "output.zip", "0%"])
 	
 	# -------------------------------------------------------------------------
 	def clickOnRemove(self):
-		print("clickOnRemove (not implemented yet)")
+		model = self.table_view_session.model()
+		current_row = self.table_view_session.currentIndex().row()
+		model.removeRow(current_row)
 	
 	# -------------------------------------------------------------------------
 	def clickOnEdit(self):
