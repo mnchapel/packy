@@ -4,6 +4,7 @@ author: Marie-Neige Chapel
 
 # PyQt
 from queue import Empty
+from typing import Self
 from PyQt6 import QtWidgets
 from ui_main_window import Ui_MainWindow
 
@@ -22,6 +23,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.connectHelpMenuActions()
 		self.connectTaskManagement()
 		self.connectTaskRunning()
+
+		self.save_text = "Save"
+		self.edit_text = "Edit"
 
 		session = Session()
 		self.table_view_session.setModel(session)
@@ -68,8 +72,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	def clickOnCreate(self):
 		model = self.table_view_session.model()
 		row_inserted = model.insertRow(["Editing...", "output.zip", "0%"])
-		print("index inserted row = ", row_inserted)
 		self.table_view_session.selectRow(row_inserted)
+		self.enableTaskProperties()
 	
 	# -------------------------------------------------------------------------
 	def clickOnRemove(self):
@@ -79,7 +83,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	
 	# -------------------------------------------------------------------------
 	def clickOnEdit(self):
-		print("clickOnEdit (not implemented yet)")
+		current_row = self.table_view_session.currentIndex().row()
+		
+		if current_row >= 0:
+			if self.push_button_edit.text() == self.edit_text:
+				self.enableTaskProperties()
+			else:
+				self.disableTaskProperties()
 	
 	# -------------------------------------------------------------------------
 	def connectTaskRunning(self):
@@ -93,3 +103,28 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	# -------------------------------------------------------------------------
 	def clickOnCancel(self):
 		print("clickOnCancel (not implemented yet)")
+
+	# -------------------------------------------------------------------------
+	def enableTaskProperties(self):
+		self.group_box_file_selection.setEnabled(True)
+		self.group_box_output_properties.setEnabled(True)
+		self.group_box_statistics.setEnabled(False)
+
+		self.push_button_create.setEnabled(False)
+		self.push_button_remove.setEnabled(False)
+		self.push_button_edit.setText(self.save_text)
+		self.push_button_run_all.setEnabled(False)
+		self.push_button_cancel.setEnabled(False)
+
+	# -------------------------------------------------------------------------
+	def disableTaskProperties(self):
+		self.group_box_file_selection.setEnabled(False)
+		self.group_box_output_properties.setEnabled(False)
+		self.group_box_statistics.setEnabled(True)
+
+		self.push_button_create.setEnabled(True)
+		self.push_button_remove.setEnabled(True)
+		self.push_button_edit.setText(self.edit_text)
+		self.push_button_run_all.setEnabled(True)
+		self.push_button_cancel.setEnabled(True)
+
