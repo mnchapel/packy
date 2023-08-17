@@ -6,6 +6,9 @@ author: Marie-Neige Chapel
 from PyQt6 import QtCore
 from PyQt6.QtCore import Qt
 
+# PackY
+from task import Task
+
 class Session(QtCore.QAbstractTableModel):
     
 	# -------------------------------------------------------------------------
@@ -22,7 +25,14 @@ class Session(QtCore.QAbstractTableModel):
     # -------------------------------------------------------------------------
 	def data(self, index, role):
 		if role == Qt.ItemDataRole.DisplayRole:
-			value = self._data[index.row()][index.column()]
+			task = self._data[index.row()]
+
+			value = ""
+			if index.column() == 0:
+				value = task.status()
+			elif index.column() == 1:
+				value = task.output()
+
 			return str(value)
 	
     # -------------------------------------------------------------------------
@@ -37,17 +47,20 @@ class Session(QtCore.QAbstractTableModel):
 
     # -------------------------------------------------------------------------
 	def columnCount(self, index=None):
-		if self._data:
-			return len(self._data[0])
 		return len(self._headers)
 	
     # -------------------------------------------------------------------------
 	def insertRow(self, data)->int:
 		row = self.rowCount()
 		self.rowsAboutToBeInserted.emit(QtCore.QModelIndex(), row, row)
-		self._data.append(data)
+		self.createTask()
 		self.rowsInserted.emit(QtCore.QModelIndex(), row, row)
 		return row
+	
+    # -------------------------------------------------------------------------
+	def createTask(self):
+		task = Task()
+		self._data.append(task)
 
     # -------------------------------------------------------------------------
 	def removeRow(self, row: int):
@@ -55,6 +68,10 @@ class Session(QtCore.QAbstractTableModel):
 			self.rowsAboutToBeRemoved.emit(QtCore.QModelIndex(), row, row)
 			self._data.pop(row)
 			self.rowsRemoved.emit(QtCore.QModelIndex(), row, row)
+
+    # -------------------------------------------------------------------------
+	def taskAt(self, row: int)->Task:
+		return self._data[row]
     
     # -------------------------------------------------------------------------
 	#def save():

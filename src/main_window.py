@@ -3,13 +3,13 @@ author: Marie-Neige Chapel
 """
 
 # PyQt
-from queue import Empty
-from typing import Self
-from PyQt6 import QtWidgets
+from PyQt6 import QtCore, QtWidgets
+from PyQt6.QtCore import Qt
 from ui_main_window import Ui_MainWindow
 
 # PackY
 from about import About
+from task import Task
 from session import Session
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -24,15 +24,23 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.connectTaskManagement()
 		self.connectTaskRunning()
 
+		self.initTaskView()
+
 		self.save_text = "Save"
 		self.edit_text = "Edit"
 
-		session = Session()
-		self.table_view_session.setModel(session)
+		self._session = Session()
+		self.table_view_session.setModel(self._session)
 
 		self.table_view_session.horizontalHeader().setVisible(True)
+		self.table_view_session.selectionModel().selectionChanged.connect(self.mapViewWithTask)
 
 		self.show()
+	
+	# -------------------------------------------------------------------------
+	def initTaskView(self):
+		self._task_view_mapper = QtWidgets.QDataWidgetMapper(self)
+		self._task_view_mapper.setOrientation(Qt.Orientation.Vertical)
 
 	# -------------------------------------------------------------------------
 	def connectFileMenuActions(self):
@@ -103,6 +111,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	# -------------------------------------------------------------------------
 	def clickOnCancel(self):
 		print("clickOnCancel (not implemented yet)")
+
+	# -------------------------------------------------------------------------
+	def mapViewWithTask(self, selected: QtCore.QItemSelection, deselected: QtCore.QItemSelection):
+		selected_row = self.table_view_session.currentIndex().row()
+		task = self._session.taskAt(selected_row)
+		self._task_view_mapper.setModel(task)
+		self._task_view_mapper.addMapping(self.line_edit_destination, 1)
+		self._task_view_mapper.toFirst()
 
 	# -------------------------------------------------------------------------
 	def enableTaskProperties(self):
