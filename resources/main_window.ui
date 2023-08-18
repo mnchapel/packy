@@ -63,6 +63,9 @@
         </item>
         <item>
          <widget class="QPushButton" name="push_button_remove">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>Remove</string>
           </property>
@@ -70,6 +73,9 @@
         </item>
         <item>
          <widget class="QPushButton" name="push_button_edit">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>Edit</string>
           </property>
@@ -81,6 +87,9 @@
        <layout class="QHBoxLayout" name="hlayout_task_running">
         <item>
          <widget class="QPushButton" name="push_button_run_all">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -94,6 +103,9 @@
         </item>
         <item>
          <widget class="QPushButton" name="push_button_cancel">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -109,6 +121,9 @@
       </item>
       <item>
        <widget class="QGroupBox" name="group_box_statistics">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="title">
          <string>Statistics</string>
         </property>
@@ -154,7 +169,7 @@
          <bool>false</bool>
         </property>
         <property name="title">
-         <string>File selection</string>
+         <string>File(s) selection</string>
         </property>
         <property name="checkable">
          <bool>false</bool>
@@ -171,23 +186,14 @@
           </widget>
          </item>
          <item row="0" column="2">
-          <widget class="QToolButton" name="tool_button_source">
+          <widget class="QPushButton" name="push_button_source">
            <property name="text">
             <string>Browse...</string>
            </property>
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QTreeWidget" name="tree_widget_source">
-           <attribute name="headerVisible">
-            <bool>false</bool>
-           </attribute>
-           <column>
-            <property name="text">
-             <string notr="true">1</string>
-            </property>
-           </column>
-          </widget>
+          <widget class="QTreeView" name="tree_view_source"/>
          </item>
         </layout>
        </widget>
@@ -225,7 +231,7 @@
          <item row="0" column="0">
           <widget class="QLabel" name="label_destination">
            <property name="text">
-            <string>Destination</string>
+            <string>Destination folder</string>
            </property>
           </widget>
          </item>
@@ -299,13 +305,6 @@
          <item row="0" column="1">
           <widget class="QLineEdit" name="line_edit_destination"/>
          </item>
-         <item row="0" column="2">
-          <widget class="QToolButton" name="tool_button_destination">
-           <property name="text">
-            <string>Browse...</string>
-           </property>
-          </widget>
-         </item>
          <item row="4" column="1">
           <widget class="QComboBox" name="cbox_compression_method">
            <item>
@@ -347,6 +346,13 @@
              <string>Fastest</string>
             </property>
            </item>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QPushButton" name="push_button_destination">
+           <property name="text">
+            <string>Browse...</string>
+           </property>
           </widget>
          </item>
         </layout>

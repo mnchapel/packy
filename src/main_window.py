@@ -5,11 +5,12 @@ author: Marie-Neige Chapel
 # PyQt
 from PyQt6 import QtCore, QtWidgets
 from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QFileDialog
 from ui_main_window import Ui_MainWindow
 
 # PackY
 from about import About
-from task import Task
+from files_model import FilesModel
 from session import Session
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -19,47 +20,81 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		super(MainWindow, self).__init__(*args, **kwargs)
 		self.setupUi(self)
 
+		# ----------------
+		# MEMBER VARIABLES
+		# ----------------
+		self._save_text = "Save"
+		self._edit_text = "Edit"
+
+		self.initConnects()
+		self.initSessionView()
+		self.initTaskView()
+		self.initFilesView()
+
+		self.show()
+
+	# -------------------------------------------------------------------------
+	def initConnects(self):
 		self.connectFileMenuActions()
 		self.connectHelpMenuActions()
 		self.connectTaskManagement()
 		self.connectTaskRunning()
+		self.connectFilesSelection()
 
-		self.initTaskView()
+	# -------------------------------------------------------------------------
+	def connectFileMenuActions(self):
+		self.action_save.triggered.connect(self.onSave)
+		self.action_options.triggered.connect(self.openOptions)
+		self.action_exit.triggered.connect(self.close)
 
-		self.save_text = "Save"
-		self.edit_text = "Edit"
+	# -------------------------------------------------------------------------
+	def connectHelpMenuActions(self):
+		self.action_documentation.triggered.connect(self.openDocumentation)
+		self.action_about.triggered.connect(self.openAbout)
+	
+	# -------------------------------------------------------------------------
+	def connectTaskManagement(self):
+		self.push_button_create.clicked.connect(self.clickOnCreate)
+		self.push_button_remove.clicked.connect(self.clickOnRemove)
+		self.push_button_edit.clicked.connect(self.clickOnEdit)
+	
+	# -------------------------------------------------------------------------
+	def connectTaskRunning(self):
+		self.push_button_run_all.clicked.connect(self.clickOnRunAll)
+		self.push_button_cancel.clicked.connect(self.clickOnCancel)
 
+	# -------------------------------------------------------------------------
+	def connectFilesSelection(self):
+		self.push_button_source.clicked.connect(self.selectFolder)
+	
+	# -------------------------------------------------------------------------
+	def initSessionView(self):
 		self._session = Session()
 		self.table_view_session.setModel(self._session)
-
 		self.table_view_session.horizontalHeader().setVisible(True)
 		self.table_view_session.selectionModel().selectionChanged.connect(self.mapViewWithTask)
 
-		self.show()
-	
 	# -------------------------------------------------------------------------
 	def initTaskView(self):
 		self._task_view_mapper = QtWidgets.QDataWidgetMapper(self)
 		self._task_view_mapper.setOrientation(Qt.Orientation.Vertical)
 
 	# -------------------------------------------------------------------------
-	def connectFileMenuActions(self):
-		self.action_save.triggered.connect(self.save)
-		self.action_options.triggered.connect(self.openOptions)
-		self.action_exit.triggered.connect(self.close)
+	def initFilesView(self):
+		self._files_model = FilesModel()
+		self._files_model.setRootPath("")
 	
 	# -------------------------------------------------------------------------
-	def save(self, s):
-		print("save (not implemented yet)")
+	def selectFolder(self):
+		QFileDialog.getExistingDirectory(self, "Select folder", self.line_edit_source.text(), QFileDialog.Option.ShowDirsOnly)
+	
+	# -------------------------------------------------------------------------
+	def onSave(self, s):
+		print("onSave (not implemented yet)")
 	
 	# -------------------------------------------------------------------------
 	def openOptions(self, s):
 		print("openOptions (not implemented yet)")
-
-	# -------------------------------------------------------------------------
-	def connectHelpMenuActions(self):
-		self.action_documentation.triggered.connect(self.openDocumentation)
-		self.action_about.triggered.connect(self.openAbout)
 
 	# -------------------------------------------------------------------------
 	def openDocumentation(self, s):
@@ -69,12 +104,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	def openAbout(self, s):
 		dlg = About(self)
 		dlg.exec()
-	
-	# -------------------------------------------------------------------------
-	def connectTaskManagement(self):
-		self.push_button_create.clicked.connect(self.clickOnCreate)
-		self.push_button_remove.clicked.connect(self.clickOnRemove)
-		self.push_button_edit.clicked.connect(self.clickOnEdit)
 	
 	# -------------------------------------------------------------------------
 	def clickOnCreate(self):
@@ -94,15 +123,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		current_row = self.table_view_session.currentIndex().row()
 		
 		if current_row >= 0:
-			if self.push_button_edit.text() == self.edit_text:
+			if self.push_button_edit.text() == self._edit_text:
 				self.enableTaskProperties()
 			else:
 				self.disableTaskProperties()
-	
-	# -------------------------------------------------------------------------
-	def connectTaskRunning(self):
-		self.push_button_run_all.clicked.connect(self.clickOnRunAll)
-		self.push_button_cancel.clicked.connect(self.clickOnCancel)
 	
 	# -------------------------------------------------------------------------
 	def clickOnRunAll(self):
@@ -118,7 +142,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		task = self._session.taskAt(selected_row)
 		self._task_view_mapper.setModel(task)
 		self._task_view_mapper.addMapping(self.line_edit_destination, 1)
+		self._task_view_mapper.addMapping(self.line_edit_source, 2)
 		self._task_view_mapper.toFirst()
+
+		if self.tree_view_source.model() is None:
+			self.tree_view_source.setModel(self._files_model)
+		
+		# TODO put these lines in another function
+		self.tree_view_source.setRootIndex(self._files_model.index(self.line_edit_source.text()))
+		
+		for col_index in range(1, self._files_model.columnCount()):
+			self.tree_view_source.setColumnHidden(col_index, True)
 
 	# -------------------------------------------------------------------------
 	def enableTaskProperties(self):
@@ -128,9 +162,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 		self.push_button_create.setEnabled(False)
 		self.push_button_remove.setEnabled(False)
-		self.push_button_edit.setText(self.save_text)
+		self.push_button_edit.setEnabled(True)
+		self.push_button_edit.setText(self._save_text)
 		self.push_button_run_all.setEnabled(False)
 		self.push_button_cancel.setEnabled(False)
+
+		self.table_view_session.setEnabled(False)
 
 	# -------------------------------------------------------------------------
 	def disableTaskProperties(self):
@@ -140,7 +177,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 		self.push_button_create.setEnabled(True)
 		self.push_button_remove.setEnabled(True)
-		self.push_button_edit.setText(self.edit_text)
+		self.push_button_edit.setText(self._edit_text)
 		self.push_button_run_all.setEnabled(True)
 		self.push_button_cancel.setEnabled(True)
+
+		self.table_view_session.setEnabled(True)
 
