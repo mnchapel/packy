@@ -242,6 +242,9 @@
              <property name="text">
               <string>tar</string>
              </property>
+             <attribute name="buttonGroup">
+              <string notr="true">button_group_packer_type</string>
+             </attribute>
             </widget>
            </item>
            <item row="1" column="0">
@@ -249,6 +252,9 @@
              <property name="text">
               <string>tbz</string>
              </property>
+             <attribute name="buttonGroup">
+              <string notr="true">button_group_packer_type</string>
+             </attribute>
             </widget>
            </item>
            <item row="1" column="1">
@@ -256,6 +262,9 @@
              <property name="text">
               <string>gz</string>
              </property>
+             <attribute name="buttonGroup">
+              <string notr="true">button_group_packer_type</string>
+             </attribute>
             </widget>
            </item>
            <item row="1" column="2">
@@ -263,6 +272,9 @@
              <property name="text">
               <string>tgz</string>
              </property>
+             <attribute name="buttonGroup">
+              <string notr="true">button_group_packer_type</string>
+             </attribute>
             </widget>
            </item>
            <item row="0" column="2">
@@ -270,6 +282,9 @@
              <property name="text">
               <string>bz2</string>
              </property>
+             <attribute name="buttonGroup">
+              <string notr="true">button_group_packer_type</string>
+             </attribute>
             </widget>
            </item>
            <item row="0" column="0">
@@ -277,6 +292,9 @@
              <property name="text">
               <string>zip</string>
              </property>
+             <attribute name="buttonGroup">
+              <string notr="true">button_group_packer_type</string>
+             </attribute>
             </widget>
            </item>
            <item row="2" column="0">
@@ -284,6 +302,9 @@
              <property name="text">
               <string>lzma</string>
              </property>
+             <attribute name="buttonGroup">
+              <string notr="true">button_group_packer_type</string>
+             </attribute>
             </widget>
            </item>
            <item row="2" column="1">
@@ -291,6 +312,9 @@
              <property name="text">
               <string>tlz</string>
              </property>
+             <attribute name="buttonGroup">
+              <string notr="true">button_group_packer_type</string>
+             </attribute>
             </widget>
            </item>
            <item row="2" column="2">
@@ -298,6 +322,9 @@
              <property name="text">
               <string>xz</string>
              </property>
+             <attribute name="buttonGroup">
+              <string notr="true">button_group_packer_type</string>
+             </attribute>
             </widget>
            </item>
           </layout>
@@ -420,4 +447,7 @@
  </widget>
  <resources/>
  <connections/>
+ <buttongroups>
+  <buttongroup name="button_group_packer_type"/>
+ </buttongroups>
 </ui>

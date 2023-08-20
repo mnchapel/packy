@@ -3,7 +3,7 @@ author: Marie-Neige Chapel
 """
 
 # PyQt
-from PyQt6 import QtCore, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QFileDialog
 from ui_main_window import Ui_MainWindow
@@ -39,7 +39,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.connectHelpMenuActions()
 		self.connectTaskManagement()
 		self.connectTaskRunning()
-		self.connectFilesSelection()
+		self.connectTaskProperties()
 
 	# -------------------------------------------------------------------------
 	def connectFileMenuActions(self):
@@ -64,6 +64,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.push_button_cancel.clicked.connect(self.clickOnCancel)
 
 	# -------------------------------------------------------------------------
+	def connectTaskProperties(self):
+		self.connectFilesSelection()
+		self.button_group_packer_type.buttonClicked.connect(self.updatePackerType)
+
+	# -------------------------------------------------------------------------
+	def updatePackerType(self, button: QtWidgets.QAbstractButton):
+		self._packer_type_mapper.submit()
+		
+	# -------------------------------------------------------------------------
 	def connectFilesSelection(self):
 		self.push_button_source.clicked.connect(self.selectFolder)
 	
@@ -78,6 +87,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	def initTaskView(self):
 		self._task_view_mapper = QtWidgets.QDataWidgetMapper(self)
 		self._task_view_mapper.setOrientation(Qt.Orientation.Vertical)
+
+		self._packer_type_mapper = QtWidgets.QDataWidgetMapper(self)
+		self._packer_type_mapper.setOrientation(Qt.Orientation.Vertical)
 
 	# -------------------------------------------------------------------------
 	def initFilesView(self):
@@ -141,8 +153,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		selected_row = self.table_view_session.currentIndex().row()
 		task = self._session.taskAt(selected_row)
 		self._task_view_mapper.setModel(task)
-		self._task_view_mapper.addMapping(self.line_edit_destination, 1)
-		self._task_view_mapper.addMapping(self.line_edit_source, 2)
+		self._task_view_mapper.addMapping(self.line_edit_destination, task.properties.OUTPUT_NAME.value)
+		self._task_view_mapper.addMapping(self.line_edit_source, task.properties.OUTPUT_FOLDER.value)
 		self._task_view_mapper.toFirst()
 
 		if self.tree_view_source.model() is None:
@@ -153,6 +165,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		
 		for col_index in range(1, self._files_model.columnCount()):
 			self.tree_view_source.setColumnHidden(col_index, True)
+
+		self._packer_type_mapper.setModel(task.packerType())
+		self._packer_type_mapper.addMapping(self.rbutton_zip, 0)
+		self._packer_type_mapper.addMapping(self.rbutton_tar, 1)
+		self._packer_type_mapper.addMapping(self.rbutton_bz2, 2)
+		self._packer_type_mapper.addMapping(self.rbutton_tbz, 3)
+		self._packer_type_mapper.addMapping(self.rbutton_gz, 4)
+		self._packer_type_mapper.addMapping(self.rbutton_tgz, 5)
+		self._packer_type_mapper.addMapping(self.rbutton_lzma, 6)
+		self._packer_type_mapper.addMapping(self.rbutton_tlz, 7)
+		self._packer_type_mapper.addMapping(self.rbutton_xz, 8)
+		self._packer_type_mapper.toFirst()
 
 	# -------------------------------------------------------------------------
 	def enableTaskProperties(self):
@@ -182,4 +206,3 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.push_button_cancel.setEnabled(True)
 
 		self.table_view_session.setEnabled(True)
-

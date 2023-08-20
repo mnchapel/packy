@@ -4,7 +4,7 @@ author: Marie-Neige Chapel
 
 # Python
 import json
-import os
+from enum import Enum
 
 # PyQt
 from PyQt6 import QtCore
@@ -12,6 +12,7 @@ from PyQt6.QtCore import Qt
 
 # PackY
 from packer import Packer
+from packer_type import PackerType
 
 class Task(QtCore.QAbstractListModel):
 	
@@ -19,12 +20,21 @@ class Task(QtCore.QAbstractListModel):
 	def __init__(self):
 		super(Task, self).__init__()
 		
+		#test
+		self._packer_type = PackerType()
+
 		# ----------------
 		# MEMBER VARIABLES
 		# ----------------
+		self.properties = Enum("TaskProperties", [
+			"STATUS",
+			"OUTPUT_NAME",
+			"OUTPUT_FOLDER",
+			"PACKER_TYPE"
+		])
+
 		self._status = "Nothing"
 		self._output_folder = QtCore.QStandardPaths.writableLocation(QtCore.QStandardPaths.StandardLocation.DownloadLocation)
-
 		self._output_name = "output_name"
 		self._packer = Packer()
 
@@ -37,21 +47,33 @@ class Task(QtCore.QAbstractListModel):
 		return self._output_name
 	
 	# -------------------------------------------------------------------------
+	def packer(self):
+		return self._packer
+	
+	# -------------------------------------------------------------------------
+	def packerType(self):
+		return self._packer_type
+
+	# -------------------------------------------------------------------------
+	def updatePackerType(self, type: str):
+		self._packer.updateType(type)
+	
+	# -------------------------------------------------------------------------
 	def data(self, index, role):
 		if index.isValid():
-			if index.row() == 0:
+			if index.row() == self.properties.STATUS.value:
 				return self._status
-			elif index.row() == 1:
+			elif index.row() == self.properties.OUTPUT_NAME.value:
 				return self._output_name
-			elif index.row() == 2:
+			elif index.row() == self.properties.OUTPUT_FOLDER.value:
 				return self._output_folder
 	
 	# -------------------------------------------------------------------------
-	def setData(self, index, value, role):
+	def setData(self, index, value, role = Qt.ItemDataRole.EditRole):
 		if index.isValid() and role == Qt.ItemDataRole.EditRole:
-			if index.row() == 1:
+			if index.row() == self.properties.OUTPUT_NAME.value:
 				self._output_name = value
-			elif index.row() == 2:
+			elif index.row() == self.properties.OUTPUT_FOLDER.value:
 				self._output_folder = value
 			return True
 		else:
@@ -59,7 +81,7 @@ class Task(QtCore.QAbstractListModel):
 	
 	# -------------------------------------------------------------------------
 	def rowCount(self, index=None):
-		return 3
+		return 4
 
 	# -------------------------------------------------------------------------
 	def save(self):
