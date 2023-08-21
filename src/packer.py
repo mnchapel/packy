@@ -2,6 +2,8 @@
 author: Marie-Neige Chapel
 """
 
+import zipfile
+
 class Packer():
 
 	# -------------------------------------------------------------------------
@@ -10,7 +12,7 @@ class Packer():
 		# ----------------
 		# MEMBER VARIABLES
 		# ----------------
-		self._packer_type = "zip"
+		self._packer_type = ""
 		self._compression_type = ""
 		self._compression_level = ""
 

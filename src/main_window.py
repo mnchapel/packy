@@ -3,7 +3,7 @@ author: Marie-Neige Chapel
 """
 
 # PyQt
-from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtWidgets
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QFileDialog
 from ui_main_window import Ui_MainWindow
@@ -11,6 +11,8 @@ from ui_main_window import Ui_MainWindow
 # PackY
 from about import About
 from files_model import FilesModel
+from task import Task
+from packer_data import PackerData
 from session import Session
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -85,9 +87,23 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 	# -------------------------------------------------------------------------
 	def initTaskView(self):
+		self.createTaskMapper()
+		self.createPackerMapper()
+	
+	# -------------------------------------------------------------------------
+	def createTaskMapper(self):
 		self._task_view_mapper = QtWidgets.QDataWidgetMapper(self)
 		self._task_view_mapper.setOrientation(Qt.Orientation.Vertical)
 
+	# -------------------------------------------------------------------------
+	def createPackerMapper(self):
+		self._packer_mapper = QtWidgets.QDataWidgetMapper(self)
+		self._packer_mapper.setOrientation(Qt.Orientation.Vertical)
+
+		self.createPackerTypeMapper()
+
+	# -------------------------------------------------------------------------
+	def createPackerTypeMapper(self):
 		self._packer_type_mapper = QtWidgets.QDataWidgetMapper(self)
 		self._packer_type_mapper.setOrientation(Qt.Orientation.Vertical)
 
@@ -152,21 +168,45 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	def mapViewWithTask(self, selected: QtCore.QItemSelection, deselected: QtCore.QItemSelection):
 		selected_row = self.table_view_session.currentIndex().row()
 		task = self._session.taskAt(selected_row)
+
+		self.updateTaskViewMapper(task)
+		self.updatePackerViewMapper(task)
+		self.updateFilesSelection()
+	
+	# -------------------------------------------------------------------------
+	def updateTaskViewMapper(self, task):
 		self._task_view_mapper.setModel(task)
 		self._task_view_mapper.addMapping(self.line_edit_destination, task.properties.OUTPUT_NAME.value)
 		self._task_view_mapper.addMapping(self.line_edit_source, task.properties.OUTPUT_FOLDER.value)
 		self._task_view_mapper.toFirst()
-
+	
+	# -------------------------------------------------------------------------
+	def updateFilesSelection(self):
 		if self.tree_view_source.model() is None:
 			self.tree_view_source.setModel(self._files_model)
-		
-		# TODO put these lines in another function
+
 		self.tree_view_source.setRootIndex(self._files_model.index(self.line_edit_source.text()))
 		
 		for col_index in range(1, self._files_model.columnCount()):
 			self.tree_view_source.setColumnHidden(col_index, True)
+	
+	# -------------------------------------------------------------------------
+	def updatePackerViewMapper(self, task: Task):
+		packer_data = task.packerData()
 
-		self._packer_type_mapper.setModel(task.packerType())
+		self._packer_mapper.setModel(packer_data)
+		self._packer_mapper.addMapping(self.cbox_compression_level, 1, b"currentIndex")
+		self._packer_mapper.addMapping(self.cbox_compression_method, 2, b"currentIndex")
+		self._packer_mapper.toFirst()
+
+		self.updatePackerTypeViewMapper(packer_data)
+	
+	# -------------------------------------------------------------------------
+	def updatePackerTypeViewMapper(self, packer_data: PackerData):
+
+		packer_type_data = packer_data.packerTypeData()
+
+		self._packer_type_mapper.setModel(packer_type_data)
 		self._packer_type_mapper.addMapping(self.rbutton_zip, 0)
 		self._packer_type_mapper.addMapping(self.rbutton_tar, 1)
 		self._packer_type_mapper.addMapping(self.rbutton_bz2, 2)

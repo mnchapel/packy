@@ -11,8 +11,7 @@ from PyQt6 import QtCore
 from PyQt6.QtCore import Qt
 
 # PackY
-from packer import Packer
-from packer_type import PackerType
+from packer_data import PackerData
 
 class Task(QtCore.QAbstractListModel):
 	
@@ -20,9 +19,6 @@ class Task(QtCore.QAbstractListModel):
 	def __init__(self):
 		super(Task, self).__init__()
 		
-		#test
-		self._packer_type = PackerType()
-
 		# ----------------
 		# MEMBER VARIABLES
 		# ----------------
@@ -36,7 +32,7 @@ class Task(QtCore.QAbstractListModel):
 		self._status = "Nothing"
 		self._output_folder = QtCore.QStandardPaths.writableLocation(QtCore.QStandardPaths.StandardLocation.DownloadLocation)
 		self._output_name = "output_name"
-		self._packer = Packer()
+		self._packer_data = PackerData()
 
 	# -------------------------------------------------------------------------
 	def status(self):
@@ -47,17 +43,9 @@ class Task(QtCore.QAbstractListModel):
 		return self._output_name
 	
 	# -------------------------------------------------------------------------
-	def packer(self):
-		return self._packer
-	
-	# -------------------------------------------------------------------------
-	def packerType(self):
-		return self._packer_type
+	def packerData(self):
+		return self._packer_data
 
-	# -------------------------------------------------------------------------
-	def updatePackerType(self, type: str):
-		self._packer.updateType(type)
-	
 	# -------------------------------------------------------------------------
 	def data(self, index, role):
 		if index.isValid():
