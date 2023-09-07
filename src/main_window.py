@@ -114,7 +114,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	
 	# -------------------------------------------------------------------------
 	def selectFolder(self):
-		QFileDialog.getExistingDirectory(self, "Select folder", self.line_edit_source.text(), QFileDialog.Option.ShowDirsOnly)
+		folder_selected = QFileDialog.getExistingDirectory(self, "Select folder", self.line_edit_source.text(), QFileDialog.Option.ShowDirsOnly)
+		self.line_edit_source.setText(folder_selected)
+		self.tree_view_source.setRootIndex(self._files_model.index(folder_selected))
 	
 	# -------------------------------------------------------------------------
 	def onSave(self, s):
