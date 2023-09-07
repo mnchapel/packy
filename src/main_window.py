@@ -189,6 +189,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		
 		for col_index in range(1, self._files_model.columnCount()):
 			self.tree_view_source.setColumnHidden(col_index, True)
+
+		self._files_model.directoryLoaded.connect(self.updateTreeChildren)
+	
+	# -------------------------------------------------------------------------
+	def updateTreeChildren(self, path: str):
+		index = self._files_model.index(path)
+
+		parent_check_state = self._files_model.data(index, QtCore.Qt.ItemDataRole.CheckStateRole)
+		self._files_model.setData(index, parent_check_state, QtCore.Qt.ItemDataRole.CheckStateRole)
 	
 	# -------------------------------------------------------------------------
 	def updatePackerViewMapper(self, task: Task):

@@ -1,4 +1,7 @@
-# from typing_extensions import override
+"""
+author: Marie-Neige Chapel
+"""
+
 from PyQt6 import QtCore, QtGui
 
 class FilesModel(QtGui.QFileSystemModel):
@@ -19,12 +22,23 @@ class FilesModel(QtGui.QFileSystemModel):
 	
 	# -------------------------------------------------------------------------
 	# @override
-	def setData(self, index, value, role):		
-		if role == QtCore.Qt.ItemDataRole.CheckStateRole and index.column() == 0:
-			self._checks[index] = value
-			return True
-		else:
-			return QtGui.QFileSystemModel.setData(self, index, value, role)
+	def setData(self, index: QtCore.QModelIndex, value, role):	
+		match role:
+			case QtCore.Qt.ItemDataRole.CheckStateRole:
+				if index.column() == 0:
+					self._checks[self.filePath(index)] = value
+
+					for i in range(self.rowCount(index)):
+						child_index = self.index(i, 0, index)
+						self.setData(child_index, value, role)
+					
+					self.dataChanged.emit(index, index)
+					return True
+				else:
+					print("[FilesModel] wrong index.column()")
+					return False
+			case _:
+				return QtGui.QFileSystemModel.setData(self, index, value, role)
 			
 	# -------------------------------------------------------------------------
 	# @override
@@ -33,7 +47,7 @@ class FilesModel(QtGui.QFileSystemModel):
 	
 	# -------------------------------------------------------------------------
 	def checkState(self, index):
-		if index in self._checks:
-			return self._checks[index]
+		if self.filePath(index) in self._checks:
+			return self._checks[self.filePath(index)]
 		else:
 			return QtCore.Qt.CheckState.Unchecked
