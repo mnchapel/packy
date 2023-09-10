@@ -10,7 +10,6 @@ from ui_main_window import Ui_MainWindow
 
 # PackY
 from about import About
-from files_model import FilesModel
 from task import Task
 from packer_data import PackerData
 from session import Session
@@ -31,7 +30,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.initConnects()
 		self.initSessionView()
 		self.initTaskView()
-		self.initFilesView()
 
 		self.show()
 
@@ -109,14 +107,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 	# -------------------------------------------------------------------------
 	def initFilesView(self):
-		self._files_model = FilesModel()
-		self._files_model.setRootPath("")
+		files_model = self._selected_task.filesSelected()
+		
+		selected_row = self.table_view_session.currentIndex().row()
+		task = self._session.taskAt(selected_row)
+		files_model = task.filesSelected()
+		files_model.setRootPath("")
 	
 	# -------------------------------------------------------------------------
 	def selectFolder(self):
+		files_model = self._selected_task.filesSelected()
 		folder_selected = QFileDialog.getExistingDirectory(self, "Select folder", self.line_edit_source.text(), QFileDialog.Option.ShowDirsOnly)
 		self.line_edit_source.setText(folder_selected)
-		self.tree_view_source.setRootIndex(self._files_model.index(folder_selected))
+		self.tree_view_source.setRootIndex(files_model.index(folder_selected))
 	
 	# -------------------------------------------------------------------------
 	def onSave(self, s):
@@ -139,7 +142,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	def clickOnCreate(self):
 		model = self.table_view_session.model()
 		row_inserted = model.insertRow(["Editing...", "output.zip", "0%"])
+
+		self._selected_task = self._session.taskAt(row_inserted)
 		self.table_view_session.selectRow(row_inserted)
+
+		self.initFilesView()
 		self.enableTaskProperties()
 	
 	# -------------------------------------------------------------------------
@@ -169,14 +176,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	# -------------------------------------------------------------------------
 	def mapViewWithTask(self, selected: QtCore.QItemSelection, deselected: QtCore.QItemSelection):
 		selected_row = self.table_view_session.currentIndex().row()
-		task = self._session.taskAt(selected_row)
+		self._selected_task = self._session.taskAt(selected_row)
 
-		self.updateTaskViewMapper(task)
-		self.updatePackerViewMapper(task)
+		self.updateTaskViewMapper()
+		self.updatePackerViewMapper()
 		self.updateFilesSelection()
 	
 	# -------------------------------------------------------------------------
-	def updateTaskViewMapper(self, task):
+	def updateTaskViewMapper(self):
+		task: Task = self._selected_task
 		self._task_view_mapper.setModel(task)
 		self._task_view_mapper.addMapping(self.line_edit_destination, task.properties.OUTPUT_NAME.value)
 		self._task_view_mapper.addMapping(self.line_edit_source, task.properties.OUTPUT_FOLDER.value)
@@ -184,26 +192,27 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	
 	# -------------------------------------------------------------------------
 	def updateFilesSelection(self):
-		if self.tree_view_source.model() is None:
-			self.tree_view_source.setModel(self._files_model)
+		files_model = self._selected_task.filesSelected()
 
-		self.tree_view_source.setRootIndex(self._files_model.index(self.line_edit_source.text()))
+		self.tree_view_source.setModel(files_model)
+		self.tree_view_source.setRootIndex(files_model.index(self.line_edit_source.text()))
 		
-		for col_index in range(1, self._files_model.columnCount()):
+		for col_index in range(1, files_model.columnCount()):
 			self.tree_view_source.setColumnHidden(col_index, True)
 
-		self._files_model.directoryLoaded.connect(self.updateTreeChildren)
+		files_model.directoryLoaded.connect(self.updateTreeChildren)
 	
 	# -------------------------------------------------------------------------
 	def updateTreeChildren(self, path: str):
-		index = self._files_model.index(path)
+		files_model = self._selected_task.filesSelected()
+		index = files_model.index(path)
 
-		parent_check_state = self._files_model.data(index, QtCore.Qt.ItemDataRole.CheckStateRole)
-		self._files_model.setData(index, parent_check_state, QtCore.Qt.ItemDataRole.CheckStateRole)
+		parent_check_state = files_model.data(index, QtCore.Qt.ItemDataRole.CheckStateRole)
+		files_model.setData(index, parent_check_state, QtCore.Qt.ItemDataRole.CheckStateRole)
 	
 	# -------------------------------------------------------------------------
-	def updatePackerViewMapper(self, task: Task):
-		packer_data = task.packerData()
+	def updatePackerViewMapper(self):
+		packer_data = self._selected_task.packerData()
 
 		self._packer_mapper.setModel(packer_data)
 		self._packer_mapper.addMapping(self.cbox_compression_level, 1, b"currentIndex")

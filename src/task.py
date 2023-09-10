@@ -9,6 +9,7 @@ from enum import Enum
 # PyQt
 from PyQt6 import QtCore
 from PyQt6.QtCore import Qt
+from files_model import FilesModel
 
 # PackY
 from packer_data import PackerData
@@ -33,6 +34,7 @@ class Task(QtCore.QAbstractListModel):
 		self._output_folder = QtCore.QStandardPaths.writableLocation(QtCore.QStandardPaths.StandardLocation.DownloadLocation)
 		self._output_name = "output_name"
 		self._packer_data = PackerData()
+		self._files_selected = FilesModel()
 
 	# -------------------------------------------------------------------------
 	def status(self):
@@ -41,6 +43,10 @@ class Task(QtCore.QAbstractListModel):
 	# -------------------------------------------------------------------------
 	def output(self):
 		return self._output_name
+	
+	# -------------------------------------------------------------------------
+	def filesSelected(self):
+		return self._files_selected
 	
 	# -------------------------------------------------------------------------
 	def packerData(self):
