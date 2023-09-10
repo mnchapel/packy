@@ -2,12 +2,17 @@
 author: Marie-Neige Chapel
 """
 
+# Python
+import json
+from typing import Self
+
 # PyQt
 from PyQt6 import QtCore
 from PyQt6.QtCore import Qt
 
 # PackY
 from task import Task
+from task_encoder import TaskEncoder
 
 class Session(QtCore.QAbstractTableModel):
     
@@ -74,7 +79,9 @@ class Session(QtCore.QAbstractTableModel):
 		return self._data[row]
     
     # -------------------------------------------------------------------------
-	#def save():
+	def save(self):
+		with open("test.json", "w") as output_file:
+			json.dump(self._data[0], output_file, cls=TaskEncoder)
     
     # -------------------------------------------------------------------------
 	#def load():

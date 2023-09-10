@@ -123,7 +123,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	
 	# -------------------------------------------------------------------------
 	def onSave(self, s):
-		print("onSave (not implemented yet)")
+		self._session.save()
 	
 	# -------------------------------------------------------------------------
 	def openOptions(self, s):
