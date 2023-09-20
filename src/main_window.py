@@ -3,9 +3,11 @@ author: Marie-Neige Chapel
 """
 
 # PyQt
+import json
 from PyQt6 import QtCore, QtWidgets
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QFileDialog
+from session_encoder import SessionEncoder
 from ui_main_window import Ui_MainWindow
 
 # PackY
@@ -13,6 +15,7 @@ from about import About
 from task import Task
 from packer_data import PackerData
 from session import Session
+from session_encoder import SessionEncoder
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     
@@ -30,6 +33,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.initConnects()
 		self.initSessionView()
 		self.initTaskView()
+		self.initTitle()
 
 		self.show()
 
@@ -43,7 +47,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 	# -------------------------------------------------------------------------
 	def connectFileMenuActions(self):
+		self.action_new_session.triggered.connect(self.onNewSession)
 		self.action_save.triggered.connect(self.onSave)
+		self.action_open.triggered.connect(self.onOpen)
 		self.action_options.triggered.connect(self.openOptions)
 		self.action_exit.triggered.connect(self.close)
 
@@ -120,10 +126,30 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		folder_selected = QFileDialog.getExistingDirectory(self, "Select folder", self.line_edit_source.text(), QFileDialog.Option.ShowDirsOnly)
 		self.line_edit_source.setText(folder_selected)
 		self.tree_view_source.setRootIndex(files_model.index(folder_selected))
+
+	# -------------------------------------------------------------------------
+	def initTitle(self):
+		self.setWindowTitle("PackY - Untitled session")
 	
 	# -------------------------------------------------------------------------
+	def onNewSession(self):
+		self._session = Session()
+
+	# -------------------------------------------------------------------------
 	def onSave(self, s):
-		self._session.save()
+		if not self._session.name():
+			[filename, _] = QFileDialog.getSaveFileName(self, "Select output folder", "")
+			print(filename)
+			self._session.setName(filename)
+		
+		with open(filename, "w") as output_file:
+			json.dump(self._session, output_file, cls=SessionEncoder, indent=4)
+	
+	# -------------------------------------------------------------------------
+	def onOpen(self, s):
+		[filename, _] = QFileDialog.getOpenFileName(self, "Open session", "")
+		print("Open ", filename)
+		self._session.load(filename)
 	
 	# -------------------------------------------------------------------------
 	def openOptions(self, s):

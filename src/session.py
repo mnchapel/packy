@@ -4,7 +4,7 @@ author: Marie-Neige Chapel
 
 # Python
 import json
-from typing import Self
+import os
 
 # PyQt
 from PyQt6 import QtCore
@@ -12,7 +12,6 @@ from PyQt6.QtCore import Qt
 
 # PackY
 from task import Task
-from task_encoder import TaskEncoder
 
 class Session(QtCore.QAbstractTableModel):
     
@@ -26,6 +25,16 @@ class Session(QtCore.QAbstractTableModel):
 		self._data = [] if data is None else data
 		self._headers = ["Status", "Output", "Progress"]
 		self._name = ""
+		self._dirname = ""
+
+    # -------------------------------------------------------------------------
+	def name(self):
+		return self._name
+
+    # -------------------------------------------------------------------------
+	def setName(self, path: str):
+		self._name = os.path.basename(path)
+		self._dirname = os.path.dirname(path)
 
     # -------------------------------------------------------------------------
 	def data(self, index, role):
@@ -75,13 +84,26 @@ class Session(QtCore.QAbstractTableModel):
 			self.rowsRemoved.emit(QtCore.QModelIndex(), row, row)
 
     # -------------------------------------------------------------------------
+	def tasks(self):
+		return self._data
+
+    # -------------------------------------------------------------------------
 	def taskAt(self, row: int)->Task:
 		return self._data[row]
     
     # -------------------------------------------------------------------------
-	def save(self):
-		with open("test.json", "w") as output_file:
-			json.dump(self._data[0], output_file, cls=TaskEncoder)
-    
-    # -------------------------------------------------------------------------
-	#def load():
+	def load(self, filename: str):
+		path = filename
+		# path = os.path.join(self._dirname, self._name + ".json")
+		with open(path, "r") as input_file:
+			data = input_file.read()
+			print("data = ", data)
+			# session = json.load(input_file)
+			# d = json.JSONDecoder()
+			# dict = d.decode(data)
+			# print("")
+			# print("dict = ", dict)
+			obj = json.loads(data)
+			print("")
+			print("obj = ", obj)
+

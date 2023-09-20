@@ -10,6 +10,10 @@ class FilesModel(QtGui.QFileSystemModel):
 	def __init__(self, parent=None):
 		super(FilesModel, self).__init__()
 		self._checks = {}
+
+	# -------------------------------------------------------------------------
+	def checksToStr(self):
+		return {str(key): str(value) for key, value in self._checks.items()}
 	
 	# -------------------------------------------------------------------------
 	# @override
