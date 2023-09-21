@@ -12,9 +12,21 @@ class Packer():
 		# ----------------
 		# MEMBER VARIABLES
 		# ----------------
-		self._packer_type = ""
+		self._type = ""
 		self._compression_type = ""
 		self._compression_level = ""
+
+    # -------------------------------------------------------------------------
+	def type(self):
+		return self._type
+	
+    # -------------------------------------------------------------------------
+	def compressionType(self):
+		return self._compression_type
+	
+    # -------------------------------------------------------------------------
+	def compressionLevel(self):
+		return self._compression_level
 
     # -------------------------------------------------------------------------
 	def updateType(self, type: str):

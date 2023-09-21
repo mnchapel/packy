@@ -9,6 +9,7 @@ import json
 from session import Session
 from task import Task
 from files_model import FilesModel
+from packer import Packer
 
 class SessionEncoder(json.JSONEncoder):
 
@@ -20,6 +21,8 @@ class SessionEncoder(json.JSONEncoder):
 			return self.serializeTask(obj)
 		elif isinstance(obj, FilesModel):
 			return self.serializeFilesModel(obj)
+		elif isinstance(obj, Packer):
+			return self.serializePacker(obj)
 		else:
 			return super.default(obj)
 	
@@ -47,5 +50,15 @@ class SessionEncoder(json.JSONEncoder):
 
 		dict["root_path"] = files_model.rootPath()
 		dict["check"] = files_model.checksToStr()
+
+		return dict
+	
+	# -------------------------------------------------------------------------
+	def serializePacker(self, packer: Packer):
+		dict = {}
+
+		dict["type"] = packer.type()
+		dict["compression_type"] = packer.compressionType()
+		dict["compression_level"] = packer.compressionLevel()
 
 		return dict

@@ -84,6 +84,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		files_model = self._selected_task.filesSelected()
 		folder_selected = QFileDialog.getExistingDirectory(self, "Select folder", self.line_edit_source.text(), QFileDialog.Option.ShowDirsOnly)
 		self.line_edit_source.setText(folder_selected)
+		files_model.setRootPath(folder_selected)
 		self.tree_view_source.setRootIndex(files_model.index(folder_selected))
 
 	# -------------------------------------------------------------------------
@@ -184,7 +185,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		files_model = self._selected_task.filesSelected()
 
 		self.tree_view_source.setModel(files_model)
-		self.tree_view_source.setRootIndex(files_model.index(self.line_edit_source.text()))
+		self.tree_view_source.setRootIndex(files_model.index(files_model.rootPath()))
 		
 		for col_index in range(1, files_model.columnCount()):
 			self.tree_view_source.setColumnHidden(col_index, True)
