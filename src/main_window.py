@@ -16,6 +16,7 @@ from task import Task
 from packer_data import PackerData
 from session import Session
 from session_encoder import SessionEncoder
+from session_decoder import SessionDecoder
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     
@@ -44,49 +45,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.connectTaskManagement()
 		self.connectTaskRunning()
 		self.connectTaskProperties()
-
-	# -------------------------------------------------------------------------
-	def connectFileMenuActions(self):
-		self.action_new_session.triggered.connect(self.onNewSession)
-		self.action_save.triggered.connect(self.onSave)
-		self.action_open.triggered.connect(self.onOpen)
-		self.action_options.triggered.connect(self.openOptions)
-		self.action_exit.triggered.connect(self.close)
-
-	# -------------------------------------------------------------------------
-	def connectHelpMenuActions(self):
-		self.action_documentation.triggered.connect(self.openDocumentation)
-		self.action_about.triggered.connect(self.openAbout)
-	
-	# -------------------------------------------------------------------------
-	def connectTaskManagement(self):
-		self.push_button_create.clicked.connect(self.clickOnCreate)
-		self.push_button_remove.clicked.connect(self.clickOnRemove)
-		self.push_button_edit.clicked.connect(self.clickOnEdit)
-	
-	# -------------------------------------------------------------------------
-	def connectTaskRunning(self):
-		self.push_button_run_all.clicked.connect(self.clickOnRunAll)
-		self.push_button_cancel.clicked.connect(self.clickOnCancel)
-
-	# -------------------------------------------------------------------------
-	def connectTaskProperties(self):
-		self.connectFilesSelection()
-		self.button_group_packer_type.buttonClicked.connect(self.updatePackerType)
-
-	# -------------------------------------------------------------------------
-	def updatePackerType(self, button: QtWidgets.QAbstractButton):
-		self._packer_type_mapper.submit()
-		
-	# -------------------------------------------------------------------------
-	def connectFilesSelection(self):
-		self.push_button_source.clicked.connect(self.selectFolder)
 	
 	# -------------------------------------------------------------------------
 	def initSessionView(self):
 		self._session = Session()
-		self.table_view_session.setModel(self._session)
 		self.table_view_session.horizontalHeader().setVisible(True)
+		self.updateSessionViewModel()
+
+	# -------------------------------------------------------------------------
+	def updateSessionViewModel(self):
+		self.table_view_session.setModel(self._session)
 		self.table_view_session.selectionModel().selectionChanged.connect(self.mapViewWithTask)
 
 	# -------------------------------------------------------------------------
@@ -110,15 +78,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	def createPackerTypeMapper(self):
 		self._packer_type_mapper = QtWidgets.QDataWidgetMapper(self)
 		self._packer_type_mapper.setOrientation(Qt.Orientation.Vertical)
-
-	# -------------------------------------------------------------------------
-	def initFilesView(self):
-		files_model = self._selected_task.filesSelected()
-		
-		selected_row = self.table_view_session.currentIndex().row()
-		task = self._session.taskAt(selected_row)
-		files_model = task.filesSelected()
-		files_model.setRootPath("")
 	
 	# -------------------------------------------------------------------------
 	def selectFolder(self):
@@ -149,7 +108,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	def onOpen(self, s):
 		[filename, _] = QFileDialog.getOpenFileName(self, "Open session", "")
 		print("Open ", filename)
-		self._session.load(filename)
+		with open(filename, "r") as file:
+			self._session = json.load(file, cls=SessionDecoder)
+			self.updateSessionViewModel()
+			if self._session.nbTasks() > 0:
+				self._selected_task = self._session.taskAt(0)
+				self.table_view_session.selectRow(0)
+				self.disableTaskProperties()
 	
 	# -------------------------------------------------------------------------
 	def openOptions(self, s):
@@ -166,13 +131,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	
 	# -------------------------------------------------------------------------
 	def clickOnCreate(self):
-		model = self.table_view_session.model()
-		row_inserted = model.insertRow(["Editing...", "output.zip", "0%"])
+		row_inserted = self._session.insertRow(["Editing...", "output.zip", "0%"])
 
 		self._selected_task = self._session.taskAt(row_inserted)
 		self.table_view_session.selectRow(row_inserted)
 
-		self.initFilesView()
 		self.enableTaskProperties()
 	
 	# -------------------------------------------------------------------------
@@ -233,8 +196,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		files_model = self._selected_task.filesSelected()
 		index = files_model.index(path)
 
-		parent_check_state = files_model.data(index, QtCore.Qt.ItemDataRole.CheckStateRole)
-		files_model.setData(index, parent_check_state, QtCore.Qt.ItemDataRole.CheckStateRole)
+		if files_model.filePath(index) != self.line_edit_source.text():
+			parent_check_state = files_model.data(index, QtCore.Qt.ItemDataRole.CheckStateRole)
+			files_model.setData(index, parent_check_state, QtCore.Qt.ItemDataRole.CheckStateRole)
 	
 	# -------------------------------------------------------------------------
 	def updatePackerViewMapper(self):
@@ -287,8 +251,50 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 		self.push_button_create.setEnabled(True)
 		self.push_button_remove.setEnabled(True)
+		self.push_button_edit.setEnabled(True)
 		self.push_button_edit.setText(self._edit_text)
 		self.push_button_run_all.setEnabled(True)
 		self.push_button_cancel.setEnabled(True)
 
 		self.table_view_session.setEnabled(True)
+		
+	# -------------------------------------------------------------------------
+	#                        CONNECT SLOTS TO SIGNALS
+	# -------------------------------------------------------------------------
+
+	# -------------------------------------------------------------------------
+	def connectFileMenuActions(self):
+		self.action_new_session.triggered.connect(self.onNewSession)
+		self.action_save.triggered.connect(self.onSave)
+		self.action_open.triggered.connect(self.onOpen)
+		self.action_options.triggered.connect(self.openOptions)
+		self.action_exit.triggered.connect(self.close)
+
+	# -------------------------------------------------------------------------
+	def connectHelpMenuActions(self):
+		self.action_documentation.triggered.connect(self.openDocumentation)
+		self.action_about.triggered.connect(self.openAbout)
+	
+	# -------------------------------------------------------------------------
+	def connectTaskManagement(self):
+		self.push_button_create.clicked.connect(self.clickOnCreate)
+		self.push_button_remove.clicked.connect(self.clickOnRemove)
+		self.push_button_edit.clicked.connect(self.clickOnEdit)
+	
+	# -------------------------------------------------------------------------
+	def connectTaskRunning(self):
+		self.push_button_run_all.clicked.connect(self.clickOnRunAll)
+		self.push_button_cancel.clicked.connect(self.clickOnCancel)
+
+	# -------------------------------------------------------------------------
+	def connectTaskProperties(self):
+		self.connectFilesSelection()
+		self.button_group_packer_type.buttonClicked.connect(self.updatePackerType)
+
+	# -------------------------------------------------------------------------
+	def updatePackerType(self, button: QtWidgets.QAbstractButton):
+		self._packer_type_mapper.submit()
+		
+	# -------------------------------------------------------------------------
+	def connectFilesSelection(self):
+		self.push_button_source.clicked.connect(self.selectFolder)

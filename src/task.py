@@ -32,21 +32,25 @@ class Task(QtCore.QAbstractListModel):
 
 		self._status = "Nothing"
 		self._output_folder = QtCore.QStandardPaths.writableLocation(QtCore.QStandardPaths.StandardLocation.DownloadLocation)
-		self._output_name = "output_name"
+		self._name = "output_name"
 		self._packer_data = PackerData()
-		self._files_selected = FilesModel()
+		self._files_selected = FilesModel(self._output_folder)
 
 	# -------------------------------------------------------------------------
 	def status(self):
 		return self._status
 
 	# -------------------------------------------------------------------------
-	def output(self):
-		return self._output_name
+	def name(self):
+		return self._name
 	
 	# -------------------------------------------------------------------------
 	def filesSelected(self):
 		return self._files_selected
+	
+	# -------------------------------------------------------------------------
+	def setFilesSelected(self, files_selected):
+		self._files_selected = files_selected
 	
 	# -------------------------------------------------------------------------
 	def packerData(self):
@@ -58,7 +62,7 @@ class Task(QtCore.QAbstractListModel):
 			if index.row() == self.properties.STATUS.value:
 				return self._status
 			elif index.row() == self.properties.OUTPUT_NAME.value:
-				return self._output_name
+				return self._name
 			elif index.row() == self.properties.OUTPUT_FOLDER.value:
 				return self._output_folder
 	
@@ -66,7 +70,7 @@ class Task(QtCore.QAbstractListModel):
 	def setData(self, index, value, role = Qt.ItemDataRole.EditRole):
 		if index.isValid() and role == Qt.ItemDataRole.EditRole:
 			if index.row() == self.properties.OUTPUT_NAME.value:
-				self._output_name = value
+				self._name = value
 			elif index.row() == self.properties.OUTPUT_FOLDER.value:
 				self._output_folder = value
 			return True

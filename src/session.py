@@ -22,7 +22,7 @@ class Session(QtCore.QAbstractTableModel):
 		# ----------------
 		# MEMBER VARIABLES
 		# ----------------
-		self._data = [] if data is None else data
+		self._tasks = [] if data is None else data
 		self._headers = ["Status", "Output", "Progress"]
 		self._name = ""
 		self._dirname = ""
@@ -39,13 +39,13 @@ class Session(QtCore.QAbstractTableModel):
     # -------------------------------------------------------------------------
 	def data(self, index, role):
 		if role == Qt.ItemDataRole.DisplayRole:
-			task = self._data[index.row()]
+			task = self._tasks[index.row()]
 
 			value = ""
 			if index.column() == 0:
 				value = task.status()
 			elif index.column() == 1:
-				value = task.output()
+				value = task.name()
 
 			return str(value)
 	
@@ -57,7 +57,7 @@ class Session(QtCore.QAbstractTableModel):
 		
     # -------------------------------------------------------------------------
 	def rowCount(self, index=None):
-		return len(self._data)
+		return len(self._tasks)
 
     # -------------------------------------------------------------------------
 	def columnCount(self, index=None):
@@ -66,6 +66,7 @@ class Session(QtCore.QAbstractTableModel):
     # -------------------------------------------------------------------------
 	def insertRow(self, data)->int:
 		row = self.rowCount()
+		print("[insertRow] row = ", row)
 		self.rowsAboutToBeInserted.emit(QtCore.QModelIndex(), row, row)
 		self.createTask()
 		self.rowsInserted.emit(QtCore.QModelIndex(), row, row)
@@ -74,36 +75,31 @@ class Session(QtCore.QAbstractTableModel):
     # -------------------------------------------------------------------------
 	def createTask(self):
 		task = Task()
-		self._data.append(task)
+		self._tasks.append(task)
 
     # -------------------------------------------------------------------------
 	def removeRow(self, row: int):
 		if self.rowCount() > row and row >= 0:
 			self.rowsAboutToBeRemoved.emit(QtCore.QModelIndex(), row, row)
-			self._data.pop(row)
+			self._tasks.pop(row)
 			self.rowsRemoved.emit(QtCore.QModelIndex(), row, row)
 
     # -------------------------------------------------------------------------
 	def tasks(self):
-		return self._data
+		return self._tasks
 
     # -------------------------------------------------------------------------
 	def taskAt(self, row: int)->Task:
-		return self._data[row]
-    
+		return self._tasks[row]
+	
     # -------------------------------------------------------------------------
-	def load(self, filename: str):
-		path = filename
-		# path = os.path.join(self._dirname, self._name + ".json")
-		with open(path, "r") as input_file:
-			data = input_file.read()
-			print("data = ", data)
-			# session = json.load(input_file)
-			# d = json.JSONDecoder()
-			# dict = d.decode(data)
-			# print("")
-			# print("dict = ", dict)
-			obj = json.loads(data)
-			print("")
-			print("obj = ", obj)
+	def setTasks(self, tasks):
+		row = len(tasks) - 1
+		print("[setTasks] row = ", row)
+		self.rowsAboutToBeInserted.emit(QtCore.QModelIndex(), 0, row)
+		self._tasks = tasks
+		self.rowsInserted.emit(QtCore.QModelIndex(), 0, row)
 
+    # -------------------------------------------------------------------------
+	def nbTasks(self):
+		return len(self._tasks)

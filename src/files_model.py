@@ -7,14 +7,19 @@ from PyQt6 import QtCore, QtGui
 class FilesModel(QtGui.QFileSystemModel):
 
 	# -------------------------------------------------------------------------
-	def __init__(self, parent=None):
+	def __init__(self, root_path: str, parent=None):
 		super(FilesModel, self).__init__()
+		self.setRootPath(root_path)
 		self._checks = {}
 
 	# -------------------------------------------------------------------------
 	def checksToStr(self):
-		return {str(key): str(value) for key, value in self._checks.items()}
+		return {str(key): value for key, value in self._checks.items()}
 	
+	# -------------------------------------------------------------------------
+	def setChecks(self, checks):
+		self._checks = checks
+
 	# -------------------------------------------------------------------------
 	# @override
 	def data(self, index, role=QtCore.Qt.ItemDataRole.DisplayRole):
@@ -26,7 +31,7 @@ class FilesModel(QtGui.QFileSystemModel):
 	
 	# -------------------------------------------------------------------------
 	# @override
-	def setData(self, index: QtCore.QModelIndex, value, role):	
+	def setData(self, index: QtCore.QModelIndex, value, role):
 		match role:
 			case QtCore.Qt.ItemDataRole.CheckStateRole:
 				if index.column() == 0:
@@ -42,6 +47,7 @@ class FilesModel(QtGui.QFileSystemModel):
 					print("[FilesModel] wrong index.column()")
 					return False
 			case _:
+				print("[FilesModel] default case")
 				return QtGui.QFileSystemModel.setData(self, index, value, role)
 			
 	# -------------------------------------------------------------------------
@@ -54,4 +60,4 @@ class FilesModel(QtGui.QFileSystemModel):
 		if self.filePath(index) in self._checks:
 			return self._checks[self.filePath(index)]
 		else:
-			return QtCore.Qt.CheckState.Unchecked
+			return 0

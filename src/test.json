@@ -1,0 +1,15 @@
+{
+    "session_name": "test.json",
+    "tasks": [
+        {
+            "task_name": "output_name",
+            "files_model": {
+                "root_path": "D:/Downloads",
+                "check": {
+                    "D:/Downloads/1.txt": 2,
+                    "D:/Downloads/2.txt": 2
+                }
+            }
+        }
+    ]
+}
