@@ -4,13 +4,13 @@ author: Marie-Neige Chapel
 
 # Python
 import json
-from files_model import FilesModel
 
 # Packy
 from session import Session
 from task import Task
 from files_model import FilesModel
 
+###############################################################################
 class SessionDecoder(json.JSONDecoder):
 
 	# -------------------------------------------------------------------------

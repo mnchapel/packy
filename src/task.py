@@ -5,6 +5,7 @@ author: Marie-Neige Chapel
 # Python
 import json
 from enum import Enum
+import os
 
 # PyQt
 from PyQt6 import QtCore
@@ -14,6 +15,7 @@ from files_model import FilesModel
 # PackY
 from packer_data import PackerData
 
+###############################################################################
 class Task(QtCore.QAbstractListModel):
 	
 	# -------------------------------------------------------------------------
@@ -26,7 +28,8 @@ class Task(QtCore.QAbstractListModel):
 		self.properties = Enum("TaskProperties", [
 			"STATUS",
 			"OUTPUT_NAME",
-			"OUTPUT_FOLDER",
+			"SOURCE_FOLDER",
+			"DESTINATION_FILE",
 			"PACKER_TYPE"
 		])
 
@@ -35,8 +38,13 @@ class Task(QtCore.QAbstractListModel):
 		self._packer_data = PackerData()
 
 		qt_folder_location = QStandardPaths.StandardLocation.DownloadLocation
-		default_input_folder = QStandardPaths.writableLocation(qt_folder_location)
-		self._files_selected = FilesModel(default_input_folder)
+		default_folder = QStandardPaths.writableLocation(qt_folder_location)
+		self._files_selected = FilesModel(default_folder)
+		self._destination_file = default_folder + "/output"
+
+	###########################################################################
+	# GETTERS
+	###########################################################################
 
 	# -------------------------------------------------------------------------
 	def status(self):
@@ -45,18 +53,34 @@ class Task(QtCore.QAbstractListModel):
 	# -------------------------------------------------------------------------
 	def name(self):
 		return self._name
+
+	# -------------------------------------------------------------------------
+	def destinationFile(self):
+		return self._destination_file
 	
 	# -------------------------------------------------------------------------
 	def filesSelected(self):
 		return self._files_selected
 	
 	# -------------------------------------------------------------------------
+	def packerData(self):
+		return self._packer_data
+
+	###########################################################################
+	# SETTERS
+	###########################################################################
+	
+	# -------------------------------------------------------------------------
 	def setFilesSelected(self, files_selected):
 		self._files_selected = files_selected
 	
 	# -------------------------------------------------------------------------
-	def packerData(self):
-		return self._packer_data
+	def setDestinationFile(self, filename):
+		self._destination_file = filename
+
+	###########################################################################
+	# MEMBER FUNCTIONS
+	###########################################################################
 
 	# -------------------------------------------------------------------------
 	def data(self, index, role):
@@ -65,23 +89,26 @@ class Task(QtCore.QAbstractListModel):
 				return self._status
 			elif index.row() == self.properties.OUTPUT_NAME.value:
 				return self._name
-			elif index.row() == self.properties.OUTPUT_FOLDER.value:
+			elif index.row() == self.properties.SOURCE_FOLDER.value:
 				return self._files_selected.rootPath()
+			elif index.row() == self.properties.DESTINATION_FILE.value:
+				print("self._destination_file = ", self._destination_file)
+				return self._destination_file
 	
 	# -------------------------------------------------------------------------
 	def setData(self, index, value, role = Qt.ItemDataRole.EditRole):
 		if index.isValid() and role == Qt.ItemDataRole.EditRole:
 			if index.row() == self.properties.OUTPUT_NAME.value:
 				self._name = value
-			elif index.row() == self.properties.OUTPUT_FOLDER.value:
-				self._output_folder = value
+			elif index.row() == self.properties.DESTINATION_FILE.value:
+				self._destination_file = value
 			return True
 		else:
 			return False
 	
 	# -------------------------------------------------------------------------
 	def rowCount(self, index=None):
-		return 4
+		return 5
 
 	# -------------------------------------------------------------------------
 	def save(self):

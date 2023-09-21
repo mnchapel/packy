@@ -4,10 +4,9 @@ author: Marie-Neige Chapel
 
 # PyQt
 import json
-from PyQt6 import QtCore, QtWidgets
-from PyQt6.QtCore import Qt
+from PyQt6 import QtWidgets
+from PyQt6.QtCore import Qt, QItemSelection
 from PyQt6.QtWidgets import QFileDialog
-from session_encoder import SessionEncoder
 from ui_main_window import Ui_MainWindow
 
 # PackY
@@ -18,6 +17,7 @@ from session import Session
 from session_encoder import SessionEncoder
 from session_decoder import SessionDecoder
 
+###############################################################################
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     
 	# -------------------------------------------------------------------------
@@ -78,14 +78,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	def createPackerTypeMapper(self):
 		self._packer_type_mapper = QtWidgets.QDataWidgetMapper(self)
 		self._packer_type_mapper.setOrientation(Qt.Orientation.Vertical)
-	
-	# -------------------------------------------------------------------------
-	def selectFolder(self):
-		files_model = self._selected_task.filesSelected()
-		folder_selected = QFileDialog.getExistingDirectory(self, "Select folder", self.line_edit_source.text(), QFileDialog.Option.ShowDirsOnly)
-		self.line_edit_source.setText(folder_selected)
-		files_model.setRootPath(folder_selected)
-		self.tree_view_source.setRootIndex(files_model.index(folder_selected))
 
 	# -------------------------------------------------------------------------
 	def initTitle(self):
@@ -98,7 +90,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	# -------------------------------------------------------------------------
 	def onSave(self, s):
 		if not self._session.name():
-			[filename, _] = QFileDialog.getSaveFileName(self, "Select output folder", "")
+			[filename, _] = QFileDialog.getSaveFileName(self, "Save As", "")
 			print(filename)
 			self._session.setName(filename)
 		
@@ -164,7 +156,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		print("clickOnCancel (not implemented yet)")
 
 	# -------------------------------------------------------------------------
-	def mapViewWithTask(self, selected: QtCore.QItemSelection, deselected: QtCore.QItemSelection):
+	def mapViewWithTask(self, selected: QItemSelection, deselected: QItemSelection):
 		selected_row = self.table_view_session.currentIndex().row()
 		self._selected_task = self._session.taskAt(selected_row)
 
@@ -176,8 +168,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	def updateTaskViewMapper(self):
 		task: Task = self._selected_task
 		self._task_view_mapper.setModel(task)
-		self._task_view_mapper.addMapping(self.line_edit_destination, task.properties.OUTPUT_NAME.value)
-		self._task_view_mapper.addMapping(self.line_edit_source, task.properties.OUTPUT_FOLDER.value)
+		self._task_view_mapper.addMapping(self.line_edit_source, task.properties.SOURCE_FOLDER.value, b"text")
+		self._task_view_mapper.addMapping(self.line_edit_destination, task.properties.DESTINATION_FILE.value, b"text")
 		self._task_view_mapper.toFirst()
 	
 	# -------------------------------------------------------------------------
@@ -198,8 +190,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		index = files_model.index(path)
 
 		if files_model.filePath(index) != self.line_edit_source.text():
-			parent_check_state = files_model.data(index, QtCore.Qt.ItemDataRole.CheckStateRole)
-			files_model.setData(index, parent_check_state, QtCore.Qt.ItemDataRole.CheckStateRole)
+			parent_check_state = files_model.data(index, Qt.ItemDataRole.CheckStateRole)
+			files_model.setData(index, parent_check_state, Qt.ItemDataRole.CheckStateRole)
 	
 	# -------------------------------------------------------------------------
 	def updatePackerViewMapper(self):
@@ -259,9 +251,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 		self.table_view_session.setEnabled(True)
 		
-	# -------------------------------------------------------------------------
-	#                        CONNECT SLOTS TO SIGNALS
-	# -------------------------------------------------------------------------
+	###########################################################################
+	# CONNECT SLOTS TO SIGNALS
+	###########################################################################
 
 	# -------------------------------------------------------------------------
 	def connectFileMenuActions(self):
@@ -289,13 +281,28 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 	# -------------------------------------------------------------------------
 	def connectTaskProperties(self):
-		self.connectFilesSelection()
+		self.push_button_source.clicked.connect(self.selectSourceFolder)
+		self.push_button_destination.clicked.connect(self.selectDestinationFile)
 		self.button_group_packer_type.buttonClicked.connect(self.updatePackerType)
+
+	###########################################################################
+	# SLOTS
+	###########################################################################
+	
+	# -------------------------------------------------------------------------
+	def selectSourceFolder(self):
+		files_model = self._selected_task.filesSelected()
+		folder_selected = QFileDialog.getExistingDirectory(self, "Select folder", self.line_edit_source.text(), QFileDialog.Option.ShowDirsOnly)
+		self.line_edit_source.setText(folder_selected)
+		files_model.setRootPath(folder_selected)
+		self.tree_view_source.setRootIndex(files_model.index(folder_selected))
+	
+	# -------------------------------------------------------------------------
+	def selectDestinationFile(self):
+		[filename, _] = QFileDialog.getSaveFileName(self, "Select file", self.line_edit_destination.text())
+		self.line_edit_destination.setText(filename)
+		self._task_view_mapper.submit()
 
 	# -------------------------------------------------------------------------
 	def updatePackerType(self, button: QtWidgets.QAbstractButton):
 		self._packer_type_mapper.submit()
-		
-	# -------------------------------------------------------------------------
-	def connectFilesSelection(self):
-		self.push_button_source.clicked.connect(self.selectFolder)

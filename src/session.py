@@ -3,7 +3,6 @@ author: Marie-Neige Chapel
 """
 
 # Python
-import json
 import os
 
 # PyQt
@@ -13,6 +12,7 @@ from PyQt6.QtCore import Qt
 # PackY
 from task import Task
 
+###############################################################################
 class Session(QtCore.QAbstractTableModel):
     
 	# -------------------------------------------------------------------------
@@ -27,14 +27,46 @@ class Session(QtCore.QAbstractTableModel):
 		self._name = ""
 		self._dirname = ""
 
+	###########################################################################
+	# GETTERS
+	###########################################################################
+
     # -------------------------------------------------------------------------
 	def name(self):
 		return self._name
+	
+    # -------------------------------------------------------------------------
+	def dirname(self):
+		return self._dirname
+
+    # -------------------------------------------------------------------------
+	def tasks(self):
+		return self._tasks
+
+    # -------------------------------------------------------------------------
+	def taskAt(self, row: int)->Task:
+		return self._tasks[row]
+
+    # -------------------------------------------------------------------------
+	def nbTasks(self):
+		return len(self._tasks)
+
+	###########################################################################
+	# SETTERS
+	###########################################################################
 
     # -------------------------------------------------------------------------
 	def setName(self, path: str):
 		self._name = os.path.basename(path)
 		self._dirname = os.path.dirname(path)
+	
+    # -------------------------------------------------------------------------
+	def setTasks(self, tasks):
+		self._tasks = tasks
+
+	###########################################################################
+	# MEMBER FUNCTIONS
+	###########################################################################
 
     # -------------------------------------------------------------------------
 	def data(self, index, role):
@@ -66,7 +98,6 @@ class Session(QtCore.QAbstractTableModel):
     # -------------------------------------------------------------------------
 	def insertRow(self, data)->int:
 		row = self.rowCount()
-		print("[insertRow] row = ", row)
 		self.rowsAboutToBeInserted.emit(QtCore.QModelIndex(), row, row)
 		self.createTask()
 		self.rowsInserted.emit(QtCore.QModelIndex(), row, row)
@@ -83,23 +114,3 @@ class Session(QtCore.QAbstractTableModel):
 			self.rowsAboutToBeRemoved.emit(QtCore.QModelIndex(), row, row)
 			self._tasks.pop(row)
 			self.rowsRemoved.emit(QtCore.QModelIndex(), row, row)
-
-    # -------------------------------------------------------------------------
-	def tasks(self):
-		return self._tasks
-
-    # -------------------------------------------------------------------------
-	def taskAt(self, row: int)->Task:
-		return self._tasks[row]
-	
-    # -------------------------------------------------------------------------
-	def setTasks(self, tasks):
-		row = len(tasks) - 1
-		print("[setTasks] row = ", row)
-		self.rowsAboutToBeInserted.emit(QtCore.QModelIndex(), 0, row)
-		self._tasks = tasks
-		self.rowsInserted.emit(QtCore.QModelIndex(), 0, row)
-
-    # -------------------------------------------------------------------------
-	def nbTasks(self):
-		return len(self._tasks)

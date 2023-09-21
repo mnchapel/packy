@@ -2,9 +2,11 @@
 author: Marie-Neige Chapel
 """
 
-from PyQt6 import QtCore, QtGui
+from PyQt6.QtCore import Qt, QModelIndex
+from PyQt6.QtGui import QFileSystemModel
 
-class FilesModel(QtGui.QFileSystemModel):
+###############################################################################
+class FilesModel(QFileSystemModel):
 
 	# -------------------------------------------------------------------------
 	def __init__(self, root_path: str, parent=None):
@@ -12,28 +14,40 @@ class FilesModel(QtGui.QFileSystemModel):
 		self.setRootPath(root_path)
 		self._checks = {}
 
+	###########################################################################
+	# GETTERS
+	###########################################################################
+
 	# -------------------------------------------------------------------------
 	def checksToStr(self):
 		return {str(key): value for key, value in self._checks.items()}
+
+	###########################################################################
+	# SETTERS
+	###########################################################################
 	
 	# -------------------------------------------------------------------------
 	def setChecks(self, checks):
 		self._checks = checks
 
+	###########################################################################
+	# MEMBER FUNCTIONS
+	###########################################################################
+
 	# -------------------------------------------------------------------------
 	# @override
-	def data(self, index, role=QtCore.Qt.ItemDataRole.DisplayRole):
-		if role != QtCore.Qt.ItemDataRole.CheckStateRole:
-			return QtGui.QFileSystemModel.data(self, index, role)
+	def data(self, index, role = Qt.ItemDataRole.DisplayRole):
+		if role != Qt.ItemDataRole.CheckStateRole:
+			return QFileSystemModel.data(self, index, role)
 		else:
 			if index.column() == 0:
 				return self.checkState(index)
 	
 	# -------------------------------------------------------------------------
 	# @override
-	def setData(self, index: QtCore.QModelIndex, value, role):
+	def setData(self, index: QModelIndex, value, role):
 		match role:
-			case QtCore.Qt.ItemDataRole.CheckStateRole:
+			case Qt.ItemDataRole.CheckStateRole:
 				if index.column() == 0:
 					self._checks[self.filePath(index)] = value
 
@@ -48,12 +62,12 @@ class FilesModel(QtGui.QFileSystemModel):
 					return False
 			case _:
 				print("[FilesModel] default case")
-				return QtGui.QFileSystemModel.setData(self, index, value, role)
+				return QFileSystemModel.setData(self, index, value, role)
 			
 	# -------------------------------------------------------------------------
 	# @override
 	def flags(self, index):
-		return QtGui.QFileSystemModel.flags(self, index) | QtCore.Qt.ItemFlag.ItemIsUserCheckable
+		return QFileSystemModel.flags(self, index) | Qt.ItemFlag.ItemIsUserCheckable
 	
 	# -------------------------------------------------------------------------
 	def checkState(self, index):

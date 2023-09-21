@@ -1,21 +1,18 @@
 {
     "session_name": "test.json",
+    "dirname": "D:/1_project/packy/03_realisations/packy/src",
     "tasks": [
-        {
-            "task_name": "output_name",
-            "files_model": {
-                "root_path": "D:/1_project",
-                "check": {
-                    "D:/1_project/.owncloudsync.log": 2,
-                    "D:/1_project/.sync-exclude.lst": 2
-                }
-            }
-        },
         {
             "task_name": "output_name",
             "files_model": {
                 "root_path": "D:/Downloads",
                 "check": {}
+            },
+            "destination_file": "D:/Downloads/output",
+            "packer_data": {
+                "type": 0,
+                "compression_method": 0,
+                "compression_level": 0
             }
         }
     ]

@@ -9,8 +9,9 @@ import json
 from session import Session
 from task import Task
 from files_model import FilesModel
-from packer import Packer
+from packer_data import PackerData
 
+###############################################################################
 class SessionEncoder(json.JSONEncoder):
 
 	# -------------------------------------------------------------------------
@@ -21,7 +22,7 @@ class SessionEncoder(json.JSONEncoder):
 			return self.serializeTask(obj)
 		elif isinstance(obj, FilesModel):
 			return self.serializeFilesModel(obj)
-		elif isinstance(obj, Packer):
+		elif isinstance(obj, PackerData):
 			return self.serializePacker(obj)
 		else:
 			return super.default(obj)
@@ -31,6 +32,7 @@ class SessionEncoder(json.JSONEncoder):
 		dict = {}
 
 		dict["session_name"] = session.name()
+		dict["dirname"] = session.dirname()
 		dict["tasks"] = session.tasks()
 
 		return dict
@@ -41,6 +43,8 @@ class SessionEncoder(json.JSONEncoder):
 
 		dict["task_name"] = task.name()
 		dict["files_model"] = task.filesSelected()
+		dict["destination_file"] = task.destinationFile()
+		dict["packer_data"] = task.packerData()
 
 		return dict
 	
@@ -54,11 +58,11 @@ class SessionEncoder(json.JSONEncoder):
 		return dict
 	
 	# -------------------------------------------------------------------------
-	def serializePacker(self, packer: Packer):
+	def serializePacker(self, packer_data: PackerData):
 		dict = {}
 
-		dict["type"] = packer.type()
-		dict["compression_type"] = packer.compressionType()
-		dict["compression_level"] = packer.compressionLevel()
+		dict["type"] = packer_data.type()
+		dict["compression_method"] = packer_data.compressionMethod()
+		dict["compression_level"] = packer_data.compressionLevel()
 
 		return dict

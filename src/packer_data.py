@@ -11,6 +11,7 @@ from PyQt6 import QtCore
 # PackY
 from packer_type_data import PackerTypeData
 
+###############################################################################
 class PackerData(QtCore.QAbstractListModel):
     
 	# -------------------------------------------------------------------------
@@ -37,12 +38,32 @@ class PackerData(QtCore.QAbstractListModel):
 		], start = 0)
 
 		self._packer_type_data = PackerTypeData()
-		self._compression_level_index = 0
 		self._compression_method_index = 0
+		self._compression_level_index = 0
+
+	###########################################################################
+	# GETTERS
+	###########################################################################
 
 	# -------------------------------------------------------------------------
 	def packerTypeData(self):
 		return self._packer_type_data
+
+	# -------------------------------------------------------------------------
+	def type(self):
+		return self._packer_type_data.type()
+	
+	# -------------------------------------------------------------------------
+	def compressionMethod(self):
+		return self._compression_method_index
+	
+	# -------------------------------------------------------------------------
+	def compressionLevel(self):
+		return self._compression_level_index
+
+	###########################################################################
+	# MEMBER FUNCTIONS
+	###########################################################################
 	
 	# -------------------------------------------------------------------------
 	# @override
