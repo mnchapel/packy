@@ -4,11 +4,13 @@ author: Marie-Neige Chapel
 
 # Python
 import json
+from tkinter import Pack
 
 # Packy
 from session import Session
 from task import Task
 from files_model import FilesModel
+from packer_data import PackerData
 
 ###############################################################################
 class SessionDecoder(json.JSONDecoder):
@@ -20,15 +22,35 @@ class SessionDecoder(json.JSONDecoder):
 	# -------------------------------------------------------------------------
 	def decodeSession(self, dict):
 		if dict.get("session_name"):
-			session = Session()
-			session.setTasks(dict["tasks"])
-			return session
+			return self.deserializeSession(dict)
 		elif dict.get("task_name"):
-			task = Task()
-			task.setFilesSelected(dict["files_model"])
-			return task
+			return self.deserializeTask(dict)
 		elif dict.get("root_path"):
-			files_model = FilesModel(dict["root_path"])
-			files_model.setChecks(dict["check"])
-			return files_model
+			return self.deserializeFilesModel(dict)
+		elif dict.get("compression_method"):
+			return self.deserializePackerData(dict)
 		return dict
+	
+	# -------------------------------------------------------------------------
+	def deserializeSession(self, dict):
+		session = Session()
+		session.setTasks(dict["tasks"])
+		return session
+	
+	# -------------------------------------------------------------------------
+	def deserializeTask(self, dict):
+		task = Task(dict["packer_data"])
+		task.setFilesSelected(dict["files_model"])
+		task.setDestinationFile(dict["destination_file"])
+		return task
+	
+	# -------------------------------------------------------------------------
+	def deserializeFilesModel(self, dict):
+		files_model = FilesModel(dict["root_path"])
+		files_model.setChecks(dict["check"])
+		return files_model
+	
+	# -------------------------------------------------------------------------
+	def deserializePackerData(self, dict):
+		packer_data = PackerData(dict)
+		return packer_data

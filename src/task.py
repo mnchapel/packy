@@ -19,7 +19,7 @@ from packer_data import PackerData
 class Task(QtCore.QAbstractListModel):
 	
 	# -------------------------------------------------------------------------
-	def __init__(self):
+	def __init__(self, packer_data = None):
 		super(Task, self).__init__()
 		
 		# ----------------
@@ -35,7 +35,11 @@ class Task(QtCore.QAbstractListModel):
 
 		self._status = "Nothing"
 		self._name = "output_name"
-		self._packer_data = PackerData()
+
+		if packer_data is None:
+			self._packer_data = PackerData()
+		else:
+			self._packer_data = packer_data
 
 		qt_folder_location = QStandardPaths.StandardLocation.DownloadLocation
 		default_folder = QStandardPaths.writableLocation(qt_folder_location)
@@ -92,7 +96,6 @@ class Task(QtCore.QAbstractListModel):
 			elif index.row() == self.properties.SOURCE_FOLDER.value:
 				return self._files_selected.rootPath()
 			elif index.row() == self.properties.DESTINATION_FILE.value:
-				print("self._destination_file = ", self._destination_file)
 				return self._destination_file
 	
 	# -------------------------------------------------------------------------

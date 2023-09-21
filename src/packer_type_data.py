@@ -12,7 +12,7 @@ from PyQt6 import QtCore
 class PackerTypeData(QtCore.QAbstractListModel):
     
 	# -------------------------------------------------------------------------
-	def __init__(self):
+	def __init__(self, type_index = None):
 		super(PackerTypeData, self).__init__()
 
 		self.types = Enum("TypeName", [
@@ -27,7 +27,10 @@ class PackerTypeData(QtCore.QAbstractListModel):
 			"XZ"
 		], start = 0)
 
-		self._type_index = 0
+		if type_index is None:
+			self._type_index = 0
+		else:
+			self._type_index = type_index
 
 	###########################################################################
 	# GETTERS

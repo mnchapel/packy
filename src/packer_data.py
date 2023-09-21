@@ -15,7 +15,7 @@ from packer_type_data import PackerTypeData
 class PackerData(QtCore.QAbstractListModel):
     
 	# -------------------------------------------------------------------------
-	def __init__(self):
+	def __init__(self, dict = None):
 		super(PackerData, self).__init__()
 
 		self.data_names = Enum("DataName", [
@@ -37,9 +37,14 @@ class PackerData(QtCore.QAbstractListModel):
 			"FASTEST"
 		], start = 0)
 
-		self._packer_type_data = PackerTypeData()
-		self._compression_method_index = 0
-		self._compression_level_index = 0
+		if dict is None:
+			self._packer_type_data = PackerTypeData()
+			self._compression_method_index = 0
+			self._compression_level_index = 0
+		else:			
+			self._packer_type_data = PackerTypeData(dict["type"])
+			self._compression_method_index = dict["compression_method"]
+			self._compression_level_index = dict["compression_level"]
 
 	###########################################################################
 	# GETTERS
