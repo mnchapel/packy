@@ -37,6 +37,10 @@ class PackerTypeData(QtCore.QAbstractListModel):
 	###########################################################################
 
 	# -------------------------------------------------------------------------
+	def extension(self):
+		return self.types(self._type_index).name.lower()
+
+	# -------------------------------------------------------------------------
 	def type(self):
 		return self._type_index
 

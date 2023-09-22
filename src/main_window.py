@@ -2,11 +2,15 @@
 author: Marie-Neige Chapel
 """
 
-# PyQt
+#Python
 import json
+import os
+
+# PyQt
 from PyQt6 import QtWidgets
 from PyQt6.QtCore import Qt, QItemSelection
 from PyQt6.QtWidgets import QFileDialog
+from packer import Packer
 from ui_main_window import Ui_MainWindow
 
 # PackY
@@ -149,7 +153,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	
 	# -------------------------------------------------------------------------
 	def clickOnRunAll(self):
-		print("clickOnRunAll (not implemented yet)")
+		packer = Packer()
+		packer.runAll(self._session)
 	
 	# -------------------------------------------------------------------------
 	def clickOnCancel(self):
@@ -299,10 +304,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	
 	# -------------------------------------------------------------------------
 	def selectDestinationFile(self):
-		[filename, _] = QFileDialog.getSaveFileName(self, "Select file", self.line_edit_destination.text())
-		self.line_edit_destination.setText(filename)
+		destination_path = self.line_edit_destination.text()
+		path_no_ext = os.path.splitext(destination_path)[0]
+		ext = os.path.splitext(destination_path)[1]
+		[path_no_ext, _] = QFileDialog.getSaveFileName(self, "Select file", path_no_ext)
+		self.line_edit_destination.setText(path_no_ext + ext)
 		self._task_view_mapper.submit()
 
 	# -------------------------------------------------------------------------
 	def updatePackerType(self, button: QtWidgets.QAbstractButton):
 		self._packer_type_mapper.submit()
+		self._task_view_mapper.submit()

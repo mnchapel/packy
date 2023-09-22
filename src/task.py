@@ -44,7 +44,7 @@ class Task(QtCore.QAbstractListModel):
 		qt_folder_location = QStandardPaths.StandardLocation.DownloadLocation
 		default_folder = QStandardPaths.writableLocation(qt_folder_location)
 		self._files_selected = FilesModel(default_folder)
-		self._destination_file = default_folder + "/output"
+		self._destination_file = default_folder + "/output." + self._packer_data.extension()
 
 	###########################################################################
 	# GETTERS
@@ -104,7 +104,10 @@ class Task(QtCore.QAbstractListModel):
 			if index.row() == self.properties.OUTPUT_NAME.value:
 				self._name = value
 			elif index.row() == self.properties.DESTINATION_FILE.value:
-				self._destination_file = value
+				path_no_ext = os.path.splitext(value)[0]
+				ext = self._packer_data.extension()
+				self._destination_file = path_no_ext + "." + ext
+				self.dataChanged.emit(index, index)
 			return True
 		else:
 			return False

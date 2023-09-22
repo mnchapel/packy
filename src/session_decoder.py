@@ -4,7 +4,6 @@ author: Marie-Neige Chapel
 
 # Python
 import json
-from tkinter import Pack
 
 # Packy
 from session import Session

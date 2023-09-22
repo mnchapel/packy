@@ -2,19 +2,41 @@
 author: Marie-Neige Chapel
 """
 
+# Python
 import zipfile
 
+# PackY
+from session import Session
+
+###############################################################################
 class Packer():
 
-	# -------------------------------------------------------------------------
-	def __init__(self):
+	# # -------------------------------------------------------------------------
+	# def __init__(self, session: Session):
 
-		# ----------------
-		# MEMBER VARIABLES
-		# ----------------
-		self._type = ""
-		self._compression_type = ""
-		self._compression_level = ""
+	# 	# ----------------
+	# 	# MEMBER VARIABLES
+	# 	# ----------------
+	# 	print("[Packer][__init__]")
+	# 	self._type = ""
+	# 	self._compression_type = ""
+	# 	self._compression_level = ""
+
+	# 	with zipfile.ZipFile("output.zip", mode = "w") as m_zip:
+	# 		m_zip.write("ui_new_session.py")
+
+	###########################################################################
+	# MEMBER FUNCTIONS
+	###########################################################################
+
+    # -------------------------------------------------------------------------
+	def runAll(self, session: Session):
+		tasks = session.tasks()
+
+		for task in tasks:
+			destination_filename = task.destinationFile()
+			with zipfile.ZipFile(destination_filename, mode = "w") as m_zip:
+				m_zip.write("ui_main_window.py")
 
     # -------------------------------------------------------------------------
 	def type(self):
