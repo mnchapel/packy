@@ -41,10 +41,10 @@ class SessionEncoder(json.JSONEncoder):
 	def serializeTask(self, task: Task):
 		dict = {}
 
-		dict["task_name"] = task.name()
 		dict["files_model"] = task.filesSelected()
-		dict["destination_file"] = task.destinationFile()
 		dict["packer_data"] = task.packerData()
+		dict["task_name"] = task.name()
+		dict["destination_file"] = task.destinationFile()
 
 		return dict
 	

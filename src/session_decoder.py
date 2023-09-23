@@ -22,34 +22,23 @@ class SessionDecoder(json.JSONDecoder):
 	def decodeSession(self, dict):
 		if dict.get("session_name"):
 			return self.deserializeSession(dict)
-		elif dict.get("task_name"):
-			return self.deserializeTask(dict)
-		elif dict.get("root_path"):
-			return self.deserializeFilesModel(dict)
-		elif dict.get("compression_method"):
-			return self.deserializePackerData(dict)
+		
 		return dict
 	
 	# -------------------------------------------------------------------------
 	def deserializeSession(self, dict):
 		session = Session()
-		session.setTasks(dict["tasks"])
+		dict_tasks = dict["tasks"]
+		tasks = []
+		for dict_task in dict_tasks:
+			task = self.deserializeTask(dict_task)
+			tasks.append(task)
+		
+		session.setTasks(tasks)
+
 		return session
 	
 	# -------------------------------------------------------------------------
 	def deserializeTask(self, dict):
-		task = Task(dict["packer_data"])
-		task.setFilesSelected(dict["files_model"])
-		task.setDestinationFile(dict["destination_file"])
+		task = Task(dict)
 		return task
-	
-	# -------------------------------------------------------------------------
-	def deserializeFilesModel(self, dict):
-		files_model = FilesModel(dict["root_path"])
-		files_model.setChecks(dict["check"])
-		return files_model
-	
-	# -------------------------------------------------------------------------
-	def deserializePackerData(self, dict):
-		packer_data = PackerData(dict)
-		return packer_data

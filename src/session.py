@@ -18,7 +18,7 @@ class Session(QtCore.QAbstractTableModel):
 	# -------------------------------------------------------------------------
 	def __init__(self, data=None):
 		super(Session, self).__init__()
-        
+
 		# ----------------
 		# MEMBER VARIABLES
 		# ----------------
@@ -80,6 +80,11 @@ class Session(QtCore.QAbstractTableModel):
 				value = task.name()
 
 			return str(value)
+		elif role == Qt.ItemDataRole.TextAlignmentRole:
+			if index.column() == 0:
+				return Qt.AlignmentFlag.AlignCenter
+			else:
+				return Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
 	
     # -------------------------------------------------------------------------
 	def headerData(self, section: int, orientation, role):
@@ -96,7 +101,7 @@ class Session(QtCore.QAbstractTableModel):
 		return len(self._headers)
 	
     # -------------------------------------------------------------------------
-	def insertRow(self, data)->int:
+	def insertRow(self)->int:
 		row = self.rowCount()
 		self.rowsAboutToBeInserted.emit(QtCore.QModelIndex(), row, row)
 		self.createTask()

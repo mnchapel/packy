@@ -2,6 +2,8 @@
 author: Marie-Neige Chapel
 """
 
+# PyQt
+import json
 from PyQt6.QtCore import Qt, QModelIndex
 from PyQt6.QtGui import QFileSystemModel
 
@@ -9,14 +11,30 @@ from PyQt6.QtGui import QFileSystemModel
 class FilesModel(QFileSystemModel):
 
 	# -------------------------------------------------------------------------
-	def __init__(self, root_path: str, parent=None):
+	def __init__(self, json_dict: dict = None, parent=None):
 		super(FilesModel, self).__init__()
-		self.setRootPath(root_path)
+
+		if json_dict is None:
+			self.defaultInitialization()
+		else:
+			self.jsonInitialization(json_dict)
+
+	# -------------------------------------------------------------------------
+	def defaultInitialization(self):
 		self._checks = {}
+	
+	# -------------------------------------------------------------------------
+	def jsonInitialization(self, json_dict: dict):
+		self.setRootPath(json_dict["root_path"])
+		self._checks = json_dict["check"]
 
 	###########################################################################
 	# GETTERS
 	###########################################################################
+
+	# -------------------------------------------------------------------------
+	def checks(self):
+		return self._checks
 
 	# -------------------------------------------------------------------------
 	def checksToStr(self):

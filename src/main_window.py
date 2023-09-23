@@ -128,7 +128,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	
 	# -------------------------------------------------------------------------
 	def clickOnCreate(self):
-		row_inserted = self._session.insertRow(["Editing...", "output.zip", "0%"])
+		row_inserted = self._session.insertRow()
 
 		self._selected_task = self._session.taskAt(row_inserted)
 		self.table_view_session.selectRow(row_inserted)

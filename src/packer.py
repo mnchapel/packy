@@ -3,27 +3,15 @@ author: Marie-Neige Chapel
 """
 
 # Python
-import zipfile
+import os
+from zipfile import ZipFile
 
 # PackY
 from session import Session
+from task import Task
 
 ###############################################################################
 class Packer():
-
-	# # -------------------------------------------------------------------------
-	# def __init__(self, session: Session):
-
-	# 	# ----------------
-	# 	# MEMBER VARIABLES
-	# 	# ----------------
-	# 	print("[Packer][__init__]")
-	# 	self._type = ""
-	# 	self._compression_type = ""
-	# 	self._compression_level = ""
-
-	# 	with zipfile.ZipFile("output.zip", mode = "w") as m_zip:
-	# 		m_zip.write("ui_new_session.py")
 
 	###########################################################################
 	# MEMBER FUNCTIONS
@@ -34,9 +22,52 @@ class Packer():
 		tasks = session.tasks()
 
 		for task in tasks:
+			checked_items = task.filesSelected().checks()
+			items_to_pack = self.filterSelectedFiles(checked_items)
+
 			destination_filename = task.destinationFile()
-			with zipfile.ZipFile(destination_filename, mode = "w") as m_zip:
-				m_zip.write("ui_main_window.py")
+			
+			with ZipFile(destination_filename, mode = "w") as m_zip:
+				self.packItems(m_zip, items_to_pack)
+
+    # -------------------------------------------------------------------------
+	def filterSelectedFiles(self, checked_items: dict):
+		items_to_pack = []
+		
+		items_to_pack = {k: v for k, v in checked_items.items() if v == 2}
+		dir_items = {item for item in items_to_pack if os.path.isdir(item)}
+		files_items = {item for item in items_to_pack if os.path.isfile(item)}
+		files_to_pack = {item for item in items_to_pack if os.path.isfile(item)}
+		
+		items_to_pack.clear()
+		items_to_pack = dir_items
+
+		for dir in dir_items:
+			for file in files_items:
+				if dir in file:
+					files_to_pack.remove(file)
+		
+		items_to_pack = dir_items | files_to_pack
+
+		return items_to_pack
+
+    # -------------------------------------------------------------------------
+	def packItems(self, m_zip: ZipFile, items: set):
+		for item in items:
+			if os.path.isdir(item):
+				self.packDir(m_zip, item)
+			else:
+				self.packFile(m_zip, item)
+
+    # -------------------------------------------------------------------------
+	def packDir(self, m_zip, path):
+		for root, dirs, files in os.walk(path):
+			for file in files:
+				m_zip.write(os.path.join(root, file), os.path.relpath(os.path.join(root, file), os.path.join(path, '..')))
+	
+    # -------------------------------------------------------------------------
+	def packFile(self, m_zip, path):
+				m_zip.write(path, os.path.basename(path))
 
     # -------------------------------------------------------------------------
 	def type(self):

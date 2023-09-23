@@ -4,8 +4,8 @@ author: Marie-Neige Chapel
 
 # Python
 import json
-from enum import Enum
 import os
+from enum import Enum
 
 # PyQt
 from PyQt6 import QtCore
@@ -19,7 +19,7 @@ from packer_data import PackerData
 class Task(QtCore.QAbstractListModel):
 	
 	# -------------------------------------------------------------------------
-	def __init__(self, packer_data = None):
+	def __init__(self, json_dict = None):
 		super(Task, self).__init__()
 		
 		# ----------------
@@ -33,18 +33,37 @@ class Task(QtCore.QAbstractListModel):
 			"PACKER_TYPE"
 		])
 
-		self._status = "Nothing"
-		self._name = "output_name"
+		self._u_dash = u'\u2014'
+		self._u_check = u'\u2713'
+		self._u_cross = u'\u2717'
 
-		if packer_data is None:
-			self._packer_data = PackerData()
+		self._status = self._u_dash
+
+		if json_dict is None:
+			self.defaultInitialization()
 		else:
-			self._packer_data = packer_data
+			self.jsonInitialization(json_dict)
 
+	# -------------------------------------------------------------------------
+	def defaultInitialization(self):
 		qt_folder_location = QStandardPaths.StandardLocation.DownloadLocation
 		default_folder = QStandardPaths.writableLocation(qt_folder_location)
-		self._files_selected = FilesModel(default_folder)
+
+		# ----------------
+		# MEMBER VARIABLES
+		# ----------------
+		self._name = "output_name"
+		self._packer_data = PackerData()
+		self._files_selected = FilesModel()
+		self._files_selected.setRootPath(default_folder)
 		self._destination_file = default_folder + "/output." + self._packer_data.extension()
+	
+	# -------------------------------------------------------------------------
+	def jsonInitialization(self, json_dict: dict):
+		self._name = "output_name"
+		self._destination_file = json_dict["destination_file"]
+		self._packer_data = PackerData(json_dict["packer_data"])
+		self._files_selected = FilesModel(json_dict["files_model"])
 
 	###########################################################################
 	# GETTERS

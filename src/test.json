@@ -3,20 +3,23 @@
     "dirname": "D:/1_project/packy/03_realisations/packy/src",
     "tasks": [
         {
-            "task_name": "output_name",
             "files_model": {
                 "root_path": "D:/Downloads",
                 "check": {
-                    "D:/Downloads/1.txt": 2,
-                    "D:/Downloads/2.txt": 2
+                    "D:/Downloads/1.txt": 0,
+                    "D:/Downloads/2.txt": 2,
+                    "D:/Downloads/DXM05B0Q": 2,
+                    "D:/Downloads/DXM05B0Q/DSRD.enc": 2,
+                    "D:/Downloads/DXM05B0Q/DXM05B0Q.enc": 2
                 }
             },
-            "destination_file": "D:/Desktop/output",
             "packer_data": {
-                "type": 4,
-                "compression_method": 2,
-                "compression_level": 1
-            }
+                "type": 0,
+                "compression_method": 0,
+                "compression_level": 0
+            },
+            "task_name": "output_name",
+            "destination_file": "D:/Desktop/output.zip"
         }
     ]
 }
