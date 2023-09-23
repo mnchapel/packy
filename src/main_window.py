@@ -96,11 +96,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	# -------------------------------------------------------------------------
 	def onSave(self, s):
 		if not self._session.name():
-			[filename, _] = QFileDialog.getSaveFileName(self, "Save As", "")
-			if filename:
-				self._session.setName(filename)
-				with open(filename, "w") as output_file:
-					json.dump(self._session, output_file, cls=SessionEncoder, indent=4)
+			self.onSaveAs(s)
+		else:
+			basename = self._session.name()
+			output_dir = self._session.dirname()
+			filename = output_dir + "/" + basename
+			with open(filename, "w") as output_file:
+				json.dump(self._session, output_file, cls=SessionEncoder, indent=4)
+
+	# -------------------------------------------------------------------------
+	def onSaveAs(self, s):
+		[filename, _] = QFileDialog.getSaveFileName(self, "Save As", "")
+		if filename:
+			self._session.setName(filename)
+			with open(filename, "w") as output_file:
+				json.dump(self._session, output_file, cls=SessionEncoder, indent=4)
 	
 	# -------------------------------------------------------------------------
 	def onOpen(self, s):
@@ -272,6 +282,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	def connectFileMenuActions(self):
 		self.action_new_session.triggered.connect(self.onNewSession)
 		self.action_save.triggered.connect(self.onSave)
+		self.action_save_as.triggered.connect(self.onSaveAs)
 		self.action_open.triggered.connect(self.onOpen)
 		self.action_options.triggered.connect(self.openOptions)
 		self.action_exit.triggered.connect(self.close)

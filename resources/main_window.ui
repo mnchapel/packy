@@ -421,6 +421,7 @@
     <addaction name="action_open"/>
     <addaction name="separator"/>
     <addaction name="action_save"/>
+    <addaction name="action_save_as"/>
     <addaction name="separator"/>
     <addaction name="action_options"/>
     <addaction name="separator"/>
@@ -464,12 +465,17 @@
   </action>
   <action name="action_new_session">
    <property name="text">
-    <string>New session</string>
+    <string>New Session</string>
    </property>
   </action>
   <action name="action_open">
    <property name="text">
     <string>Open...</string>
+   </property>
+  </action>
+  <action name="action_save_as">
+   <property name="text">
+    <string>Save As...</string>
    </property>
   </action>
  </widget>

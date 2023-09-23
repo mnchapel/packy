@@ -4,6 +4,7 @@ author: Marie-Neige Chapel
 
 # Python
 import os
+from selectors import SelectSelector
 
 # PyQt
 from PyQt6 import QtCore
@@ -16,16 +17,35 @@ from task import Task
 class Session(QtCore.QAbstractTableModel):
     
 	# -------------------------------------------------------------------------
-	def __init__(self, data=None):
+	def __init__(self, json_dict = None):
 		super(Session, self).__init__()
 
 		# ----------------
 		# MEMBER VARIABLES
 		# ----------------
-		self._tasks = [] if data is None else data
 		self._headers = ["Status", "Output", "Progress"]
+		self._tasks = []
+
+		if json_dict is None:
+			self.defaultInitialization()
+		else:
+			self.jsonInitialization(json_dict)
+
+	# -------------------------------------------------------------------------
+	def defaultInitialization(self):
+		# ----------------
+		# MEMBER VARIABLES
+		# ----------------
 		self._name = ""
 		self._dirname = ""
+	
+	# -------------------------------------------------------------------------
+	def jsonInitialization(self, json_dict: dict):
+		# ----------------
+		# MEMBER VARIABLES
+		# ----------------
+		self._name = json_dict["session_name"]
+		self._dirname = json_dict["dirname"]
 
 	###########################################################################
 	# GETTERS

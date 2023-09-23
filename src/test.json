@@ -18,7 +18,7 @@
                 "compression_method": 0,
                 "compression_level": 0
             },
-            "task_name": "output_name",
+            "task_name": "output.zip",
             "destination_file": "D:/Desktop/output.zip"
         }
     ]

@@ -27,7 +27,7 @@ class SessionDecoder(json.JSONDecoder):
 	
 	# -------------------------------------------------------------------------
 	def deserializeSession(self, dict):
-		session = Session()
+		session = Session(dict)
 		dict_tasks = dict["tasks"]
 		tasks = []
 		for dict_task in dict_tasks:
