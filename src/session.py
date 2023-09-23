@@ -119,3 +119,7 @@ class Session(QtCore.QAbstractTableModel):
 			self.rowsAboutToBeRemoved.emit(QtCore.QModelIndex(), row, row)
 			self._tasks.pop(row)
 			self.rowsRemoved.emit(QtCore.QModelIndex(), row, row)
+
+    # -------------------------------------------------------------------------
+	def emitTaskDataChanged(self, task_row: int):
+		self.dataChanged.emit(self.index(task_row, 0), self.index(task_row, 0))

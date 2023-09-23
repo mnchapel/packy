@@ -4,6 +4,7 @@ author: Marie-Neige Chapel
 
 # Python
 import json
+from operator import index
 import os
 from enum import Enum
 
@@ -52,7 +53,6 @@ class Task(QtCore.QAbstractListModel):
 		# ----------------
 		# MEMBER VARIABLES
 		# ----------------
-		self._name = "output_name"
 		self._packer_data = PackerData()
 		self._files_selected = FilesModel()
 		self._files_selected.setRootPath(default_folder)
@@ -60,7 +60,6 @@ class Task(QtCore.QAbstractListModel):
 	
 	# -------------------------------------------------------------------------
 	def jsonInitialization(self, json_dict: dict):
-		self._name = "output_name"
 		self._destination_file = json_dict["destination_file"]
 		self._packer_data = PackerData(json_dict["packer_data"])
 		self._files_selected = FilesModel(json_dict["files_model"])
@@ -70,12 +69,12 @@ class Task(QtCore.QAbstractListModel):
 	###########################################################################
 
 	# -------------------------------------------------------------------------
-	def status(self):
-		return self._status
+	def name(self):
+		return os.path.basename(self._destination_file)
 
 	# -------------------------------------------------------------------------
-	def name(self):
-		return self._name
+	def status(self):
+		return self._status
 
 	# -------------------------------------------------------------------------
 	def destinationFile(self):
@@ -111,7 +110,7 @@ class Task(QtCore.QAbstractListModel):
 			if index.row() == self.properties.STATUS.value:
 				return self._status
 			elif index.row() == self.properties.OUTPUT_NAME.value:
-				return self._name
+				return os.path.basename(self._destination_file)
 			elif index.row() == self.properties.SOURCE_FOLDER.value:
 				return self._files_selected.rootPath()
 			elif index.row() == self.properties.DESTINATION_FILE.value:
@@ -134,6 +133,17 @@ class Task(QtCore.QAbstractListModel):
 	# -------------------------------------------------------------------------
 	def rowCount(self, index=None):
 		return 5
+	
+	# -------------------------------------------------------------------------
+	def initStatus(self):
+		self._status = self._u_dash
+
+	# -------------------------------------------------------------------------
+	def updateStatus(self, success: bool):
+		if success:
+			self._status = self._u_check
+		else:
+			self._status = self._u_cross
 
 	# -------------------------------------------------------------------------
 	def save(self):

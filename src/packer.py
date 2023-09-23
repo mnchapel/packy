@@ -3,6 +3,7 @@ author: Marie-Neige Chapel
 """
 
 # Python
+import enum
 import os
 from zipfile import ZipFile
 
@@ -21,7 +22,7 @@ class Packer():
 	def runAll(self, session: Session):
 		tasks = session.tasks()
 
-		for task in tasks:
+		for index, task in enumerate(tasks):
 			checked_items = task.filesSelected().checks()
 			items_to_pack = self.filterSelectedFiles(checked_items)
 
@@ -29,6 +30,9 @@ class Packer():
 			
 			with ZipFile(destination_filename, mode = "w") as m_zip:
 				self.packItems(m_zip, items_to_pack)
+			
+			task.updateStatus(True)
+			session.emitTaskDataChanged(index)
 
     # -------------------------------------------------------------------------
 	def filterSelectedFiles(self, checked_items: dict):
@@ -61,7 +65,7 @@ class Packer():
 
     # -------------------------------------------------------------------------
 	def packDir(self, m_zip, path):
-		for root, dirs, files in os.walk(path):
+		for root, _, files in os.walk(path):
 			for file in files:
 				m_zip.write(os.path.join(root, file), os.path.relpath(os.path.join(root, file), os.path.join(path, '..')))
 	

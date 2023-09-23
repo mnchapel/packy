@@ -5,6 +5,7 @@ author: Marie-Neige Chapel
 #Python
 import json
 import os
+from typing import Self
 
 # PyQt
 from PyQt6 import QtWidgets
@@ -153,8 +154,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	
 	# -------------------------------------------------------------------------
 	def clickOnRunAll(self):
+		self.initTasksStatus()
 		packer = Packer()
 		packer.runAll(self._session)
+
+	# -------------------------------------------------------------------------
+	def initTasksStatus(self):
+		tasks = self._session.tasks()
+		for task in tasks:
+			task.initStatus()
 	
 	# -------------------------------------------------------------------------
 	def clickOnCancel(self):
