@@ -5,6 +5,7 @@ author: Marie-Neige Chapel
 #Python
 import json
 import os
+from queue import Empty
 from typing import Self
 
 # PyQt
@@ -96,23 +97,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	def onSave(self, s):
 		if not self._session.name():
 			[filename, _] = QFileDialog.getSaveFileName(self, "Save As", "")
-			print(filename)
-			self._session.setName(filename)
-		
-		with open(filename, "w") as output_file:
-			json.dump(self._session, output_file, cls=SessionEncoder, indent=4)
+			if filename:
+				self._session.setName(filename)
+				with open(filename, "w") as output_file:
+					json.dump(self._session, output_file, cls=SessionEncoder, indent=4)
 	
 	# -------------------------------------------------------------------------
 	def onOpen(self, s):
 		[filename, _] = QFileDialog.getOpenFileName(self, "Open session", "")
-		print("Open ", filename)
-		with open(filename, "r") as file:
-			self._session = json.load(file, cls=SessionDecoder)
-			self.updateSessionViewModel()
-			if self._session.nbTasks() > 0:
-				self._selected_task = self._session.taskAt(0)
-				self.table_view_session.selectRow(0)
-				self.disableTaskProperties()
+		if filename:
+			with open(filename, "r") as file:
+				self._session = json.load(file, cls=SessionDecoder)
+				self.updateSessionViewModel()
+				if self._session.nbTasks() > 0:
+					self._selected_task = self._session.taskAt(0)
+					self.table_view_session.selectRow(0)
+					self.disableTaskProperties()
 	
 	# -------------------------------------------------------------------------
 	def openOptions(self, s):
@@ -306,9 +306,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	def selectSourceFolder(self):
 		files_model = self._selected_task.filesSelected()
 		folder_selected = QFileDialog.getExistingDirectory(self, "Select folder", self.line_edit_source.text(), QFileDialog.Option.ShowDirsOnly)
-		self.line_edit_source.setText(folder_selected)
-		files_model.setRootPath(folder_selected)
-		self.tree_view_source.setRootIndex(files_model.index(folder_selected))
+
+		if folder_selected:
+			self.line_edit_source.setText(folder_selected)
+			files_model.setRootPath(folder_selected)
+			self.tree_view_source.setRootIndex(files_model.index(folder_selected))
 	
 	# -------------------------------------------------------------------------
 	def selectDestinationFile(self):
@@ -316,8 +318,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		path_no_ext = os.path.splitext(destination_path)[0]
 		ext = os.path.splitext(destination_path)[1]
 		[path_no_ext, _] = QFileDialog.getSaveFileName(self, "Select file", path_no_ext)
-		self.line_edit_destination.setText(path_no_ext + ext)
-		self._task_view_mapper.submit()
+
+		if path_no_ext:
+			self.line_edit_destination.setText(path_no_ext + ext)
+			self._task_view_mapper.submit()
 
 	# -------------------------------------------------------------------------
 	def updatePackerType(self, button: QtWidgets.QAbstractButton):
