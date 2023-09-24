@@ -40,14 +40,12 @@ class Preferences(QAbstractListModel):
 
 		if not file_exists:
 			self.initSettings()
-		# else:
-			# self.dataChanged.emit(self.index(0, 0), self.index(4, 0))
 
 	# -------------------------------------------------------------------------
 	def initSettings(self):
 		self._settings.beginGroup("general")
 		self._settings.setValue("snapshot_retention", 0)
-		self._settings.setValue("nb_snapshots", 0)
+		self._settings.setValue("nb_snapshots", 1)
 		self._settings.endGroup()
 
 		self._settings.beginGroup("task")
