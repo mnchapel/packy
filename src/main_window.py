@@ -5,8 +5,6 @@ author: Marie-Neige Chapel
 #Python
 import json
 import os
-from queue import Empty
-from typing import Self
 
 # PyQt
 from PyQt6 import QtWidgets
@@ -22,6 +20,8 @@ from packer_data import PackerData
 from session import Session
 from session_encoder import SessionEncoder
 from session_decoder import SessionDecoder
+from preferences import Preferences
+from options import Options
 
 ###############################################################################
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -41,6 +41,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.initSessionView()
 		self.initTaskView()
 		self.initTitle()
+		self.initPreferences()
 
 		self.show()
 
@@ -67,6 +68,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	def initTaskView(self):
 		self.createTaskMapper()
 		self.createPackerMapper()
+	
+	# -------------------------------------------------------------------------
+	def initPreferences(self):
+		self._preferences = Preferences()
 	
 	# -------------------------------------------------------------------------
 	def createTaskMapper(self):
@@ -123,19 +128,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 					self._selected_task = self._session.taskAt(0)
 					self.table_view_session.selectRow(0)
 					self.disableTaskProperties()
-	
-	# -------------------------------------------------------------------------
-	def openOptions(self, s):
-		print("openOptions (not implemented yet)")
 
 	# -------------------------------------------------------------------------
 	def openDocumentation(self, s):
 		print("openDocumentation (not implemented yet)")
-	
-	# -------------------------------------------------------------------------
-	def openAbout(self, s):
-		dlg = About(self)
-		dlg.exec()
 	
 	# -------------------------------------------------------------------------
 	def clickOnCreate(self):
@@ -312,6 +308,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	###########################################################################
 	# SLOTS
 	###########################################################################
+	
+	# -------------------------------------------------------------------------
+	def openOptions(self, s):
+		print("openOptions (not implemented yet)")
+		dlg = Options(self)
+		dlg.exec()
+	
+	# -------------------------------------------------------------------------
+	def openAbout(self, s):
+		dlg = About(self)
+		dlg.exec()
 	
 	# -------------------------------------------------------------------------
 	def selectSourceFolder(self):

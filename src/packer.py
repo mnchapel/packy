@@ -3,13 +3,11 @@ author: Marie-Neige Chapel
 """
 
 # Python
-import enum
 import os
 from zipfile import ZipFile
 
 # PackY
 from session import Session
-from task import Task
 
 ###############################################################################
 class Packer():
