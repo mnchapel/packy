@@ -6,13 +6,13 @@ author: Marie-Neige Chapel
 from enum import Enum
 
 #PyQt
-from PyQt6 import QtCore
+from PyQt6.QtCore import QAbstractListModel
 
 # PackY
 from packer_type_data import PackerTypeData
 
 ###############################################################################
-class PackerData(QtCore.QAbstractListModel):
+class PackerData(QAbstractListModel):
     
 	# -------------------------------------------------------------------------
 	def __init__(self, json_dict: dict = None):

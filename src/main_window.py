@@ -311,8 +311,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	
 	# -------------------------------------------------------------------------
 	def openOptions(self, s):
-		print("openOptions (not implemented yet)")
-		dlg = Options(self)
+		dlg = Options(self._preferences, self)
 		dlg.exec()
 	
 	# -------------------------------------------------------------------------

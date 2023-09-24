@@ -3,7 +3,6 @@ author: Marie-Neige Chapel
 """
 
 # PyQt
-import json
 from PyQt6.QtCore import Qt, QModelIndex
 from PyQt6.QtGui import QFileSystemModel
 

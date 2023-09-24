@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QTabWidget" name="tabWidget">
+    <widget class="QTabWidget" name="tab_widget">
      <property name="currentIndex">
       <number>0</number>
      </property>
@@ -25,7 +25,7 @@
       </attribute>
       <layout class="QGridLayout" name="gridLayout">
        <item row="2" column="1">
-        <widget class="QSpinBox" name="spinBox">
+        <widget class="QSpinBox" name="spin_box_nb_snapshots">
          <property name="enabled">
           <bool>false</bool>
          </property>
@@ -35,31 +35,37 @@
         </widget>
        </item>
        <item row="1" column="0">
-        <widget class="QRadioButton" name="radioButton_4">
+        <widget class="QRadioButton" name="r_button_keep_all">
          <property name="text">
           <string>Keep all snapshots</string>
          </property>
          <property name="checked">
           <bool>true</bool>
          </property>
+         <attribute name="buttonGroup">
+          <string notr="true">b_group_snapshot_retention</string>
+         </attribute>
         </widget>
        </item>
        <item row="0" column="0">
-        <widget class="QLabel" name="label_2">
+        <widget class="QLabel" name="label_snapshot_retention">
          <property name="text">
-          <string>Snapshot rentention:</string>
+          <string>Snapshot retention:</string>
          </property>
         </widget>
        </item>
        <item row="2" column="0">
-        <widget class="QRadioButton" name="radioButton_5">
+        <widget class="QRadioButton" name="r_button_nb_snapshots">
          <property name="text">
           <string>Number of latest snapshots to keep:</string>
          </property>
+         <attribute name="buttonGroup">
+          <string notr="true">b_group_snapshot_retention</string>
+         </attribute>
         </widget>
        </item>
        <item row="3" column="0">
-        <spacer name="verticalSpacer">
+        <spacer name="v_spacer_general">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
@@ -72,7 +78,7 @@
         </spacer>
        </item>
        <item row="2" column="2">
-        <spacer name="horizontalSpacer">
+        <spacer name="h_spacer_general">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -99,31 +105,40 @@
         </widget>
        </item>
        <item>
-        <widget class="QRadioButton" name="radioButton">
+        <widget class="QRadioButton" name="r_button_current_date">
          <property name="text">
           <string>Add the current date</string>
          </property>
          <property name="checked">
           <bool>true</bool>
          </property>
+         <attribute name="buttonGroup">
+          <string notr="true">b_group_output_format</string>
+         </attribute>
         </widget>
        </item>
        <item>
-        <widget class="QRadioButton" name="radioButton_2">
+        <widget class="QRadioButton" name="r_button_version_num">
          <property name="text">
           <string>Add version number</string>
          </property>
+         <attribute name="buttonGroup">
+          <string notr="true">b_group_output_format</string>
+         </attribute>
         </widget>
        </item>
        <item>
-        <widget class="QRadioButton" name="radioButton_3">
+        <widget class="QRadioButton" name="r_button_nothing">
          <property name="text">
           <string>Add nothing</string>
          </property>
+         <attribute name="buttonGroup">
+          <string notr="true">b_group_output_format</string>
+         </attribute>
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer_2">
+        <spacer name="v_spacer_task">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
@@ -140,7 +155,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QDialogButtonBox" name="buttonBox">
+    <widget class="QDialogButtonBox" name="button_box">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
@@ -154,7 +169,7 @@
  <resources/>
  <connections>
   <connection>
-   <sender>buttonBox</sender>
+   <sender>button_box</sender>
    <signal>accepted()</signal>
    <receiver>dialog_options</receiver>
    <slot>accept()</slot>
@@ -170,7 +185,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>buttonBox</sender>
+   <sender>button_box</sender>
    <signal>rejected()</signal>
    <receiver>dialog_options</receiver>
    <slot>reject()</slot>
@@ -186,4 +201,8 @@
    </hints>
   </connection>
  </connections>
+ <buttongroups>
+  <buttongroup name="b_group_snapshot_retention"/>
+  <buttongroup name="b_group_output_format"/>
+ </buttongroups>
 </ui>
