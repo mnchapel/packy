@@ -245,6 +245,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.group_box_file_selection.setEnabled(True)
 		self.group_box_output_properties.setEnabled(True)
 		self.group_box_statistics.setEnabled(False)
+		self.disableUnavailablePackerType()
 
 		self.push_button_create.setEnabled(False)
 		self.push_button_remove.setEnabled(False)
@@ -254,7 +255,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.push_button_cancel.setEnabled(False)
 
 		self.table_view_session.setEnabled(False)
-
+	
+	# -------------------------------------------------------------------------
+	def disableUnavailablePackerType(self):
+		self.rbutton_tar.setEnabled(False)
+		self.rbutton_bz2.setEnabled(False)
+		self.rbutton_tbz.setEnabled(False)
+		self.rbutton_gz.setEnabled(False)
+		self.rbutton_tgz.setEnabled(False)
+		self.rbutton_lzma.setEnabled(False)
+		self.rbutton_tlz.setEnabled(False)
+		self.rbutton_xz.setEnabled(False)
 	# -------------------------------------------------------------------------
 	def disableTaskProperties(self):
 		self.group_box_file_selection.setEnabled(False)
