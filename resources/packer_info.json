@@ -1,0 +1,38 @@
+{
+	"zip": {
+		"methods": ["Stored", "Deflated"],
+		"levels": ["None"]
+	},
+	"tar": {
+		"methods": [""],
+		"levels": [""]
+	},
+	"bz2": {
+		"methods": [""],
+		"levels": [""]
+	},
+	"tbz": {
+		"methods": [""],
+		"levels": [""]
+	},
+	"gz": {
+		"methods": [""],
+		"levels": [""]
+	},
+	"tgz": {
+		"methods": [""],
+		"levels": [""]
+	},
+	"lzma": {
+		"methods": ["LZMA"],
+		"levels": ["No compression", "normal", "fast"]
+	},
+	"tlz": {
+		"methods": [""],
+		"levels": [""]
+	},
+	"xz": {
+		"methods": [""],
+		"levels": [""]
+	}
+}

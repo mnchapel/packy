@@ -141,6 +141,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.table_view_session.selectRow(row_inserted)
 
 		self.enableTaskProperties()
+		self.updateCompressionLevel()
+		self.updateCompressionMethod()
 	
 	# -------------------------------------------------------------------------
 	def clickOnRemove(self):
@@ -263,7 +265,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.rbutton_tbz.setEnabled(False)
 		self.rbutton_gz.setEnabled(False)
 		self.rbutton_tgz.setEnabled(False)
-		self.rbutton_lzma.setEnabled(False)
+		# self.rbutton_lzma.setEnabled(False)
 		self.rbutton_tlz.setEnabled(False)
 		self.rbutton_xz.setEnabled(False)
 	# -------------------------------------------------------------------------
@@ -355,3 +357,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	def updatePackerType(self, button: QtWidgets.QAbstractButton):
 		self._packer_type_mapper.submit()
 		self._task_view_mapper.submit()
+
+		self.updateCompressionMethod()
+		self.updateCompressionLevel()
+
+	# -------------------------------------------------------------------------
+	def updateCompressionMethod(self):
+		packer_data = self._selected_task.packerData()
+		info = packer_data.methodsInfo()
+		self.cbox_compression_method.clear()
+		for method in info:
+			self.cbox_compression_method.addItem(method)
+
+	# -------------------------------------------------------------------------
+	def updateCompressionLevel(self):
+		packer_data = self._selected_task.packerData()
+		info = packer_data.levelsInfo()
+		self.cbox_compression_level.clear()
+		for level in info:
+			self.cbox_compression_level.addItem(level)

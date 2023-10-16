@@ -8,8 +8,6 @@ import json
 # Packy
 from session import Session
 from task import Task
-from files_model import FilesModel
-from packer_data import PackerData
 
 ###############################################################################
 class SessionDecoder(json.JSONDecoder):

@@ -3,6 +3,7 @@ author: Marie-Neige Chapel
 """
 
 # Python
+import json
 from enum import Enum
 
 #PyQt
@@ -41,6 +42,13 @@ class PackerData(QAbstractListModel):
 			self.defaultInitialization()
 		else:
 			self.jsonInitialization(json_dict)
+			
+		self.loadPackerInfo()
+
+	# -------------------------------------------------------------------------
+	def loadPackerInfo(self):
+		with open("../resources/packer_info.json", "r") as file:
+			self._info = json.load(file)
 
 	# -------------------------------------------------------------------------
 	def defaultInitialization(self):
@@ -77,6 +85,18 @@ class PackerData(QAbstractListModel):
 	# -------------------------------------------------------------------------
 	def compressionLevel(self):
 		return self._compression_level_index
+
+    # -------------------------------------------------------------------------
+	def methodsInfo(self):
+		packer_type = self.extension()
+		packer_info = self._info[packer_type]
+		return packer_info["methods"]
+
+    # -------------------------------------------------------------------------
+	def levelsInfo(self):
+		packer_type = self.extension()
+		packer_info = self._info[packer_type]
+		return packer_info["levels"]
 
 	###########################################################################
 	# MEMBER FUNCTIONS

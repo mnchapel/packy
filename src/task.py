@@ -4,7 +4,6 @@ author: Marie-Neige Chapel
 
 # Python
 import json
-from operator import index
 import os
 from enum import Enum
 
