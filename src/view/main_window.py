@@ -14,7 +14,7 @@ from model.packer import Packer
 from view.ui_main_window import Ui_MainWindow
 
 # PackY
-from about import About
+from view.about import About
 from model.task import Task
 from model.packer_data import PackerData
 from model.session import Session
