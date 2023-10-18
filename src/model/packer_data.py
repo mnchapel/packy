@@ -10,7 +10,7 @@ from enum import Enum
 from PyQt6.QtCore import QAbstractListModel
 
 # PackY
-from packer_type_data import PackerTypeData
+from model.packer_type_data import PackerTypeData
 
 ###############################################################################
 class PackerData(QAbstractListModel):

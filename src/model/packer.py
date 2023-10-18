@@ -7,7 +7,7 @@ import os
 from zipfile import ZipFile
 
 # PackY
-from session import Session
+from model.session import Session
 
 ###############################################################################
 class Packer():

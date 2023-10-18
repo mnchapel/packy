@@ -7,7 +7,7 @@ from enum import Enum, auto
 import os
 
 # PyQt
-from PyQt6.QtCore import QAbstractListModel, QSettings, QModelIndex
+from PyQt6.QtCore import QAbstractListModel, QSettings
 
 ###############################################################################
 class PreferencesRows(Enum):

@@ -4,14 +4,13 @@ author: Marie-Neige Chapel
 
 # Python
 import os
-from selectors import SelectSelector
 
 # PyQt
 from PyQt6 import QtCore
 from PyQt6.QtCore import Qt
 
 # PackY
-from task import Task
+from model.task import Task
 
 ###############################################################################
 class Session(QtCore.QAbstractTableModel):

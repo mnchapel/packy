@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import QDialog, QDataWidgetMapper, QAbstractButton
 from PyQt6.uic import loadUi
 
 # PackY
-from preferences import Preferences, PreferencesRows
+from model.preferences import Preferences, PreferencesRows
 
 ###############################################################################
 class Options(QDialog):

@@ -10,10 +10,10 @@ from enum import Enum
 # PyQt
 from PyQt6 import QtCore
 from PyQt6.QtCore import Qt, QStandardPaths
-from files_model import FilesModel
 
 # PackY
-from packer_data import PackerData
+from model.files_model import FilesModel
+from model.packer_data import PackerData
 
 ###############################################################################
 class Task(QtCore.QAbstractListModel):

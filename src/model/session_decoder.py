@@ -6,8 +6,8 @@ author: Marie-Neige Chapel
 import json
 
 # Packy
-from session import Session
-from task import Task
+from model.session import Session
+from model.task import Task
 
 ###############################################################################
 class SessionDecoder(json.JSONDecoder):

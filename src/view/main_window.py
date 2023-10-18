@@ -10,18 +10,18 @@ import os
 from PyQt6 import QtWidgets
 from PyQt6.QtCore import Qt, QItemSelection
 from PyQt6.QtWidgets import QFileDialog
-from packer import Packer
-from ui_main_window import Ui_MainWindow
+from model.packer import Packer
+from view.ui_main_window import Ui_MainWindow
 
 # PackY
 from about import About
-from task import Task
-from packer_data import PackerData
-from session import Session
-from session_encoder import SessionEncoder
-from session_decoder import SessionDecoder
-from preferences import Preferences
-from options import Options
+from model.task import Task
+from model.packer_data import PackerData
+from model.session import Session
+from model.session_encoder import SessionEncoder
+from model.session_decoder import SessionDecoder
+from model.preferences import Preferences
+from view.options import Options
 
 ###############################################################################
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):

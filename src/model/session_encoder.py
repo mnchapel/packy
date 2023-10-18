@@ -6,10 +6,10 @@ author: Marie-Neige Chapel
 import json
 
 # Packy
-from session import Session
-from task import Task
-from files_model import FilesModel
-from packer_data import PackerData
+from model.session import Session
+from model.task import Task
+from model.files_model import FilesModel
+from model.packer_data import PackerData
 
 ###############################################################################
 class SessionEncoder(json.JSONEncoder):
