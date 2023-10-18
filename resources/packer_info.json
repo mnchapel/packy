@@ -25,7 +25,7 @@
 	},
 	"lzma": {
 		"methods": ["LZMA"],
-		"levels": ["No compression", "normal", "fast"]
+		"levels": ["No compression", "Normal", "Fast"]
 	},
 	"tlz": {
 		"methods": [""],

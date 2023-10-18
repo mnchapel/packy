@@ -184,6 +184,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.updateTaskViewMapper()
 		self.updatePackerViewMapper()
 		self.updateFilesSelection()
+		self.updateCompressionMethod()
+		self.updateCompressionLevel()
 	
 	# -------------------------------------------------------------------------
 	def updateTaskViewMapper(self):
@@ -363,16 +365,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 	# -------------------------------------------------------------------------
 	def updateCompressionMethod(self):
+		curr_index = self.cbox_compression_method.currentIndex()
+		
 		packer_data = self._selected_task.packerData()
 		info = packer_data.methodsInfo()
 		self.cbox_compression_method.clear()
 		for method in info:
 			self.cbox_compression_method.addItem(method)
+		
+		self.cbox_compression_method.setCurrentIndex(curr_index)
 
 	# -------------------------------------------------------------------------
 	def updateCompressionLevel(self):
+		curr_index = self.cbox_compression_level.currentIndex()
+
 		packer_data = self._selected_task.packerData()
 		info = packer_data.levelsInfo()
 		self.cbox_compression_level.clear()
 		for level in info:
 			self.cbox_compression_level.addItem(level)
+		
+		self.cbox_compression_level.setCurrentIndex(curr_index)
