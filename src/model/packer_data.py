@@ -13,30 +13,17 @@ from PyQt6.QtCore import QAbstractListModel
 from model.packer_type_data import PackerTypeData
 
 ###############################################################################
+class DataName(Enum):
+	PACKER_TYPE = 0
+	COMPRESSION_LEVEL = 1
+	COMPRESSION_METHOD = 2
+
+###############################################################################
 class PackerData(QAbstractListModel):
     
 	# -------------------------------------------------------------------------
 	def __init__(self, json_dict: dict = None):
 		super(PackerData, self).__init__()
-
-		self.data_names = Enum("DataName", [
-			"PACKER_TYPE",
-			"COMPRESSION_LEVEL",
-			"COMPRESSION_METHOD"
-		], start = 0)
-
-		self.compression_levels = Enum("CompressionLevelName", [
-			"STORE",
-			"DEFLATE",
-			"OPTIMAL"
-		], start = 0)
-
-		self.compression_methods = Enum("CompressionMethodName", [
-			"NORMAL",
-			"MAXIMUM",
-			"FAST",
-			"FASTEST"
-		], start = 0)
 
 		if json_dict is None:
 			self.defaultInitialization()
@@ -105,15 +92,15 @@ class PackerData(QAbstractListModel):
 	# -------------------------------------------------------------------------
 	# @override
 	def rowCount(self, index=None):
-		return len(self.data_names)
+		return len(DataName)
 	
 	# -------------------------------------------------------------------------
 	# @override
 	def data(self, index, role):
 		if index.isValid():
-			if index.row() == self.data_names.PACKER_TYPE.value:
+			if index.row() == DataName.PACKER_TYPE.value:
 				return None
-			elif index.row() == self.data_names.COMPRESSION_LEVEL.value:
+			elif index.row() == DataName.COMPRESSION_LEVEL.value:
 				return self._compression_level_index
 			else:
 				return self._compression_method_index
@@ -123,8 +110,8 @@ class PackerData(QAbstractListModel):
 	# @override
 	def setData(self, index, value, role):
 		if index.isValid():
-			if index.row() == self.data_names.COMPRESSION_LEVEL.value:
+			if index.row() == DataName.COMPRESSION_LEVEL.value:
 				self._compression_level_index = value
-			elif index.row() == self.data_names.COMPRESSION_METHOD.value:
+			elif index.row() == DataName.COMPRESSION_METHOD.value:
 				self._compression_method_index = value
 		return False

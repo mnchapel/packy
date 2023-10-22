@@ -1,7 +1,7 @@
 {
 	"zip": {
 		"methods": ["Stored", "Deflated"],
-		"levels": ["None"]
+		"levels": [["None"], ["No compression", "Best compression", "Default", "Best speed"]]
 	},
 	"tar": {
 		"methods": [""],
@@ -25,7 +25,7 @@
 	},
 	"lzma": {
 		"methods": ["LZMA"],
-		"levels": ["No compression", "Normal", "Fast"]
+		"levels": [["None"]]
 	},
 	"tlz": {
 		"methods": [""],

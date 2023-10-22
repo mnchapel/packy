@@ -10,17 +10,17 @@ import os
 from PyQt6 import QtWidgets
 from PyQt6.QtCore import Qt, QItemSelection
 from PyQt6.QtWidgets import QFileDialog
-from model.packer import Packer
+from model.packer_factory import createPacker
 from view.ui_main_window import Ui_MainWindow
 
 # PackY
-from view.about import About
 from model.task import Task
-from model.packer_data import PackerData
+from model.packer_data import DataName, PackerData
 from model.session import Session
 from model.session_encoder import SessionEncoder
 from model.session_decoder import SessionDecoder
 from model.preferences import Preferences
+from view.about import About
 from view.options import Options
 
 ###############################################################################
@@ -141,8 +141,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.table_view_session.selectRow(row_inserted)
 
 		self.enableTaskProperties()
-		self.updateCompressionLevel()
 		self.updateCompressionMethod()
+		self.updateCompressionLevel()
 	
 	# -------------------------------------------------------------------------
 	def clickOnRemove(self):
@@ -163,8 +163,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	# -------------------------------------------------------------------------
 	def clickOnRunAll(self):
 		self.initTasksStatus()
-		packer = Packer()
-		packer.runAll(self._session)
+
+		tasks = self._session.tasks()
+
+		for index, task in enumerate(tasks):
+			packer = createPacker(task.packerData().extension())
+			packer.run(task)
+			self._session.emitTaskDataChanged(index)
 
 	# -------------------------------------------------------------------------
 	def initTasksStatus(self):
@@ -184,8 +189,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.updateTaskViewMapper()
 		self.updatePackerViewMapper()
 		self.updateFilesSelection()
-		self.updateCompressionMethod()
-		self.updateCompressionLevel()
 	
 	# -------------------------------------------------------------------------
 	def updateTaskViewMapper(self):
@@ -220,9 +223,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	def updatePackerViewMapper(self):
 		packer_data = self._selected_task.packerData()
 
+		self.updateCompressionMethod()
+		
 		self._packer_mapper.setModel(packer_data)
-		self._packer_mapper.addMapping(self.cbox_compression_level, 1, b"currentIndex")
-		self._packer_mapper.addMapping(self.cbox_compression_method, 2, b"currentIndex")
+		self._packer_mapper.addMapping(self.cbox_compression_method, DataName.COMPRESSION_METHOD.value, b"currentIndex")
+		self._packer_mapper.toFirst()
+
+		self.updateCompressionLevel()
+		
+		self._packer_mapper.addMapping(self.cbox_compression_level, DataName.COMPRESSION_LEVEL.value, b"currentIndex")
 		self._packer_mapper.toFirst()
 
 		self.updatePackerTypeViewMapper(packer_data)
@@ -319,6 +328,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.push_button_source.clicked.connect(self.selectSourceFolder)
 		self.push_button_destination.clicked.connect(self.selectDestinationFile)
 		self.button_group_packer_type.buttonClicked.connect(self.updatePackerType)
+		self.cbox_compression_method.activated.connect(self.updateCompressionLevel)
 
 	###########################################################################
 	# SLOTS
@@ -360,8 +370,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self._packer_type_mapper.submit()
 		self._task_view_mapper.submit()
 
+		self.cbox_compression_method.setCurrentIndex(0)
+		self.cbox_compression_level.setCurrentIndex(0)
 		self.updateCompressionMethod()
-		self.updateCompressionLevel()
 
 	# -------------------------------------------------------------------------
 	def updateCompressionMethod(self):
@@ -374,15 +385,23 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 			self.cbox_compression_method.addItem(method)
 		
 		self.cbox_compression_method.setCurrentIndex(curr_index)
+		
+		curr_index = self.cbox_compression_method.currentIndex()
+
+		self.updateCompressionLevel()
 
 	# -------------------------------------------------------------------------
 	def updateCompressionLevel(self):
 		curr_index = self.cbox_compression_level.currentIndex()
+		c_method_curr_index = self.cbox_compression_method.currentIndex()
 
 		packer_data = self._selected_task.packerData()
 		info = packer_data.levelsInfo()
 		self.cbox_compression_level.clear()
-		for level in info:
+		for level in info[c_method_curr_index]:
 			self.cbox_compression_level.addItem(level)
 		
-		self.cbox_compression_level.setCurrentIndex(curr_index)
+		if self.cbox_compression_level.count() > curr_index:
+			self.cbox_compression_level.setCurrentIndex(curr_index)
+		else:
+			self.cbox_compression_level.setCurrentIndex(0)
