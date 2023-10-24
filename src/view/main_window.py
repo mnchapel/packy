@@ -171,8 +171,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		for index, task in enumerate(tasks):
 			packer = createPacker(task, index)
 			self._thread_pool.start(packer)
-			# self._session.emitTaskDataChanged(index)
-			# self.table_view_session.update()
 
 	# -------------------------------------------------------------------------
 	def initTasksStatus(self):

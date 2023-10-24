@@ -144,6 +144,7 @@ class Task(QtCore.QAbstractListModel):
 	# -------------------------------------------------------------------------
 	def initStatus(self):
 		self._status = self._u_dash
+		self.statusChanged.emit(self._id)
 
 	# -------------------------------------------------------------------------
 	def updateStatus(self, success: bool):
