@@ -3,15 +3,18 @@ author: Marie-Neige Chapel
 """
 
 # PackY
+from model.task import Task
 from model.zip_packer import ZipPacker
 
 ###############################################################################
 # class PackerFactory:
 
 # -------------------------------------------------------------------------
-def createPacker(extension: str):
+def createPacker(task: Task, index:int):
+	extension = task.packerData().extension()
+
 	match extension:
 		case "zip" | "lzma":
-			return ZipPacker()
+			return ZipPacker(task, index)
 		case _:
 			raise Exception("[createPacker] extension not recognized.")

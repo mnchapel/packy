@@ -12,7 +12,12 @@ from model.packer import Packer
 from model.packer_data import PackerData
 from model.task import Task
 
+###############################################################################
 class ZipPacker(Packer):
+
+    # -------------------------------------------------------------------------
+	def __init__(self, task: Task, index: int):
+		super(ZipPacker, self).__init__(task, index)
 
 	# -------------------------------------------------------------------------
 	def packItems(self, task: Task, items: set):

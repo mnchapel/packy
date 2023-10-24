@@ -69,6 +69,14 @@ class Session(QtCore.QAbstractTableModel):
     # -------------------------------------------------------------------------
 	def nbTasks(self):
 		return len(self._tasks)
+	
+    # -------------------------------------------------------------------------
+	def taskRowById(self, id: int):
+		for row_num, task in enumerate(self._tasks):
+			if task.id() == id:
+				return row_num
+		
+		return -1
 
 	###########################################################################
 	# SETTERS
@@ -82,6 +90,8 @@ class Session(QtCore.QAbstractTableModel):
     # -------------------------------------------------------------------------
 	def setTasks(self, tasks):
 		self._tasks = tasks
+		for task in self._tasks:
+			task.statusChanged.connect(self.emitDataChanged)
 
 	###########################################################################
 	# MEMBER FUNCTIONS
@@ -129,8 +139,14 @@ class Session(QtCore.QAbstractTableModel):
 	
     # -------------------------------------------------------------------------
 	def createTask(self):
-		task = Task()
+
+		task_id = 0
+		if len(self._tasks) > 0:
+			task_id = self._tasks[-1].id() + 1
+
+		task = Task(task_id)
 		self._tasks.append(task)
+		task.statusChanged.connect(self.emitDataChanged)
 
     # -------------------------------------------------------------------------
 	def removeRow(self, row: int):
@@ -138,6 +154,13 @@ class Session(QtCore.QAbstractTableModel):
 			self.rowsAboutToBeRemoved.emit(QtCore.QModelIndex(), row, row)
 			self._tasks.pop(row)
 			self.rowsRemoved.emit(QtCore.QModelIndex(), row, row)
+
+    # -------------------------------------------------------------------------
+	def emitDataChanged(self, task_id: int):
+		row_num = self.taskRowById(task_id)
+
+		if row_num != -1:
+			self.dataChanged.emit(self.index(row_num, 0), self.index(row_num, 0))
 
     # -------------------------------------------------------------------------
 	def emitTaskDataChanged(self, task_row: int):

@@ -8,7 +8,7 @@ import os
 
 # PyQt
 from PyQt6 import QtWidgets
-from PyQt6.QtCore import Qt, QItemSelection
+from PyQt6.QtCore import Qt, QItemSelection, QThreadPool
 from PyQt6.QtWidgets import QFileDialog
 from model.packer_factory import createPacker
 from view.ui_main_window import Ui_MainWindow
@@ -42,6 +42,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.initTaskView()
 		self.initTitle()
 		self.initPreferences()
+
+		self._thread_pool = QThreadPool()
 
 		self.show()
 
@@ -167,9 +169,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		tasks = self._session.tasks()
 
 		for index, task in enumerate(tasks):
-			packer = createPacker(task.packerData().extension())
-			packer.run(task)
-			self._session.emitTaskDataChanged(index)
+			packer = createPacker(task, index)
+			self._thread_pool.start(packer)
+			# self._session.emitTaskDataChanged(index)
+			# self.table_view_session.update()
 
 	# -------------------------------------------------------------------------
 	def initTasksStatus(self):
@@ -276,7 +279,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.rbutton_tbz.setEnabled(False)
 		self.rbutton_gz.setEnabled(False)
 		self.rbutton_tgz.setEnabled(False)
-		# self.rbutton_lzma.setEnabled(False)
 		self.rbutton_tlz.setEnabled(False)
 		self.rbutton_xz.setEnabled(False)
 	# -------------------------------------------------------------------------

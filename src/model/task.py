@@ -9,7 +9,7 @@ from enum import Enum
 
 # PyQt
 from PyQt6 import QtCore
-from PyQt6.QtCore import Qt, QStandardPaths
+from PyQt6.QtCore import Qt, QStandardPaths, pyqtSignal
 
 # PackY
 from model.files_model import FilesModel
@@ -17,9 +17,11 @@ from model.packer_data import PackerData
 
 ###############################################################################
 class Task(QtCore.QAbstractListModel):
+		
+	statusChanged = pyqtSignal(int)
 	
 	# -------------------------------------------------------------------------
-	def __init__(self, json_dict = None):
+	def __init__(self, id:int, json_dict = None):
 		super(Task, self).__init__()
 		
 		# ----------------
@@ -32,6 +34,8 @@ class Task(QtCore.QAbstractListModel):
 			"DESTINATION_FILE",
 			"PACKER_TYPE"
 		])
+
+		self._id = id
 
 		self._u_dash = u'\u2014'
 		self._u_check = u'\u2713'
@@ -59,6 +63,7 @@ class Task(QtCore.QAbstractListModel):
 	
 	# -------------------------------------------------------------------------
 	def jsonInitialization(self, json_dict: dict):
+		self._id = json_dict["id"]
 		self._destination_file = json_dict["destination_file"]
 		self._packer_data = PackerData(json_dict["packer_data"])
 		self._files_selected = FilesModel(json_dict["files_model"])
@@ -66,6 +71,10 @@ class Task(QtCore.QAbstractListModel):
 	###########################################################################
 	# GETTERS
 	###########################################################################
+
+	# -------------------------------------------------------------------------
+	def id(self):
+		return self._id
 
 	# -------------------------------------------------------------------------
 	def name(self):
@@ -124,7 +133,6 @@ class Task(QtCore.QAbstractListModel):
 				path_no_ext = os.path.splitext(value)[0]
 				ext = self._packer_data.extension()
 				self._destination_file = path_no_ext + "." + ext
-				self.dataChanged.emit(index, index)
 			return True
 		else:
 			return False
@@ -143,6 +151,8 @@ class Task(QtCore.QAbstractListModel):
 			self._status = self._u_check
 		else:
 			self._status = self._u_cross
+		
+		self.statusChanged.emit(self._id)
 
 	# -------------------------------------------------------------------------
 	def save(self):

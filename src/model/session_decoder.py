@@ -38,5 +38,5 @@ class SessionDecoder(json.JSONDecoder):
 	
 	# -------------------------------------------------------------------------
 	def deserializeTask(self, dict):
-		task = Task(dict)
+		task = Task(0, dict)
 		return task

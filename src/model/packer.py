@@ -5,24 +5,37 @@ author: Marie-Neige Chapel
 # Python
 import os
 
+# PyQt
+from PyQt6.QtCore import QRunnable, pyqtSignal
+
 # PackY
 from model.task import Task
 
 ###############################################################################
-class Packer():
+class Packer(QRunnable):
+
+    # -------------------------------------------------------------------------
+	def __init__(self, task: Task, index: int):
+		super(Packer, self).__init__()
+
+		self._task = task
+		self._index = index
+		self._finish_signal = pyqtSignal(int)
 
 	###########################################################################
 	# MEMBER FUNCTIONS
 	###########################################################################
 
     # -------------------------------------------------------------------------
-	def run(self, task: Task):
-		checked_items = task.filesSelected().checks()
+	def run(self):
+		checked_items = self._task.filesSelected().checks()
 		items_to_pack = self.filterSelectedFiles(checked_items)
 
-		self.packItems(task, items_to_pack)
+		self.packItems(self._task, items_to_pack)
 			
-		task.updateStatus(True)
+		self._task.updateStatus(True)
+		print("task updated status to true")
+		self._task.submit()
 
     # -------------------------------------------------------------------------
 	def filterSelectedFiles(self, checked_items: dict):
