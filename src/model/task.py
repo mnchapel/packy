@@ -8,15 +8,14 @@ import os
 from enum import Enum
 
 # PyQt
-from PyQt6 import QtCore
-from PyQt6.QtCore import Qt, QStandardPaths, pyqtSignal
+from PyQt6.QtCore import Qt, QStandardPaths, QAbstractListModel, pyqtSignal
 
 # PackY
 from model.files_model import FilesModel
 from model.packer_data import PackerData
 
 ###############################################################################
-class Task(QtCore.QAbstractListModel):
+class Task(QAbstractListModel):
 		
 	statusChanged = pyqtSignal(int)
 	

@@ -6,9 +6,10 @@ author: Marie-Neige Chapel
 import os
 
 # PyQt
-from PyQt6.QtCore import QRunnable, pyqtSignal
+from PyQt6.QtCore import QRunnable
 
 # PackY
+from model.packer_signals import PackerSignals
 from model.task import Task
 
 ###############################################################################
@@ -18,9 +19,9 @@ class Packer(QRunnable):
 	def __init__(self, task: Task, index: int):
 		super(Packer, self).__init__()
 
+		self.signals = PackerSignals()
 		self._task = task
 		self._index = index
-		self._finish_signal = pyqtSignal(int)
 
 	###########################################################################
 	# MEMBER FUNCTIONS
@@ -31,11 +32,13 @@ class Packer(QRunnable):
 		checked_items = self._task.filesSelected().checks()
 		items_to_pack = self.filterSelectedFiles(checked_items)
 
+		self.signals.progress.emit(50)
+
 		self.packItems(self._task, items_to_pack)
 			
 		self._task.updateStatus(True)
-		print("task updated status to true")
-		self._task.submit()
+		self.signals.progress.emit(100)
+		self.signals.finish.emit()
 
     # -------------------------------------------------------------------------
 	def filterSelectedFiles(self, checked_items: dict):

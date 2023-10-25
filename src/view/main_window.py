@@ -16,6 +16,7 @@ from view.ui_main_window import Ui_MainWindow
 # PackY
 from model.task import Task
 from model.packer_data import DataName, PackerData
+from model.progression import Progression
 from model.session import Session
 from model.session_encoder import SessionEncoder
 from model.session_decoder import SessionDecoder
@@ -40,6 +41,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.initConnects()
 		self.initSessionView()
 		self.initTaskView()
+		self.initProgressionView()
 		self.initTitle()
 		self.initPreferences()
 
@@ -70,6 +72,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	def initTaskView(self):
 		self.createTaskMapper()
 		self.createPackerMapper()
+	
+	# -------------------------------------------------------------------------
+	def initProgressionView(self):
+		self._progression = Progression()
+		
+		self._progression_mapper = QtWidgets.QDataWidgetMapper(self)
+		self._progression_mapper.setOrientation(Qt.Orientation.Vertical)
+		self._progression_mapper.setModel(self._progression)
+		self._progression_mapper.addMapping(self.pbar_global_progress, 0, b"value")
+		self._progression_mapper.addMapping(self.pbar_task_progress, 1, b"value")
+		self._progression_mapper.toFirst()
 	
 	# -------------------------------------------------------------------------
 	def initPreferences(self):
@@ -167,9 +180,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.initTasksStatus()
 
 		tasks = self._session.tasks()
+		self._progression.setNbTask(len(tasks))
 
 		for index, task in enumerate(tasks):
 			packer = createPacker(task, index)
+			packer.signals.progress.connect(self._progression.updateTaskProgress)
+			packer.signals.finish.connect(self._progression.updateGlobalProgress)
 			self._thread_pool.start(packer)
 
 	# -------------------------------------------------------------------------
