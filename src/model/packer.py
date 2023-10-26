@@ -4,6 +4,7 @@ author: Marie-Neige Chapel
 
 # Python
 import os
+import shutil
 
 # PyQt
 from PyQt6.QtCore import QObject, pyqtSignal
@@ -34,9 +35,15 @@ class Packer(QObject):
 		checked_items = self._task.filesSelected().checks()
 		items_to_pack = self.filterSelectedFiles(checked_items)
 
-		self.progress.emit(50)
+		self.progress.emit(33)
 
-		self.packItems(self._task, items_to_pack)
+		tmp_folder_path = self.copyItemsToTmpFolder(items_to_pack)
+
+		self.progress.emit(66)
+
+		self.packTmpFolder(self._task, tmp_folder_path)
+
+		self.cleanTmpFolder(tmp_folder_path)
 			
 		self._task.updateStatus(True)
 		self.progress.emit(100)
@@ -62,3 +69,20 @@ class Packer(QObject):
 		items_to_pack = dir_items | files_to_pack
 
 		return items_to_pack
+	
+    # -------------------------------------------------------------------------
+	def copyItemsToTmpFolder(self, items: set)->str:
+		destination_file = self._task.destinationFile()
+		basename = os.path.basename(destination_file)
+		basename_no_ext = os.path.splitext(basename)[0]
+		tmp_folder_path = os.path.join("../tmp/", basename_no_ext)
+		os.mkdir(tmp_folder_path)
+
+		for item in items:
+			shutil.copy(item, tmp_folder_path)
+		
+		return tmp_folder_path
+
+    # -------------------------------------------------------------------------
+	def cleanTmpFolder(self, tmp_folder_path: str):
+		shutil.rmtree(tmp_folder_path)

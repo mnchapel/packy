@@ -23,7 +23,7 @@
         },
         {
             "id": 1,
-            "checked": 2,
+            "checked": 0,
             "files_model": {
                 "root_path": "D:/Downloads",
                 "check": {
