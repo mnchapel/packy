@@ -37,6 +37,23 @@
             },
             "task_name": "output_lzma.lzma",
             "destination_file": "D:/Desktop/output_lzma.lzma"
+        },
+        {
+            "id": 2,
+            "files_model": {
+                "root_path": "D:/Downloads",
+                "check": {
+                    "D:/Downloads/00_pytorch_and_deep_learning_fundamentals.pdf": 2,
+                    "D:/Downloads/01_pytorch_workflow.pdf": 2
+                }
+            },
+            "packer_data": {
+                "type": 0,
+                "compression_method": 0,
+                "compression_level": 0
+            },
+            "task_name": "output_zip_2.zip",
+            "destination_file": "D:/Desktop/output_zip_2.zip"
         }
     ]
 }

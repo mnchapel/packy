@@ -10,19 +10,19 @@ import os
 from PyQt6 import QtWidgets
 from PyQt6.QtCore import Qt, QItemSelection, QThreadPool
 from PyQt6.QtWidgets import QFileDialog
-from model.packer_factory import createPacker
-from view.ui_main_window import Ui_MainWindow
 
 # PackY
-from model.task import Task
 from model.packer_data import DataName, PackerData
+from model.packer_worker import PackerWorker
+from model.preferences import Preferences
 from model.progression import Progression
+from model.task import Task
 from model.session import Session
 from model.session_encoder import SessionEncoder
 from model.session_decoder import SessionDecoder
-from model.preferences import Preferences
 from view.about import About
 from view.options import Options
+from view.ui_main_window import Ui_MainWindow
 
 ###############################################################################
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -182,11 +182,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		tasks = self._session.tasks()
 		self._progression.setNbTask(len(tasks))
 
-		for index, task in enumerate(tasks):
-			packer = createPacker(task, index)
-			packer.signals.progress.connect(self._progression.updateTaskProgress)
-			packer.signals.finish.connect(self._progression.updateGlobalProgress)
-			self._thread_pool.start(packer)
+		packer_worker = PackerWorker(self._session, self._progression)
+		self._thread_pool.start(packer_worker)
 
 	# -------------------------------------------------------------------------
 	def initTasksStatus(self):
