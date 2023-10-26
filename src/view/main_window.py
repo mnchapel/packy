@@ -183,6 +183,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self._progression.setNbTask(len(tasks))
 
 		packer_worker = PackerWorker(self._session, self._progression)
+		packer_worker.signals.runTaskId.connect(self.selectTask)
 		self._thread_pool.start(packer_worker)
 
 	# -------------------------------------------------------------------------
@@ -418,3 +419,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 			self.cbox_compression_level.setCurrentIndex(curr_index)
 		else:
 			self.cbox_compression_level.setCurrentIndex(0)
+	
+	# -------------------------------------------------------------------------
+	def selectTask(self, row_num: int):
+		self.table_view_session.selectRow(row_num)
