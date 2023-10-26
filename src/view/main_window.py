@@ -179,8 +179,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	def clickOnRunAll(self):
 		self.initTasksStatus()
 
-		tasks = self._session.tasks()
-		self._progression.setNbTask(len(tasks))
+		self._progression.init()
+		self._progression.setNbTask(self._session.nbCheckedTasks())
 
 		packer_worker = PackerWorker(self._session, self._progression)
 		packer_worker.signals.runTaskId.connect(self.selectTask)

@@ -22,7 +22,7 @@ class Session(QtCore.QAbstractTableModel):
 		# ----------------
 		# MEMBER VARIABLES
 		# ----------------
-		self._headers = ["Status", "Output", "Progress"]
+		self._headers = ["", "Status", "Output", "Size"]
 		self._tasks = []
 
 		if json_dict is None:
@@ -69,6 +69,10 @@ class Session(QtCore.QAbstractTableModel):
     # -------------------------------------------------------------------------
 	def nbTasks(self):
 		return len(self._tasks)
+
+    # -------------------------------------------------------------------------
+	def nbCheckedTasks(self):
+		return sum(1 for task in self._tasks if task.isChecked())
 	
     # -------------------------------------------------------------------------
 	def taskRowById(self, id: int):
@@ -96,30 +100,6 @@ class Session(QtCore.QAbstractTableModel):
 	###########################################################################
 	# MEMBER FUNCTIONS
 	###########################################################################
-
-    # -------------------------------------------------------------------------
-	def data(self, index, role):
-		if role == Qt.ItemDataRole.DisplayRole:
-			task = self._tasks[index.row()]
-
-			value = ""
-			if index.column() == 0:
-				value = task.status()
-			elif index.column() == 1:
-				value = task.name()
-
-			return str(value)
-		elif role == Qt.ItemDataRole.TextAlignmentRole:
-			if index.column() == 0:
-				return Qt.AlignmentFlag.AlignCenter
-			else:
-				return Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
-	
-    # -------------------------------------------------------------------------
-	def headerData(self, section: int, orientation, role):
-		if role == Qt.ItemDataRole.DisplayRole:
-			if orientation == Qt.Orientation.Horizontal:
-				return self._headers[section]
 		
     # -------------------------------------------------------------------------
 	def rowCount(self, index=None):
@@ -128,6 +108,49 @@ class Session(QtCore.QAbstractTableModel):
     # -------------------------------------------------------------------------
 	def columnCount(self, index=None):
 		return len(self._headers)
+
+    # -------------------------------------------------------------------------
+	def data(self, index, role):
+		if role == Qt.ItemDataRole.DisplayRole:
+			task = self._tasks[index.row()]
+
+			value = ""
+			if index.column() == 1:
+				value = task.status()
+			elif index.column() == 2:
+				value = task.name()
+
+			return str(value)
+		
+		elif role == Qt.ItemDataRole.TextAlignmentRole:
+			if index.column() == 1:
+				return Qt.AlignmentFlag.AlignCenter
+			else:
+				return Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
+		
+		elif role == Qt.ItemDataRole.CheckStateRole:
+			if index.column() == 0:
+				task = self._tasks[index.row()]
+				return task.isChecked()
+	
+    # -------------------------------------------------------------------------
+	def setData(self, index, value, role):
+		if role == Qt.ItemDataRole.CheckStateRole:
+			task = self._tasks[index.row()]
+			task.setChecked(value)
+			return True
+		
+		return False
+	
+    # -------------------------------------------------------------------------
+	def headerData(self, section: int, orientation, role):
+		if role == Qt.ItemDataRole.DisplayRole:
+			if orientation == Qt.Orientation.Horizontal:
+				return self._headers[section]
+	
+    # -------------------------------------------------------------------------
+	def flags(self, index):
+		return super().flags(index) | Qt.ItemFlag.ItemIsUserCheckable
 	
     # -------------------------------------------------------------------------
 	def insertRow(self)->int:
@@ -160,7 +183,7 @@ class Session(QtCore.QAbstractTableModel):
 		row_num = self.taskRowById(task_id)
 
 		if row_num != -1:
-			self.dataChanged.emit(self.index(row_num, 0), self.index(row_num, 0))
+			self.dataChanged.emit(self.index(row_num, 1), self.index(row_num, 1))
 
     # -------------------------------------------------------------------------
 	def emitTaskDataChanged(self, task_row: int):

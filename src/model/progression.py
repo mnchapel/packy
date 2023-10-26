@@ -12,10 +12,7 @@ class Progression(QAbstractListModel):
 	def __init__(self):
 		super(Progression, self).__init__()
 
-		self.__nb_task = 0
-		self.__nb_task_finished = 0
-		self._global_progress = 0
-		self._task_progress = 0
+		self.init()
 
 	###########################################################################
 	# SETTERS
@@ -28,6 +25,14 @@ class Progression(QAbstractListModel):
 	###########################################################################
 	# MEMBER FUNCTIONS
 	###########################################################################
+
+    # -------------------------------------------------------------------------
+	def init(self):
+		self.__nb_task = 0
+		self.__nb_task_finished = 0
+		self._global_progress = 0
+		self._task_progress = 0
+
 
     # -------------------------------------------------------------------------
 	def rowCount(self, index=None):

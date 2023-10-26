@@ -42,6 +42,7 @@ class SessionEncoder(json.JSONEncoder):
 		dict = {}
 
 		dict["id"] = task.id()
+		dict["checked"] = task.isChecked()
 		dict["files_model"] = task.filesSelected()
 		dict["packer_data"] = task.packerData()
 		dict["task_name"] = task.name()

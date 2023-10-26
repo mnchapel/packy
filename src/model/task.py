@@ -55,6 +55,7 @@ class Task(QAbstractListModel):
 		# ----------------
 		# MEMBER VARIABLES
 		# ----------------
+		self.__checked = Qt.CheckState.Checked
 		self._packer_data = PackerData()
 		self._files_selected = FilesModel()
 		self._files_selected.setRootPath(default_folder)
@@ -63,6 +64,7 @@ class Task(QAbstractListModel):
 	# -------------------------------------------------------------------------
 	def jsonInitialization(self, json_dict: dict):
 		self._id = json_dict["id"]
+		self.__checked = json_dict["checked"]
 		self._destination_file = json_dict["destination_file"]
 		self._packer_data = PackerData(json_dict["packer_data"])
 		self._files_selected = FilesModel(json_dict["files_model"])
@@ -94,6 +96,10 @@ class Task(QAbstractListModel):
 	# -------------------------------------------------------------------------
 	def packerData(self):
 		return self._packer_data
+	
+	# -------------------------------------------------------------------------
+	def isChecked(self)->Qt.CheckState:
+		return self.__checked
 
 	###########################################################################
 	# SETTERS
@@ -106,6 +112,10 @@ class Task(QAbstractListModel):
 	# -------------------------------------------------------------------------
 	def setDestinationFile(self, filename):
 		self._destination_file = filename
+	
+	# -------------------------------------------------------------------------
+	def setChecked(self, value:Qt.CheckState):
+		self.__checked = value
 
 	###########################################################################
 	# MEMBER FUNCTIONS

@@ -4,6 +4,7 @@
     "tasks": [
         {
             "id": 0,
+            "checked": 2,
             "files_model": {
                 "root_path": "D:/Downloads",
                 "check": {
@@ -22,6 +23,7 @@
         },
         {
             "id": 1,
+            "checked": 2,
             "files_model": {
                 "root_path": "D:/Downloads",
                 "check": {
@@ -40,6 +42,7 @@
         },
         {
             "id": 2,
+            "checked": 0,
             "files_model": {
                 "root_path": "D:/Downloads",
                 "check": {

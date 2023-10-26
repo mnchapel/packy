@@ -3,7 +3,7 @@ author: Marie-Neige Chapel
 """
 
 # PyQt
-from PyQt6.QtCore import QRunnable
+from PyQt6.QtCore import Qt, QRunnable
 
 # PackY
 from model.packer_factory import createPacker
@@ -27,8 +27,9 @@ class PackerWorker(QRunnable):
 		tasks = self._session.tasks()
 
 		for index, task in enumerate(tasks):
-			self.signals.runTaskId.emit(index)
-			packer = createPacker(task, index)
-			packer.progress.connect(self._progression.updateTaskProgress)
-			packer.finish.connect(self._progression.updateGlobalProgress)
-			packer.run()
+			if task.isChecked() == Qt.CheckState.Checked.value:
+				self.signals.runTaskId.emit(index)
+				packer = createPacker(task, index)
+				packer.progress.connect(self._progression.updateTaskProgress)
+				packer.finish.connect(self._progression.updateGlobalProgress)
+				packer.run()
