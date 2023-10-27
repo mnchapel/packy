@@ -167,6 +167,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 			self.push_button_remove.setEnabled(False)
 			self.push_button_edit.setEnabled(False)
 			self.push_button_run_all.setEnabled(False)
+			self.clearTaskProperties()
 	
 	# -------------------------------------------------------------------------
 	def clickOnEdit(self):
@@ -295,6 +296,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.rbutton_tgz.setEnabled(False)
 		self.rbutton_tlz.setEnabled(False)
 		self.rbutton_xz.setEnabled(False)
+
 	# -------------------------------------------------------------------------
 	def disableTaskProperties(self):
 		self.group_box_file_selection.setEnabled(False)
@@ -308,6 +310,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.push_button_run_all.setEnabled(True)
 
 		self.table_view_session.setEnabled(True)
+
+	# -------------------------------------------------------------------------
+	def clearTaskProperties(self):
+		self.line_edit_source.setText("")
+		self.line_edit_destination.setText("")
+		self.cbox_compression_method.clear()
+		self.cbox_compression_level.clear()
+		self.tree_view_source.setModel(None)
+
+		checked_button = self.button_group_packer_type.checkedButton()
+		self.button_group_packer_type.setExclusive(False)
+		checked_button.setChecked(False)
+		self.button_group_packer_type.setExclusive(True)
+
 		
 	###########################################################################
 	# CONNECT SLOTS TO SIGNALS
