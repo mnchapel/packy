@@ -17,6 +17,7 @@ from model.packer_worker import PackerWorker
 from model.preferences import Preferences
 from model.progression import Progression
 from model.task import Task
+from model.task import TaskProperties
 from model.session import Session
 from model.session_encoder import SessionEncoder
 from model.session_decoder import SessionDecoder
@@ -35,8 +36,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		# ----------------
 		# MEMBER VARIABLES
 		# ----------------
-		self._save_text = "Save"
-		self._edit_text = "Edit"
+		self.__thread_pool = QThreadPool()
 
 		self.initConnects()
 		self.initSessionView()
@@ -44,8 +44,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.initProgressionView()
 		self.initTitle()
 		self.initPreferences()
-
-		self._thread_pool = QThreadPool()
 
 		self.show()
 
@@ -59,13 +57,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	
 	# -------------------------------------------------------------------------
 	def initSessionView(self):
-		self._session = Session()
+		self.__session = Session()
 		self.table_view_session.horizontalHeader().setVisible(True)
 		self.updateSessionViewModel()
 
 	# -------------------------------------------------------------------------
 	def updateSessionViewModel(self):
-		self.table_view_session.setModel(self._session)
+		self.table_view_session.setModel(self.__session)
 		self.table_view_session.selectionModel().selectionChanged.connect(self.mapViewWithTask)
 
 	# -------------------------------------------------------------------------
@@ -75,35 +73,35 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	
 	# -------------------------------------------------------------------------
 	def initProgressionView(self):
-		self._progression = Progression()
+		self.__progression = Progression()
 		
-		self._progression_mapper = QtWidgets.QDataWidgetMapper(self)
-		self._progression_mapper.setOrientation(Qt.Orientation.Vertical)
-		self._progression_mapper.setModel(self._progression)
-		self._progression_mapper.addMapping(self.pbar_global_progress, 0, b"value")
-		self._progression_mapper.addMapping(self.pbar_task_progress, 1, b"value")
-		self._progression_mapper.toFirst()
+		self.__progression_mapper = QtWidgets.QDataWidgetMapper(self)
+		self.__progression_mapper.setOrientation(Qt.Orientation.Vertical)
+		self.__progression_mapper.setModel(self.__progression)
+		self.__progression_mapper.addMapping(self.pbar_global_progress, 0, b"value")
+		self.__progression_mapper.addMapping(self.pbar_task_progress, 1, b"value")
+		self.__progression_mapper.toFirst()
 	
 	# -------------------------------------------------------------------------
 	def initPreferences(self):
-		self._preferences = Preferences()
+		self.__preferences = Preferences()
 	
 	# -------------------------------------------------------------------------
 	def createTaskMapper(self):
-		self._task_view_mapper = QtWidgets.QDataWidgetMapper(self)
-		self._task_view_mapper.setOrientation(Qt.Orientation.Vertical)
+		self.__task_view_mapper = QtWidgets.QDataWidgetMapper(self)
+		self.__task_view_mapper.setOrientation(Qt.Orientation.Vertical)
 
 	# -------------------------------------------------------------------------
 	def createPackerMapper(self):
-		self._packer_mapper = QtWidgets.QDataWidgetMapper(self)
-		self._packer_mapper.setOrientation(Qt.Orientation.Vertical)
+		self.__packer_mapper = QtWidgets.QDataWidgetMapper(self)
+		self.__packer_mapper.setOrientation(Qt.Orientation.Vertical)
 
 		self.createPackerTypeMapper()
 
 	# -------------------------------------------------------------------------
 	def createPackerTypeMapper(self):
-		self._packer_type_mapper = QtWidgets.QDataWidgetMapper(self)
-		self._packer_type_mapper.setOrientation(Qt.Orientation.Vertical)
+		self.__packer_type_mapper = QtWidgets.QDataWidgetMapper(self)
+		self.__packer_type_mapper.setOrientation(Qt.Orientation.Vertical)
 
 	# -------------------------------------------------------------------------
 	def initTitle(self):
@@ -111,36 +109,36 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	
 	# -------------------------------------------------------------------------
 	def onNewSession(self):
-		self._session = Session()
+		self.__session = Session()
 
 	# -------------------------------------------------------------------------
 	def onSave(self, s):
-		if not self._session.name():
+		if not self.__session.name():
 			self.onSaveAs(s)
 		else:
-			basename = self._session.name()
-			output_dir = self._session.dirname()
+			basename = self.__session.name()
+			output_dir = self.__session.dirname()
 			filename = output_dir + "/" + basename
 			with open(filename, "w") as output_file:
-				json.dump(self._session, output_file, cls=SessionEncoder, indent=4)
+				json.dump(self.__session, output_file, cls=SessionEncoder, indent=4)
 
 	# -------------------------------------------------------------------------
 	def onSaveAs(self, s):
 		[filename, _] = QFileDialog.getSaveFileName(self, "Save As", "")
 		if filename:
-			self._session.setName(filename)
+			self.__session.setName(filename)
 			with open(filename, "w") as output_file:
-				json.dump(self._session, output_file, cls=SessionEncoder, indent=4)
+				json.dump(self.__session, output_file, cls=SessionEncoder, indent=4)
 	
 	# -------------------------------------------------------------------------
 	def onOpen(self, s):
 		[filename, _] = QFileDialog.getOpenFileName(self, "Open session", "")
 		if filename:
 			with open(filename, "r") as file:
-				self._session = json.load(file, cls=SessionDecoder)
+				self.__session = json.load(file, cls=SessionDecoder)
 				self.updateSessionViewModel()
-				if self._session.nbTasks() > 0:
-					self._selected_task = self._session.taskAt(0)
+				if self.__session.nbTasks() > 0:
+					self.__selected_task = self.__session.taskAt(0)
 					self.table_view_session.selectRow(0)
 					self.disableTaskProperties()
 
@@ -150,9 +148,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	
 	# -------------------------------------------------------------------------
 	def clickOnCreate(self):
-		row_inserted = self._session.insertRow()
+		row_inserted = self.__session.insertRow()
 
-		self._selected_task = self._session.taskAt(row_inserted)
+		self.__selected_task = self.__session.taskAt(row_inserted)
 		self.table_view_session.selectRow(row_inserted)
 
 		self.enableTaskProperties()
@@ -164,13 +162,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		model = self.table_view_session.model()
 		current_row = self.table_view_session.currentIndex().row()
 		model.removeRow(current_row)
+
+		if self.__session.nbTasks() == 0:
+			self.push_button_remove.setEnabled(False)
+			self.push_button_edit.setEnabled(False)
+			self.push_button_run_all.setEnabled(False)
 	
 	# -------------------------------------------------------------------------
 	def clickOnEdit(self):
 		current_row = self.table_view_session.currentIndex().row()
 		
 		if current_row >= 0:
-			if self.push_button_edit.text() == self._edit_text:
+			if self.push_button_edit.text() == "Edit":
 				self.enableTaskProperties()
 			else:
 				self.disableTaskProperties()
@@ -179,16 +182,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	def clickOnRunAll(self):
 		self.initTasksStatus()
 
-		self._progression.init()
-		self._progression.setNbTask(self._session.nbCheckedTasks())
+		self.__progression.init()
+		self.__progression.setNbTask(self.__session.nbCheckedTasks())
 
-		packer_worker = PackerWorker(self._session, self._progression)
+		packer_worker = PackerWorker(self.__session, self.__progression)
 		packer_worker.signals.runTaskId.connect(self.selectTask)
-		self._thread_pool.start(packer_worker)
+		self.__thread_pool.start(packer_worker)
 
 	# -------------------------------------------------------------------------
 	def initTasksStatus(self):
-		tasks = self._session.tasks()
+		tasks = self.__session.tasks()
 		for task in tasks:
 			task.initStatus()
 	
@@ -199,7 +202,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	# -------------------------------------------------------------------------
 	def mapViewWithTask(self, selected: QItemSelection, deselected: QItemSelection):
 		selected_row = self.table_view_session.currentIndex().row()
-		self._selected_task = self._session.taskAt(selected_row)
+		self.__selected_task = self.__session.taskAt(selected_row)
 
 		self.updateTaskViewMapper()
 		self.updatePackerViewMapper()
@@ -207,15 +210,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	
 	# -------------------------------------------------------------------------
 	def updateTaskViewMapper(self):
-		task: Task = self._selected_task
-		self._task_view_mapper.setModel(task)
-		self._task_view_mapper.addMapping(self.line_edit_source, task.properties.SOURCE_FOLDER.value, b"text")
-		self._task_view_mapper.addMapping(self.line_edit_destination, task.properties.DESTINATION_FILE.value, b"text")
-		self._task_view_mapper.toFirst()
+		task: Task = self.__selected_task
+		self.__task_view_mapper.setModel(task)
+		self.__task_view_mapper.addMapping(self.line_edit_source, TaskProperties.SOURCE_FOLDER.value, b"text")
+		self.__task_view_mapper.addMapping(self.line_edit_destination, TaskProperties.DESTINATION_FILE.value, b"text")
+		self.__task_view_mapper.toFirst()
 	
 	# -------------------------------------------------------------------------
 	def updateFilesSelection(self):
-		files_model = self._selected_task.filesSelected()
+		files_model = self.__selected_task.filesSelected()
 
 		self.tree_view_source.setModel(files_model)
 		self.tree_view_source.setRootIndex(files_model.index(files_model.rootPath()))
@@ -227,7 +230,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	
 	# -------------------------------------------------------------------------
 	def updateTreeChildren(self, path: str):
-		files_model = self._selected_task.filesSelected()
+		files_model = self.__selected_task.filesSelected()
 		index = files_model.index(path)
 
 		if files_model.filePath(index) != self.line_edit_source.text():
@@ -236,18 +239,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	
 	# -------------------------------------------------------------------------
 	def updatePackerViewMapper(self):
-		packer_data = self._selected_task.packerData()
+		packer_data = self.__selected_task.packerData()
 
 		self.updateCompressionMethod()
 		
-		self._packer_mapper.setModel(packer_data)
-		self._packer_mapper.addMapping(self.cbox_compression_method, DataName.COMPRESSION_METHOD.value, b"currentIndex")
-		self._packer_mapper.toFirst()
+		self.__packer_mapper.setModel(packer_data)
+		self.__packer_mapper.addMapping(self.cbox_compression_method, DataName.COMPRESSION_METHOD.value, b"currentIndex")
+		self.__packer_mapper.toFirst()
 
 		self.updateCompressionLevel()
 		
-		self._packer_mapper.addMapping(self.cbox_compression_level, DataName.COMPRESSION_LEVEL.value, b"currentIndex")
-		self._packer_mapper.toFirst()
+		self.__packer_mapper.addMapping(self.cbox_compression_level, DataName.COMPRESSION_LEVEL.value, b"currentIndex")
+		self.__packer_mapper.toFirst()
 
 		self.updatePackerTypeViewMapper(packer_data)
 	
@@ -256,17 +259,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 		packer_type_data = packer_data.packerTypeData()
 
-		self._packer_type_mapper.setModel(packer_type_data)
-		self._packer_type_mapper.addMapping(self.rbutton_zip, 0)
-		self._packer_type_mapper.addMapping(self.rbutton_tar, 1)
-		self._packer_type_mapper.addMapping(self.rbutton_bz2, 2)
-		self._packer_type_mapper.addMapping(self.rbutton_tbz, 3)
-		self._packer_type_mapper.addMapping(self.rbutton_gz, 4)
-		self._packer_type_mapper.addMapping(self.rbutton_tgz, 5)
-		self._packer_type_mapper.addMapping(self.rbutton_lzma, 6)
-		self._packer_type_mapper.addMapping(self.rbutton_tlz, 7)
-		self._packer_type_mapper.addMapping(self.rbutton_xz, 8)
-		self._packer_type_mapper.toFirst()
+		self.__packer_type_mapper.setModel(packer_type_data)
+		self.__packer_type_mapper.addMapping(self.rbutton_zip, 0)
+		self.__packer_type_mapper.addMapping(self.rbutton_tar, 1)
+		self.__packer_type_mapper.addMapping(self.rbutton_bz2, 2)
+		self.__packer_type_mapper.addMapping(self.rbutton_tbz, 3)
+		self.__packer_type_mapper.addMapping(self.rbutton_gz, 4)
+		self.__packer_type_mapper.addMapping(self.rbutton_tgz, 5)
+		self.__packer_type_mapper.addMapping(self.rbutton_lzma, 6)
+		self.__packer_type_mapper.addMapping(self.rbutton_tlz, 7)
+		self.__packer_type_mapper.addMapping(self.rbutton_xz, 8)
+		self.__packer_type_mapper.toFirst()
 
 	# -------------------------------------------------------------------------
 	def enableTaskProperties(self):
@@ -278,9 +281,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.push_button_create.setEnabled(False)
 		self.push_button_remove.setEnabled(False)
 		self.push_button_edit.setEnabled(True)
-		self.push_button_edit.setText(self._save_text)
+		self.push_button_edit.setText("Save")
 		self.push_button_run_all.setEnabled(False)
-		self.push_button_cancel.setEnabled(False)
 
 		self.table_view_session.setEnabled(False)
 	
@@ -302,9 +304,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.push_button_create.setEnabled(True)
 		self.push_button_remove.setEnabled(True)
 		self.push_button_edit.setEnabled(True)
-		self.push_button_edit.setText(self._edit_text)
+		self.push_button_edit.setText("Edit")
 		self.push_button_run_all.setEnabled(True)
-		self.push_button_cancel.setEnabled(True)
 
 		self.table_view_session.setEnabled(True)
 		
@@ -350,7 +351,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	
 	# -------------------------------------------------------------------------
 	def openOptions(self, s):
-		dlg = Options(self._preferences, self)
+		dlg = Options(self.__preferences, self)
 		dlg.exec()
 	
 	# -------------------------------------------------------------------------
@@ -360,7 +361,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	
 	# -------------------------------------------------------------------------
 	def selectSourceFolder(self):
-		files_model = self._selected_task.filesSelected()
+		files_model = self.__selected_task.filesSelected()
 		folder_selected = QFileDialog.getExistingDirectory(self, "Select folder", self.line_edit_source.text(), QFileDialog.Option.ShowDirsOnly)
 
 		if folder_selected:
@@ -377,12 +378,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 		if path_no_ext:
 			self.line_edit_destination.setText(path_no_ext + ext)
-			self._task_view_mapper.submit()
+			self.__task_view_mapper.submit()
 
 	# -------------------------------------------------------------------------
 	def updatePackerType(self, button: QtWidgets.QAbstractButton):
-		self._packer_type_mapper.submit()
-		self._task_view_mapper.submit()
+		self.__packer_type_mapper.submit()
+		self.__task_view_mapper.submit()
 
 		self.cbox_compression_method.setCurrentIndex(0)
 		self.cbox_compression_level.setCurrentIndex(0)
@@ -392,7 +393,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	def updateCompressionMethod(self):
 		curr_index = self.cbox_compression_method.currentIndex()
 		
-		packer_data = self._selected_task.packerData()
+		packer_data = self.__selected_task.packerData()
 		info = packer_data.methodsInfo()
 		self.cbox_compression_method.clear()
 		for method in info:
@@ -409,7 +410,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		curr_index = self.cbox_compression_level.currentIndex()
 		c_method_curr_index = self.cbox_compression_method.currentIndex()
 
-		packer_data = self._selected_task.packerData()
+		packer_data = self.__selected_task.packerData()
 		info = packer_data.levelsInfo()
 		self.cbox_compression_level.clear()
 		for level in info[c_method_curr_index]:

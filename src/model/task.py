@@ -15,6 +15,20 @@ from model.files_model import FilesModel
 from model.packer_data import PackerData
 
 ###############################################################################
+class TaskProperties(Enum):
+	STATUS = 0
+	OUTPUT_NAME = 1
+	SOURCE_FOLDER = 2
+	DESTINATION_FILE = 3
+	PACKER_TYPE = 4
+
+###############################################################################
+class TaskStatus(Enum):
+	WAITING = 0
+	SUCCESS = 1
+	ERROR = 2
+
+###############################################################################
 class Task(QAbstractListModel):
 		
 	statusChanged = pyqtSignal(int)
@@ -26,21 +40,12 @@ class Task(QAbstractListModel):
 		# ----------------
 		# MEMBER VARIABLES
 		# ----------------
-		self.properties = Enum("TaskProperties", [
-			"STATUS",
-			"OUTPUT_NAME",
-			"SOURCE_FOLDER",
-			"DESTINATION_FILE",
-			"PACKER_TYPE"
-		])
+		self.__u_dash = u'\u2014'
+		self.__u_check = u'\u2713'
+		self.__u_cross = u'\u2715'
 
-		self._id = id
-
-		self._u_dash = u'\u2014'
-		self._u_check = u'\u2713'
-		self._u_cross = u'\u2717'
-
-		self._status = self._u_dash
+		self.__id = id
+		self.__status = TaskStatus.WAITING
 
 		if json_dict is None:
 			self.defaultInitialization()
@@ -56,18 +61,18 @@ class Task(QAbstractListModel):
 		# MEMBER VARIABLES
 		# ----------------
 		self.__checked = Qt.CheckState.Checked
-		self._packer_data = PackerData()
-		self._files_selected = FilesModel()
-		self._files_selected.setRootPath(default_folder)
-		self._destination_file = default_folder + "/output." + self._packer_data.extension()
+		self.__packer_data = PackerData()
+		self.__files_selected = FilesModel()
+		self.__files_selected.setRootPath(default_folder)
+		self.__destination_file = default_folder + "/output." + self.__packer_data.extension()
 	
 	# -------------------------------------------------------------------------
 	def jsonInitialization(self, json_dict: dict):
-		self._id = json_dict["id"]
+		self.__id = json_dict["id"]
 		self.__checked = json_dict["checked"]
-		self._destination_file = json_dict["destination_file"]
-		self._packer_data = PackerData(json_dict["packer_data"])
-		self._files_selected = FilesModel(json_dict["files_model"])
+		self.__destination_file = json_dict["destination_file"]
+		self.__packer_data = PackerData(json_dict["packer_data"])
+		self.__files_selected = FilesModel(json_dict["files_model"])
 
 	###########################################################################
 	# GETTERS
@@ -75,27 +80,33 @@ class Task(QAbstractListModel):
 
 	# -------------------------------------------------------------------------
 	def id(self):
-		return self._id
+		return self.__id
 
 	# -------------------------------------------------------------------------
-	def name(self):
-		return os.path.basename(self._destination_file)
+	def name(self)->str:
+		return os.path.basename(self.__destination_file)
 
 	# -------------------------------------------------------------------------
-	def status(self):
-		return self._status
+	def statusUnicode(self)->str:
+		match self.__status:
+			case TaskStatus.WAITING:
+				return self.__u_dash
+			case TaskStatus.SUCCESS:
+				return self.__u_check
+			case TaskStatus.ERROR:
+				return self.__u_cross
 
 	# -------------------------------------------------------------------------
 	def destinationFile(self):
-		return self._destination_file
+		return self.__destination_file
 	
 	# -------------------------------------------------------------------------
 	def filesSelected(self):
-		return self._files_selected
+		return self.__files_selected
 	
 	# -------------------------------------------------------------------------
 	def packerData(self):
-		return self._packer_data
+		return self.__packer_data
 	
 	# -------------------------------------------------------------------------
 	def isChecked(self)->Qt.CheckState:
@@ -107,11 +118,11 @@ class Task(QAbstractListModel):
 	
 	# -------------------------------------------------------------------------
 	def setFilesSelected(self, files_selected):
-		self._files_selected = files_selected
+		self.__files_selected = files_selected
 	
 	# -------------------------------------------------------------------------
 	def setDestinationFile(self, filename):
-		self._destination_file = filename
+		self.__destination_file = filename
 	
 	# -------------------------------------------------------------------------
 	def setChecked(self, value:Qt.CheckState):
@@ -124,24 +135,24 @@ class Task(QAbstractListModel):
 	# -------------------------------------------------------------------------
 	def data(self, index, role):
 		if index.isValid():
-			if index.row() == self.properties.STATUS.value:
-				return self._status
-			elif index.row() == self.properties.OUTPUT_NAME.value:
-				return os.path.basename(self._destination_file)
-			elif index.row() == self.properties.SOURCE_FOLDER.value:
-				return self._files_selected.rootPath()
-			elif index.row() == self.properties.DESTINATION_FILE.value:
-				return self._destination_file
+			if index.row() == TaskProperties.STATUS.value:
+				return self.statusUnicode()
+			elif index.row() == TaskProperties.OUTPUT_NAME.value:
+				return os.path.basename(self.__destination_file)
+			elif index.row() == TaskProperties.SOURCE_FOLDER.value:
+				return self.__files_selected.rootPath()
+			elif index.row() == TaskProperties.DESTINATION_FILE.value:
+				return self.__destination_file
 	
 	# -------------------------------------------------------------------------
 	def setData(self, index, value, role = Qt.ItemDataRole.EditRole):
 		if index.isValid() and role == Qt.ItemDataRole.EditRole:
-			if index.row() == self.properties.OUTPUT_NAME.value:
-				self._name = value
-			elif index.row() == self.properties.DESTINATION_FILE.value:
+			if index.row() == TaskProperties.OUTPUT_NAME.value:
+				self.__name = value
+			elif index.row() == TaskProperties.DESTINATION_FILE.value:
 				path_no_ext = os.path.splitext(value)[0]
-				ext = self._packer_data.extension()
-				self._destination_file = path_no_ext + "." + ext
+				ext = self.__packer_data.extension()
+				self.__destination_file = path_no_ext + "." + ext
 			return True
 		else:
 			return False
@@ -152,17 +163,13 @@ class Task(QAbstractListModel):
 	
 	# -------------------------------------------------------------------------
 	def initStatus(self):
-		self._status = self._u_dash
-		self.statusChanged.emit(self._id)
+		self.__status = TaskStatus.WAITING
+		self.statusChanged.emit(self.__id)
 
 	# -------------------------------------------------------------------------
-	def updateStatus(self, success: bool):
-		if success:
-			self._status = self._u_check
-		else:
-			self._status = self._u_cross
-		
-		self.statusChanged.emit(self._id)
+	def updateStatus(self, status: TaskStatus):
+		self.__status = status
+		self.statusChanged.emit(self.__id)
 
 	# -------------------------------------------------------------------------
 	def save(self):

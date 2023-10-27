@@ -16,8 +16,8 @@ from model.task import Task
 class ZipPacker(Packer):
 
     # -------------------------------------------------------------------------
-	def __init__(self, task: Task, index: int):
-		super(ZipPacker, self).__init__(task, index)
+	def __init__(self, task: Task):
+		super(ZipPacker, self).__init__(task)
 
 	# -------------------------------------------------------------------------
 	def packTmpFolder(self, task: Task, tmp_folder_path: str):

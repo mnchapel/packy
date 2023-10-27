@@ -7,10 +7,10 @@ import os
 import shutil
 
 # PyQt
-from PyQt6.QtCore import QObject, pyqtSignal
+from PyQt6.QtCore import Qt, QObject, pyqtSignal
 
 # PackY
-from model.task import Task
+from model.task import Task, TaskStatus
 
 ###############################################################################
 class Packer(QObject):
@@ -20,11 +20,10 @@ class Packer(QObject):
 	finish = pyqtSignal()
 
     # -------------------------------------------------------------------------
-	def __init__(self, task: Task, index: int):
+	def __init__(self, task: Task):
 		super(Packer, self).__init__()
 
-		self._task = task
-		self._index = index
+		self.__task = task
 
 	###########################################################################
 	# MEMBER FUNCTIONS
@@ -32,28 +31,35 @@ class Packer(QObject):
 
     # -------------------------------------------------------------------------
 	def run(self):
-		checked_items = self._task.filesSelected().checks()
-		items_to_pack = self.filterSelectedFiles(checked_items)
+		try:
+			tmp_folder_path = self.tmpFolderPath()
 
-		self.progress.emit(33)
+			checked_items = self.__task.filesSelected().checks()
+			items_to_pack = self.filterSelectedFiles(checked_items)
 
-		tmp_folder_path = self.copyItemsToTmpFolder(items_to_pack)
+			self.progress.emit(33)
 
-		self.progress.emit(66)
+			self.copyItemsToTmpFolder(items_to_pack, tmp_folder_path)
 
-		self.packTmpFolder(self._task, tmp_folder_path)
+			self.progress.emit(66)
 
-		self.cleanTmpFolder(tmp_folder_path)
-			
-		self._task.updateStatus(True)
-		self.progress.emit(100)
-		self.finish.emit()
+			self.packTmpFolder(self.__task, tmp_folder_path)
+
+			self.__task.updateStatus(TaskStatus.SUCCESS)
+		except OSError as ex:
+			self.__task.updateStatus(TaskStatus.ERROR)
+			print(type(ex), ": ", ex)
+		finally:
+			self.cleanTmpFolder(tmp_folder_path)
+			self.progress.emit(100)
+			self.finish.emit()
 
     # -------------------------------------------------------------------------
 	def filterSelectedFiles(self, checked_items: dict):
 		items_to_pack = []
 		
-		items_to_pack = {k: v for k, v in checked_items.items() if v == 2}
+		items_to_pack = {k: v for k, v in checked_items.items() if v == Qt.CheckState.Checked.value}
+
 		dir_items = {item for item in items_to_pack if os.path.isdir(item)}
 		files_items = {item for item in items_to_pack if os.path.isfile(item)}
 		files_to_pack = {item for item in items_to_pack if os.path.isfile(item)}
@@ -71,18 +77,27 @@ class Packer(QObject):
 		return items_to_pack
 	
     # -------------------------------------------------------------------------
-	def copyItemsToTmpFolder(self, items: set)->str:
-		destination_file = self._task.destinationFile()
+	def tmpFolderPath(self)->str:
+		destination_file = self.__task.destinationFile()
 		basename = os.path.basename(destination_file)
 		basename_no_ext = os.path.splitext(basename)[0]
 		tmp_folder_path = os.path.join("../tmp/", basename_no_ext)
-		os.mkdir(tmp_folder_path)
 
-		for item in items:
-			shutil.copy(item, tmp_folder_path)
-		
 		return tmp_folder_path
+	
+    # -------------------------------------------------------------------------
+	def copyItemsToTmpFolder(self, items: set, tmp_folder_path: str):
+		try:
+			os.mkdir(tmp_folder_path)
+
+			for item in items:
+				shutil.copy(item, tmp_folder_path)
+		
+		except OSError as ex:
+			raise ex
+		
 
     # -------------------------------------------------------------------------
 	def cleanTmpFolder(self, tmp_folder_path: str):
-		shutil.rmtree(tmp_folder_path)
+		if os.path.exists(tmp_folder_path):
+			shutil.rmtree(tmp_folder_path)

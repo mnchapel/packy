@@ -18,18 +18,18 @@ class PackerWorker(QRunnable):
 	def __init__(self, session: Session, progression: Progression):
 		super(PackerWorker, self).__init__()
 
-		self._session = session
-		self._progression = progression
+		self.__session = session
+		self.__progression = progression
 		self.signals = PackerWorkerSignals()
 
     # -------------------------------------------------------------------------
 	def run(self):
-		tasks = self._session.tasks()
+		tasks = self.__session.tasks()
 
 		for index, task in enumerate(tasks):
 			if task.isChecked() == Qt.CheckState.Checked.value:
 				self.signals.runTaskId.emit(index)
-				packer = createPacker(task, index)
-				packer.progress.connect(self._progression.updateTaskProgress)
-				packer.finish.connect(self._progression.updateGlobalProgress)
+				packer = createPacker(task)
+				packer.progress.connect(self.__progression.updateTaskProgress)
+				packer.finish.connect(self.__progression.updateGlobalProgress)
 				packer.run()

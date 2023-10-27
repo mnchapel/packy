@@ -36,21 +36,21 @@ class Preferences(QAbstractListModel):
 		# ----------------
 		# MEMBER VARIABLES
 		# ----------------
-		self._settings = QSettings(filename, format)
+		self.__settings = QSettings(filename, format)
 
 		if not file_exists:
 			self.initSettings()
 
 	# -------------------------------------------------------------------------
 	def initSettings(self):
-		self._settings.beginGroup("general")
-		self._settings.setValue("snapshot_retention", 0)
-		self._settings.setValue("nb_snapshots", 1)
-		self._settings.endGroup()
+		self.__settings.beginGroup("general")
+		self.__settings.setValue("snapshot_retention", 0)
+		self.__settings.setValue("nb_snapshots", 1)
+		self.__settings.endGroup()
 
-		self._settings.beginGroup("task")
-		self._settings.setValue("suffix", 0)
-		self._settings.endGroup()
+		self.__settings.beginGroup("task")
+		self.__settings.setValue("suffix", 0)
+		self.__settings.endGroup()
 
 	###########################################################################
 	# MEMBER FUNCTIONS
@@ -67,17 +67,17 @@ class Preferences(QAbstractListModel):
 		if index.isValid():
 			match index.row():
 				case PreferencesRows.SR_KEEP_ALL.value:
-					return self._settings.value("general/snapshot_retention", type = int) == index.row()
+					return self.__settings.value("general/snapshot_retention", type = int) == index.row()
 				case PreferencesRows.SR_NB_SNAPSHOT.value:
-					return self._settings.value("general/snapshot_retention", type = int) == index.row()
+					return self.__settings.value("general/snapshot_retention", type = int) == index.row()
 				case PreferencesRows.SR_NB.value:
-					return self._settings.value("general/nb_snapshots", type = int)
+					return self.__settings.value("general/nb_snapshots", type = int)
 				case PreferencesRows.T_CURR_DATE.value:
-					return self._settings.value("task/suffix", type = int) == index.row()
+					return self.__settings.value("task/suffix", type = int) == index.row()
 				case PreferencesRows.T_VERSION_NUM.value:
-					return self._settings.value("task/suffix", type = int) == index.row()
+					return self.__settings.value("task/suffix", type = int) == index.row()
 				case PreferencesRows.T_NOTHING.value:
-					return self._settings.value("task/suffix", type = int) == index.row()
+					return self.__settings.value("task/suffix", type = int) == index.row()
 		return None
 	
 	# -------------------------------------------------------------------------
@@ -86,15 +86,15 @@ class Preferences(QAbstractListModel):
 		if index.isValid():
 			match index.row():
 				case PreferencesRows.SR_KEEP_ALL.value:
-					self._settings.setValue("general/snapshot_retention", index.row())
+					self.__settings.setValue("general/snapshot_retention", index.row())
 				case PreferencesRows.SR_NB_SNAPSHOT.value:
-					self._settings.setValue("general/snapshot_retention", index.row())
+					self.__settings.setValue("general/snapshot_retention", index.row())
 				case PreferencesRows.SR_NB.value:
-					self._settings.setValue("general/nb_snapshots", value)
+					self.__settings.setValue("general/nb_snapshots", value)
 				case PreferencesRows.T_CURR_DATE.value:
-					self._settings.setValue("task/suffix", index.row())
+					self.__settings.setValue("task/suffix", index.row())
 				case PreferencesRows.T_VERSION_NUM.value:
-					self._settings.setValue("task/suffix", index.row())
+					self.__settings.setValue("task/suffix", index.row())
 				case PreferencesRows.T_NOTHING.value:
-					self._settings.setValue("task/suffix", index.row())
+					self.__settings.setValue("task/suffix", index.row())
 		return False

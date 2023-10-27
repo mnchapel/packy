@@ -20,12 +20,12 @@ class FilesModel(QFileSystemModel):
 
 	# -------------------------------------------------------------------------
 	def defaultInitialization(self):
-		self._checks = {}
+		self.__checks = {}
 	
 	# -------------------------------------------------------------------------
 	def jsonInitialization(self, json_dict: dict):
 		self.setRootPath(json_dict["root_path"])
-		self._checks = json_dict["check"]
+		self.__checks = json_dict["check"]
 
 	###########################################################################
 	# GETTERS
@@ -33,11 +33,11 @@ class FilesModel(QFileSystemModel):
 
 	# -------------------------------------------------------------------------
 	def checks(self):
-		return self._checks
+		return self.__checks
 
 	# -------------------------------------------------------------------------
 	def checksToStr(self):
-		return {str(key): value for key, value in self._checks.items()}
+		return {str(key): value for key, value in self.__checks.items()}
 
 	###########################################################################
 	# SETTERS
@@ -45,7 +45,7 @@ class FilesModel(QFileSystemModel):
 	
 	# -------------------------------------------------------------------------
 	def setChecks(self, checks):
-		self._checks = checks
+		self.__checks = checks
 
 	###########################################################################
 	# MEMBER FUNCTIONS
@@ -66,7 +66,7 @@ class FilesModel(QFileSystemModel):
 		match role:
 			case Qt.ItemDataRole.CheckStateRole:
 				if index.column() == 0:
-					self._checks[self.filePath(index)] = value
+					self.__checks[self.filePath(index)] = value
 
 					for i in range(self.rowCount(index)):
 						child_index = self.index(i, 0, index)
@@ -88,7 +88,7 @@ class FilesModel(QFileSystemModel):
 	
 	# -------------------------------------------------------------------------
 	def checkState(self, index):
-		if self.filePath(index) in self._checks:
-			return self._checks[self.filePath(index)]
+		if self.filePath(index) in self.__checks:
+			return self.__checks[self.filePath(index)]
 		else:
 			return 0

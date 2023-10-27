@@ -30,8 +30,8 @@ class Progression(QAbstractListModel):
 	def init(self):
 		self.__nb_task = 0
 		self.__nb_task_finished = 0
-		self._global_progress = 0
-		self._task_progress = 0
+		self.__global_progress = 0
+		self.__task_progress = 0
 
 
     # -------------------------------------------------------------------------
@@ -42,9 +42,9 @@ class Progression(QAbstractListModel):
 	def data(self, index, role):
 		if index.isValid():
 			if index.row() == 0:
-				return self._global_progress
+				return self.__global_progress
 			elif index.row() == 1:
-				return self._task_progress
+				return self.__task_progress
 	
 	###########################################################################
 	# SLOTS
@@ -52,11 +52,11 @@ class Progression(QAbstractListModel):
 
     # -------------------------------------------------------------------------
 	def updateTaskProgress(self, progress: int):
-		self._task_progress = progress
+		self.__task_progress = progress
 		self.dataChanged.emit(self.index(1, 0), self.index(1, 0))
 	
     # -------------------------------------------------------------------------
 	def updateGlobalProgress(self):
 		self.__nb_task_finished += 1
-		self._global_progress = (self.__nb_task_finished / self.__nb_task) * 100
+		self.__global_progress = (self.__nb_task_finished / self.__nb_task) * 100
 		self.dataChanged.emit(self.index(0, 0), self.index(0, 0))

@@ -28,9 +28,9 @@ class PackerTypeData(QtCore.QAbstractListModel):
 		], start = 0)
 
 		if type_index is None:
-			self._type_index = 0
+			self.__type_index = 0
 		else:
-			self._type_index = type_index
+			self.__type_index = type_index
 
 	###########################################################################
 	# GETTERS
@@ -38,11 +38,11 @@ class PackerTypeData(QtCore.QAbstractListModel):
 
 	# -------------------------------------------------------------------------
 	def extension(self):
-		return self.types(self._type_index).name.lower()
+		return self.types(self.__type_index).name.lower()
 
 	# -------------------------------------------------------------------------
 	def type(self):
-		return self._type_index
+		return self.__type_index
 
 	###########################################################################
 	# MEMBER FUNCTIONS
@@ -57,7 +57,7 @@ class PackerTypeData(QtCore.QAbstractListModel):
 	# @override
 	def data(self, index, role):
 		if index.isValid():
-			if index.row() == self._type_index:
+			if index.row() == self.__type_index:
 				return True
 			else:
 				return False
@@ -68,6 +68,6 @@ class PackerTypeData(QtCore.QAbstractListModel):
 	def setData(self, index, value, role):
 		if index.isValid():
 			if value is True:
-				self._type_index = index.row()
+				self.__type_index = index.row()
 			return True
 		return False
