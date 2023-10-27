@@ -162,12 +162,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		model = self.table_view_session.model()
 		current_row = self.table_view_session.currentIndex().row()
 		model.removeRow(current_row)
-
+		
 		if self.__session.nbTasks() == 0:
 			self.push_button_remove.setEnabled(False)
 			self.push_button_edit.setEnabled(False)
 			self.push_button_run_all.setEnabled(False)
 			self.clearTaskProperties()
+			return
+		elif current_row > self.__session.nbTasks():
+			current_row -= 1
+		
+		self.table_view_session.selectRow(current_row)
 	
 	# -------------------------------------------------------------------------
 	def clickOnEdit(self):
