@@ -5,6 +5,7 @@ author: Marie-Neige Chapel
 # Python
 import json
 import os
+import re
 from enum import Enum
 
 # PyQt
@@ -64,15 +65,17 @@ class Task(QAbstractListModel):
 		self.__packer_data = PackerData()
 		self.__files_selected = FilesModel()
 		self.__files_selected.setRootPath(default_folder)
-		self.__destination_file = default_folder + "/output." + self.__packer_data.extension()
+		# self.__destination_file = default_folder + "/output." + self.__packer_data.extension()
+		self.__updateDestinationFile(default_folder + "/output")
 	
 	# -------------------------------------------------------------------------
 	def jsonInitialization(self, json_dict: dict):
 		self.__id = json_dict["id"]
 		self.__checked = json_dict["checked"]
-		self.__destination_file = json_dict["destination_file"]
 		self.__packer_data = PackerData(json_dict["packer_data"])
 		self.__files_selected = FilesModel(json_dict["files_model"])
+		# self.__destination_file = json_dict["destination_file"]
+		self.__updateDestinationFile(json_dict["destination_file"])
 
 	###########################################################################
 	# GETTERS
@@ -121,10 +124,6 @@ class Task(QAbstractListModel):
 		self.__files_selected = files_selected
 	
 	# -------------------------------------------------------------------------
-	def setDestinationFile(self, filename):
-		self.__destination_file = filename
-	
-	# -------------------------------------------------------------------------
 	def setChecked(self, value:Qt.CheckState):
 		self.__checked = value
 
@@ -150,9 +149,10 @@ class Task(QAbstractListModel):
 			if index.row() == TaskProperties.OUTPUT_NAME.value:
 				self.__name = value
 			elif index.row() == TaskProperties.DESTINATION_FILE.value:
-				path_no_ext = os.path.splitext(value)[0]
-				ext = self.__packer_data.extension()
-				self.__destination_file = path_no_ext + "." + ext
+				self.__updateDestinationFile(value)
+				# path_no_ext = os.path.splitext(value)[0]
+				# ext = self.__packer_data.extension()
+				# self.__destination_file = path_no_ext + "." + ext
 			return True
 		else:
 			return False
@@ -170,6 +170,34 @@ class Task(QAbstractListModel):
 	def updateStatus(self, status: TaskStatus):
 		self.__status = status
 		self.statusChanged.emit(self.__id)
+	
+	# -------------------------------------------------------------------------
+	def __updateDestinationFile(self, filename)->None:
+		dest_dir_path = os.path.dirname(filename)
+
+		basename = os.path.basename(filename)
+		basename_no_ext = os.path.splitext(basename)[0]
+		basename_no_suffix = basename_no_ext.rsplit("_", 1)[0]
+		
+		last_id = self.__findLastSuffixId(dest_dir_path, basename_no_suffix)
+		suffix = "_" + str(last_id + 1)
+
+		complete_basename = basename_no_suffix + suffix + "." + self.__packer_data.extension()
+		
+		self.__destination_file = os.path.join(dest_dir_path, complete_basename)
+
+	# -------------------------------------------------------------------------
+	def __findLastSuffixId(self, dest_dir_path: str, basename_no_suffix: str)->int:
+		regex = basename_no_suffix + "_\d+." + self.__packer_data.extension()
+
+		last_id = -1
+		for filename in os.listdir(dest_dir_path):
+			if re.search(regex, filename):
+				basename_no_ext = os.path.splitext(filename)[0]
+				id = basename_no_ext.rsplit("_", 1)[1]
+				last_id = int(id) if last_id < int(id) else last_id
+		
+		return last_id
 
 	# -------------------------------------------------------------------------
 	def save(self):
