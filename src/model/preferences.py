@@ -6,17 +6,16 @@ author: Marie-Neige Chapel
 from enum import Enum, auto
 
 ###############################################################################
-class PreferencesRows(Enum):
-	# ---------
-	# "General"
+class PreferencesGeneral(Enum):
 	SR_KEEP_ALL = 0			# "Snapshot retention": "Keep all snapshots"
 	SR_NB_SNAPSHOT = auto()	# "Snapshot retention": "Number of latest snapshots to keep"
 	SR_NB = auto()			# "Snapshot retention": spin_box_nb_snapshots
-	# ---------
-	# "Task"
-	T_CURR_DATE = auto()	# "Output format": "Add the current date"
-	T_VERSION_NUM = auto()	# "Output format": "Add version numbers"
-	T_NOTHING = auto()		# "Output format": "Add nothing"
+
+###############################################################################
+class PreferencesTask(Enum):
+	SUFFIX_CURR_DATE = 0	# "Output format": "Add the current date"
+	SUFFIX_VERSION_NUM = auto()	# "Output format": "Add version numbers"
+	SUFFIX_NOTHING = auto()		# "Output format": "Add nothing"
 
 ###############################################################################
 class PreferencesKeys(Enum):

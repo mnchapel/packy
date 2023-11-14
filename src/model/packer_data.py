@@ -115,3 +115,13 @@ class PackerData(QAbstractListModel):
 			elif index.row() == DataName.COMPRESSION_METHOD.value:
 				self.__compression_method_index = value
 		return False
+
+    # -------------------------------------------------------------------------
+	def serialize(self) -> dict:
+		dict = {}
+
+		dict["type"] = self.type()
+		dict["compression_method"] = self.__compression_method_index
+		dict["compression_level"] = self.__compression_level_index
+
+		return dict

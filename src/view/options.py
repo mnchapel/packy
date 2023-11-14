@@ -3,15 +3,19 @@ author: Marie-Neige Chapel
 """
 
 # PyQt
-from PyQt6.QtCore import QSettings
+from asyncio import Task
+from PyQt6.QtCore import QSettings, pyqtSignal
 from PyQt6.QtWidgets import QDialog, QAbstractButton
 from PyQt6.uic import loadUi
 
 # PackY
-from model.preferences import PreferencesKeys, PreferencesRows
+from model.preferences import PreferencesKeys, PreferencesTask
+from model.task import Task
 
 ###############################################################################
 class Options(QDialog):
+
+	taskSuffixChanged = pyqtSignal()
 
 	# -------------------------------------------------------------------------
 	def __init__(self, parent=None):
@@ -92,6 +96,8 @@ class Options(QDialog):
 
 	# -------------------------------------------------------------------------
 	def updateTaskSettings(self):
+		old_task_suffix = self.__settings.value(PreferencesKeys.TASK_SUFFIX.value)
+
 		task_suffix = 0
 
 		if self.__ui.r_button_version_num.isChecked():
@@ -99,4 +105,7 @@ class Options(QDialog):
 		elif self.__ui.r_button_nothing.isChecked():
 			task_suffix = 2
 
-		self.__settings.setValue(PreferencesKeys.TASK_SUFFIX.value, task_suffix)
+		if old_task_suffix != task_suffix:
+			self.__settings.setValue(PreferencesKeys.TASK_SUFFIX.value, task_suffix)
+			Task.updateDestSuffix(PreferencesTask(task_suffix))
+			self.taskSuffixChanged.emit()

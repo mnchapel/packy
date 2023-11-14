@@ -6,36 +6,37 @@ author: Marie-Neige Chapel
 import json
 import os
 import re
-from enum import Enum
+from enum import Enum, auto
 
 # PyQt
-from PyQt6.QtCore import Qt, QStandardPaths, QAbstractListModel, pyqtSignal
+from PyQt6.QtCore import Qt, QSettings, QStandardPaths, QAbstractListModel, pyqtSignal
 
 # PackY
 from model.files_model import FilesModel
 from model.packer_data import PackerData
+from model.preferences import PreferencesTask, PreferencesKeys
 
 ###############################################################################
 class TaskProperties(Enum):
 	STATUS = 0
-	OUTPUT_NAME = 1
-	SOURCE_FOLDER = 2
-	DESTINATION_FILE = 3
-	PACKER_TYPE = 4
+	SRC_FOLDER = auto()
+	DST_BASENAME = auto()
+	DST_FILE = auto()
+	PACKER_TYPE = auto()
 
 ###############################################################################
 class TaskStatus(Enum):
 	WAITING = 0
-	SUCCESS = 1
-	ERROR = 2
+	SUCCESS = auto()
+	ERROR = auto()
 
 ###############################################################################
 class Task(QAbstractListModel):
 		
 	statusChanged = pyqtSignal(int)
-	
+
 	# -------------------------------------------------------------------------
-	def __init__(self, id:int, json_dict = None):
+	def __init__(self, id:int, json_dict = None) -> None:
 		super(Task, self).__init__()
 		
 		# ----------------
@@ -48,15 +49,24 @@ class Task(QAbstractListModel):
 		self.__id = id
 		self.__status = TaskStatus.WAITING
 
+		self.initStaticMembers()
+
 		if json_dict is None:
 			self.defaultInitialization()
 		else:
-			self.jsonInitialization(json_dict)
+			self.deserialization(json_dict)
+
+	# # -------------------------------------------------------------------------
+	def initStaticMembers(self) -> None:
+		if not hasattr(Task, "dest_suffix"):
+			settings: QSettings = QSettings()
+			suffix_value = settings.value(PreferencesKeys.TASK_SUFFIX.value, type = int)
+			self.updateDestSuffix(PreferencesTask(suffix_value))
 
 	# -------------------------------------------------------------------------
-	def defaultInitialization(self):
+	def defaultInitialization(self) -> None:
 		qt_folder_location = QStandardPaths.StandardLocation.DownloadLocation
-		default_folder = QStandardPaths.writableLocation(qt_folder_location)
+		self.__dest_folder = QStandardPaths.writableLocation(qt_folder_location)
 
 		# ----------------
 		# MEMBER VARIABLES
@@ -64,30 +74,26 @@ class Task(QAbstractListModel):
 		self.__checked = Qt.CheckState.Checked
 		self.__packer_data = PackerData()
 		self.__files_selected = FilesModel()
-		self.__files_selected.setRootPath(default_folder)
-		# self.__destination_file = default_folder + "/output." + self.__packer_data.extension()
-		self.__updateDestinationFile(default_folder + "/output")
+		self.__files_selected.setRootPath(self.__dest_folder)
+		self.__dest_raw_basename = "output"
+		self.__dest_folder = ""
 	
 	# -------------------------------------------------------------------------
-	def jsonInitialization(self, json_dict: dict):
+	def deserialization(self, json_dict: dict) -> None:
 		self.__id = json_dict["id"]
 		self.__checked = json_dict["checked"]
 		self.__packer_data = PackerData(json_dict["packer_data"])
 		self.__files_selected = FilesModel(json_dict["files_model"])
-		# self.__destination_file = json_dict["destination_file"]
-		self.__updateDestinationFile(json_dict["destination_file"])
+		self.__dest_raw_basename = json_dict["dst_raw_basename"]
+		self.__dest_folder = json_dict["dst_folder"]
 
 	###########################################################################
 	# GETTERS
 	###########################################################################
 
 	# -------------------------------------------------------------------------
-	def id(self):
+	def id(self) -> int:
 		return self.__id
-
-	# -------------------------------------------------------------------------
-	def name(self)->str:
-		return os.path.basename(self.__destination_file)
 
 	# -------------------------------------------------------------------------
 	def statusUnicode(self)->str:
@@ -98,10 +104,19 @@ class Task(QAbstractListModel):
 				return self.__u_check
 			case TaskStatus.ERROR:
 				return self.__u_cross
-
+			
 	# -------------------------------------------------------------------------
-	def destinationFile(self):
-		return self.__destination_file
+	def destFile(self) -> str:
+		dst_basename = self.destBasename()
+		return os.path.join(self.__dest_folder, dst_basename)
+			
+	# -------------------------------------------------------------------------
+	def rawDestFile(self) -> str:
+		return os.path.join(self.__dest_folder, self.__dest_raw_basename)
+	
+	# -------------------------------------------------------------------------
+	def destBasename(self) -> str:
+		return self.__dest_raw_basename + Task.dest_suffix + "." + self.__packer_data.extension()
 	
 	# -------------------------------------------------------------------------
 	def filesSelected(self):
@@ -112,13 +127,22 @@ class Task(QAbstractListModel):
 		return self.__packer_data
 	
 	# -------------------------------------------------------------------------
-	def isChecked(self)->Qt.CheckState:
+	def isChecked(self) -> Qt.CheckState:
 		return self.__checked
 
 	###########################################################################
 	# SETTERS
 	###########################################################################
 	
+	# -------------------------------------------------------------------------
+	def setRawDstFile(self, value: str) -> None:
+		self.__dest_folder = os.path.dirname(value)
+		self.__dest_raw_basename = os.path.basename(value)
+		
+		first_row = 0
+		last_row = self.rowCount() - 1
+		self.dataChanged.emit(self.index(first_row, 0), self.index(last_row, 0))
+
 	# -------------------------------------------------------------------------
 	def setFilesSelected(self, files_selected):
 		self.__files_selected = files_selected
@@ -127,6 +151,23 @@ class Task(QAbstractListModel):
 	def setChecked(self, value:Qt.CheckState):
 		self.__checked = value
 
+	# -------------------------------------------------------------------------
+	@staticmethod
+	def updateDestSuffix(value):
+		dest_suffix = ""
+
+		match value:
+			case PreferencesTask.SUFFIX_CURR_DATE:
+				dest_suffix = "_date"
+			case PreferencesTask.SUFFIX_VERSION_NUM:
+				dest_suffix = "_id"
+			case PreferencesTask.SUFFIX_NOTHING:
+				dest_suffix = ""
+			case _:
+				print("[Task][updateDestSuffix] value not recognized.")
+		
+		Task.dest_suffix = dest_suffix
+
 	###########################################################################
 	# MEMBER FUNCTIONS
 	###########################################################################
@@ -134,32 +175,29 @@ class Task(QAbstractListModel):
 	# -------------------------------------------------------------------------
 	def data(self, index, role):
 		if index.isValid():
-			if index.row() == TaskProperties.STATUS.value:
-				return self.statusUnicode()
-			elif index.row() == TaskProperties.OUTPUT_NAME.value:
-				return os.path.basename(self.__destination_file)
-			elif index.row() == TaskProperties.SOURCE_FOLDER.value:
-				return self.__files_selected.rootPath()
-			elif index.row() == TaskProperties.DESTINATION_FILE.value:
-				return self.__destination_file
+			match index.row():
+				case TaskProperties.STATUS.value:
+					return self.statusUnicode()
+				case TaskProperties.SRC_FOLDER.value:
+					return self.__files_selected.rootPath()
+				case TaskProperties.DST_BASENAME.value:
+					return self.destBasename()
+				case TaskProperties.DST_FILE.value:
+					return self.destFile()
 	
 	# -------------------------------------------------------------------------
 	def setData(self, index, value, role = Qt.ItemDataRole.EditRole):
 		if index.isValid() and role == Qt.ItemDataRole.EditRole:
-			if index.row() == TaskProperties.OUTPUT_NAME.value:
-				self.__name = value
-			elif index.row() == TaskProperties.DESTINATION_FILE.value:
-				self.__updateDestinationFile(value)
-				# path_no_ext = os.path.splitext(value)[0]
-				# ext = self.__packer_data.extension()
-				# self.__destination_file = path_no_ext + "." + ext
+			match index.row():
+				case TaskProperties.DST_BASENAME.value:
+					self.dataChanged.emit(index, index)
 			return True
 		else:
 			return False
 	
 	# -------------------------------------------------------------------------
 	def rowCount(self, index=None):
-		return 5
+		return len(TaskProperties)
 	
 	# -------------------------------------------------------------------------
 	def initStatus(self):
@@ -170,21 +208,16 @@ class Task(QAbstractListModel):
 	def updateStatus(self, status: TaskStatus):
 		self.__status = status
 		self.statusChanged.emit(self.__id)
-	
-	# -------------------------------------------------------------------------
-	def __updateDestinationFile(self, filename)->None:
-		dest_dir_path = os.path.dirname(filename)
 
-		basename = os.path.basename(filename)
-		basename_no_ext = os.path.splitext(basename)[0]
-		basename_no_suffix = basename_no_ext.rsplit("_", 1)[0]
-		
-		last_id = self.__findLastSuffixId(dest_dir_path, basename_no_suffix)
+	# -------------------------------------------------------------------------
+	def __suffixId(self, dest_dir_path: str, basename_no_suffix: str)->str:
+		print("[Task][__suffixId]")
+		return "_id"
+	
+		last_id = self.__findLastSuffixId()
 		suffix = "_" + str(last_id + 1)
 
-		complete_basename = basename_no_suffix + suffix + "." + self.__packer_data.extension()
-		
-		self.__destination_file = os.path.join(dest_dir_path, complete_basename)
+		return suffix
 
 	# -------------------------------------------------------------------------
 	def __findLastSuffixId(self, dest_dir_path: str, basename_no_suffix: str)->int:
@@ -198,7 +231,25 @@ class Task(QAbstractListModel):
 				last_id = int(id) if last_id < int(id) else last_id
 		
 		return last_id
+	
+	# -------------------------------------------------------------------------
+	def __suffixTimeStamp(self, dest_dir_path: str, basename_no_suffix: str)->str:
+		print("[Task][__suffixTimeStamp]")
+		return "_date"
+	
+	# -------------------------------------------------------------------------
+	def __suffixNothing(self, dest_dir_path: str, basename_no_suffix: str)->str:
+		return ""
 
 	# -------------------------------------------------------------------------
-	def save(self):
-		json.dump(self.output, indent=4)
+	def serialize(self) -> dict:
+		dict = {}
+
+		dict["id"] = self.__id
+		dict["checked"] = self.__checked.value
+		dict["files_model"] = self.__files_selected
+		dict["packer_data"] = self.__packer_data
+		dict["dst_raw_basename"] = self.__dest_raw_basename
+		dict["dst_folder"] = self.__dest_folder
+
+		return dict

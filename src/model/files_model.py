@@ -35,10 +35,6 @@ class FilesModel(QFileSystemModel):
 	def checks(self):
 		return self.__checks
 
-	# -------------------------------------------------------------------------
-	def checksToStr(self):
-		return {str(key): value for key, value in self.__checks.items()}
-
 	###########################################################################
 	# SETTERS
 	###########################################################################
@@ -92,3 +88,16 @@ class FilesModel(QFileSystemModel):
 			return self.__checks[self.filePath(index)]
 		else:
 			return 0
+		
+	# -------------------------------------------------------------------------
+	def serialize(self):
+		dict = {}
+
+		dict["root_path"] = self.rootPath()
+		dict["check"] = self.__checksToStr()
+
+		return dict
+
+	# -------------------------------------------------------------------------
+	def __checksToStr(self):
+		return {str(key): value for key, value in self.__checks.items()}

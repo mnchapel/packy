@@ -18,8 +18,8 @@
                 "compression_method": 1,
                 "compression_level": 0
             },
-            "task_name": "output_zip.zip",
-            "destination_file": "D:/Desktop/output_zip.zip"
+			"dst_raw_basename": "output_zip",
+            "dst_folder": "D:/Desktop"
         },
         {
             "id": 1,
@@ -37,8 +37,8 @@
                 "compression_method": 0,
                 "compression_level": 0
             },
-            "task_name": "output_lzma.lzma",
-            "destination_file": "D:/Desktop/output_lzma.lzma"
+            "dst_raw_basename": "output_lzma",
+            "dst_folder": "D:/Desktop"
         },
         {
             "id": 2,
@@ -55,8 +55,8 @@
                 "compression_method": 0,
                 "compression_level": 0
             },
-            "task_name": "output_zip_2.zip",
-            "destination_file": "D:/Desktop/output_zip_2.zip"
+            "dst_raw_basename": "output_zip2",
+            "dst_folder": "D:/Desktop"
         }
     ]
 }

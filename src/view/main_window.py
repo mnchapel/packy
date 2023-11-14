@@ -117,10 +117,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		if not self.__session.name():
 			self.onSaveAs(s)
 		else:
-			basename = self.__session.name()
-			output_dir = self.__session.dirname()
-			filename = output_dir + "/" + basename
-			with open(filename, "w") as output_file:
+			dst_file_path = self.__session.outputFile()
+			with open(dst_file_path, "w") as output_file:
 				json.dump(self.__session, output_file, cls=SessionEncoder, indent=4)
 
 	# -------------------------------------------------------------------------
@@ -128,7 +126,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		[filename, _] = QFileDialog.getSaveFileName(self, "Save As", "")
 		if filename:
 			self.__session.setName(filename)
-			with open(filename, "w") as output_file:
+			dst_file_path = self.__session.outputFile()
+			with open(dst_file_path, "w") as output_file:
 				json.dump(self.__session, output_file, cls=SessionEncoder, indent=4)
 	
 	# -------------------------------------------------------------------------
@@ -219,8 +218,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	def updateTaskViewMapper(self) -> None:
 		task: Task = self.__selected_task
 		self.__task_view_mapper.setModel(task)
-		self.__task_view_mapper.addMapping(self.line_edit_source, TaskProperties.SOURCE_FOLDER.value, b"text")
-		self.__task_view_mapper.addMapping(self.line_edit_destination, TaskProperties.DESTINATION_FILE.value, b"text")
+		self.__task_view_mapper.addMapping(self.line_edit_source, TaskProperties.SRC_FOLDER.value, b"text")
+		self.__task_view_mapper.addMapping(self.line_edit_destination, TaskProperties.DST_FILE.value, b"text")
 		self.__task_view_mapper.toFirst()
 	
 	# -------------------------------------------------------------------------
@@ -374,14 +373,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	# -------------------------------------------------------------------------
 	def openOptions(self, s):
 		dlg = Options(self)
-		code = dlg.exec()
-
-		# print("[openOptions]")
-		# match code:
-		# 	case QDialog.DialogCode.Accepted:
-		# 		Task.suffix_preference = self.__preferences.suffix()
-		# 		print("Task.suffix_preference = ", Task.suffix_preference)
-		# 		self.__session.submit()
+		dlg.taskSuffixChanged.connect(self.__session.emitSuffixChanged)
+		dlg.exec()
 	
 	# -------------------------------------------------------------------------
 	def openAbout(self, s):
@@ -400,17 +393,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	
 	# -------------------------------------------------------------------------
 	def selectDestinationFile(self):
-		destination_path = self.line_edit_destination.text()
-		path_no_ext = os.path.splitext(destination_path)[0]
-		ext = os.path.splitext(destination_path)[1]
-		[path_no_ext, _] = QFileDialog.getSaveFileName(self, "Select file", path_no_ext)
+		raw_dest_file = self.__selected_task.rawDestFile()
+		[raw_basename, _] = QFileDialog.getSaveFileName(self, "Select file", raw_dest_file)
 
-		if path_no_ext:
-			self.line_edit_destination.setText(path_no_ext + ext)
-			self.__task_view_mapper.submit()
+		if raw_basename:
+			self.__selected_task.setRawDstFile(raw_basename)
+			# self.__task_view_mapper.submit()
 
 	# -------------------------------------------------------------------------
 	def updatePackerType(self, button: QtWidgets.QAbstractButton):
+		print("[MainWindow][updatePackerType]")
 		self.__packer_type_mapper.submit()
 		self.__task_view_mapper.submit()
 
