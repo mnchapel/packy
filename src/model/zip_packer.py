@@ -22,7 +22,7 @@ class ZipPacker(Packer):
 	# -------------------------------------------------------------------------
 	def packTmpFolder(self, task: Task, tmp_folder_path: str):
 
-		destination_filename = task.destinationFile()
+		destination_filename = task.destFile()
 		packer_data = task.packerData()
 
 		[c_method, c_level] = self.convertPackerData(packer_data)

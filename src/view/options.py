@@ -18,7 +18,7 @@ class Options(QDialog):
 	taskSuffixChanged = pyqtSignal()
 
 	# -------------------------------------------------------------------------
-	def __init__(self, parent=None):
+	def __init__(self, parent=None) -> None:
 		super(Options, self).__init__()
 
 		# ----------------
@@ -35,7 +35,7 @@ class Options(QDialog):
 			self.__ui.spin_box_nb_snapshots.setEnabled(True)
 	
 	# -------------------------------------------------------------------------
-	def initGeneralSection(self):
+	def initGeneralSection(self) -> None:
 		general_sr = self.__settings.value(PreferencesKeys.GENERAL_SR.value, type=int)
 
 		match general_sr:
@@ -50,7 +50,7 @@ class Options(QDialog):
 		self.__ui.spin_box_nb_snapshots.setValue(nb_snapshots)
 
 	# -------------------------------------------------------------------------
-	def initTaskSection(self):
+	def initTaskSection(self) -> None:
 		task_suffix = self.__settings.value(PreferencesKeys.TASK_SUFFIX.value, type = int)
 
 		match task_suffix:
@@ -64,18 +64,18 @@ class Options(QDialog):
 				raise Exception("[initTaskSection] The preference TASK_SUFFIX unknown.")
 	
 	# -------------------------------------------------------------------------
-	def initConnect(self):
+	def initConnect(self) -> None:
 		self.__ui.b_group_snapshot_retention.buttonClicked.connect(self.updateGui)
 
 	# -------------------------------------------------------------------------
-	def updateGui(self, button: QAbstractButton):
+	def updateGui(self, button: QAbstractButton) -> None:
 		if button.objectName() == "r_button_nb_snapshots":
 			self.__ui.spin_box_nb_snapshots.setEnabled(True)
 		else:
 			self.__ui.spin_box_nb_snapshots.setEnabled(False)
 
 	# -------------------------------------------------------------------------
-	def accept(self):
+	def accept(self) -> None:
 		print("[Options][accept]")
 
 		self.updateGeneralSettings()
@@ -84,7 +84,7 @@ class Options(QDialog):
 		super().accept()
 
 	# -------------------------------------------------------------------------
-	def updateGeneralSettings(self):
+	def updateGeneralSettings(self) -> None:
 		general_sr = 0
 		if self.__ui.r_button_nb_snapshots.isChecked() :
 			general_sr = 1
@@ -95,7 +95,7 @@ class Options(QDialog):
 		self.__settings.setValue(PreferencesKeys.GENERAL_NB_SNAPSHOT.value, nb_snapshots)
 
 	# -------------------------------------------------------------------------
-	def updateTaskSettings(self):
+	def updateTaskSettings(self) -> None:
 		old_task_suffix = self.__settings.value(PreferencesKeys.TASK_SUFFIX.value)
 
 		task_suffix = 0

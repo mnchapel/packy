@@ -3,9 +3,9 @@ author: Marie-Neige Chapel
 """
 
 # Python
-import json
 import os
 import re
+from datetime import date
 from enum import Enum, auto
 
 # PyQt
@@ -58,10 +58,11 @@ class Task(QAbstractListModel):
 
 	# # -------------------------------------------------------------------------
 	def initStaticMembers(self) -> None:
-		if not hasattr(Task, "dest_suffix"):
+		if not hasattr(Task, "funcDstSuffix"):
 			settings: QSettings = QSettings()
 			suffix_value = settings.value(PreferencesKeys.TASK_SUFFIX.value, type = int)
 			self.updateDestSuffix(PreferencesTask(suffix_value))
+			
 
 	# -------------------------------------------------------------------------
 	def defaultInitialization(self) -> None:
@@ -116,7 +117,9 @@ class Task(QAbstractListModel):
 	
 	# -------------------------------------------------------------------------
 	def destBasename(self) -> str:
-		return self.__dest_raw_basename + Task.dest_suffix + "." + self.__packer_data.extension()
+		dst_suffix = Task.funcDstSuffix(self)
+		extension = self.__packer_data.extension()
+		return self.__dest_raw_basename + dst_suffix + "." + extension
 	
 	# -------------------------------------------------------------------------
 	def filesSelected(self):
@@ -154,19 +157,19 @@ class Task(QAbstractListModel):
 	# -------------------------------------------------------------------------
 	@staticmethod
 	def updateDestSuffix(value):
-		dest_suffix = ""
+		func_dst_suffix = Task.__suffixTimeStamp
 
 		match value:
 			case PreferencesTask.SUFFIX_CURR_DATE:
-				dest_suffix = "_date"
+				func_dst_suffix = Task.__suffixTimeStamp
 			case PreferencesTask.SUFFIX_VERSION_NUM:
-				dest_suffix = "_id"
+				func_dst_suffix = Task.__suffixId
 			case PreferencesTask.SUFFIX_NOTHING:
-				dest_suffix = ""
+				func_dst_suffix = Task.__suffixNothing
 			case _:
 				print("[Task][updateDestSuffix] value not recognized.")
 		
-		Task.dest_suffix = dest_suffix
+		Task.funcDstSuffix = func_dst_suffix
 
 	###########################################################################
 	# MEMBER FUNCTIONS
@@ -210,9 +213,8 @@ class Task(QAbstractListModel):
 		self.statusChanged.emit(self.__id)
 
 	# -------------------------------------------------------------------------
-	def __suffixId(self, dest_dir_path: str, basename_no_suffix: str)->str:
-		print("[Task][__suffixId]")
-		return "_id"
+	def __suffixId(self)->str:
+		# return "_id"
 	
 		last_id = self.__findLastSuffixId()
 		suffix = "_" + str(last_id + 1)
@@ -220,11 +222,11 @@ class Task(QAbstractListModel):
 		return suffix
 
 	# -------------------------------------------------------------------------
-	def __findLastSuffixId(self, dest_dir_path: str, basename_no_suffix: str)->int:
-		regex = basename_no_suffix + "_\d+." + self.__packer_data.extension()
+	def __findLastSuffixId(self)->int:
+		regex = self.__dest_raw_basename + "_\d+." + self.__packer_data.extension()
 
 		last_id = -1
-		for filename in os.listdir(dest_dir_path):
+		for filename in os.listdir(self.__dest_folder):
 			if re.search(regex, filename):
 				basename_no_ext = os.path.splitext(filename)[0]
 				id = basename_no_ext.rsplit("_", 1)[1]
@@ -233,12 +235,11 @@ class Task(QAbstractListModel):
 		return last_id
 	
 	# -------------------------------------------------------------------------
-	def __suffixTimeStamp(self, dest_dir_path: str, basename_no_suffix: str)->str:
-		print("[Task][__suffixTimeStamp]")
-		return "_date"
+	def __suffixTimeStamp(self)->str:
+		return date.today().strftime("%Y_%m_%d")
 	
 	# -------------------------------------------------------------------------
-	def __suffixNothing(self, dest_dir_path: str, basename_no_suffix: str)->str:
+	def __suffixNothing(self)->str:
 		return ""
 
 	# -------------------------------------------------------------------------

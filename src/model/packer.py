@@ -78,7 +78,7 @@ class Packer(QObject):
 	
     # -------------------------------------------------------------------------
 	def tmpFolderPath(self)->str:
-		destination_file = self.__task.destinationFile()
+		destination_file = self.__task.destFile()
 		basename = os.path.basename(destination_file)
 		basename_no_ext = os.path.splitext(basename)[0]
 		tmp_folder_path = os.path.join("../tmp/", basename_no_ext)
