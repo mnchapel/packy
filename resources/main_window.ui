@@ -20,8 +20,8 @@
    <property name="autoFillBackground">
     <bool>false</bool>
    </property>
-   <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,1">
-    <item>
+   <layout class="QGridLayout" name="gridLayout_4">
+    <item row="0" column="1">
      <layout class="QVBoxLayout" name="vlayout_left">
       <item>
        <widget class="QLabel" name="label_list_of_tasks">
@@ -131,13 +131,6 @@
          <string>Statistics</string>
         </property>
         <layout class="QGridLayout" name="gridLayout">
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_global_progress">
-           <property name="text">
-            <string>Global progress</string>
-           </property>
-          </widget>
-         </item>
          <item row="0" column="1">
           <widget class="QProgressBar" name="pbar_global_progress">
            <property name="value">
@@ -159,12 +152,19 @@
            </property>
           </widget>
          </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_global_progress">
+           <property name="text">
+            <string>Global progress</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </item>
      </layout>
     </item>
-    <item>
+    <item row="0" column="2">
      <layout class="QVBoxLayout" name="vlayout_right">
       <item>
        <widget class="QGroupBox" name="group_box_file_selection">
@@ -398,6 +398,20 @@
          </item>
         </layout>
        </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="1" column="1" colspan="2">
+     <layout class="QVBoxLayout" name="vlayout_bottom">
+      <item>
+       <widget class="QLabel" name="label_log_panel">
+        <property name="text">
+         <string>Log panel:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPlainTextEdit" name="log_panel"/>
       </item>
      </layout>
     </item>

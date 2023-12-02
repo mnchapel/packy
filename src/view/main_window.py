@@ -4,12 +4,11 @@ author: Marie-Neige Chapel
 
 #Python
 import json
-import os
 
 # PyQt
 from PyQt6 import QtWidgets
-from PyQt6.QtCore import Qt, QCoreApplication, QItemSelection, QThreadPool
-from PyQt6.QtWidgets import QFileDialog
+from PyQt6.QtCore import Qt, QCoreApplication, QItemSelection, QThreadPool, QStandardPaths
+from PyQt6.QtWidgets import QFileDialog, QPlainTextEdit
 
 # PackY
 from model.packer_data import DataName, PackerData
@@ -33,11 +32,23 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.setupUi(self)
 
 		# ----------------
+		# STATIC VARIABLES
+		# ----------------
+		self.initApplication()
+
+		if not hasattr(MainWindow, "log_panel"):
+			MainWindow.log_panel: QPlainTextEdit = self.log_panel
+		
+		if not hasattr(MainWindow, "log_file_path"):
+			app_data_location = QStandardPaths.StandardLocation.AppDataLocation
+			folder_path = QStandardPaths.writableLocation(app_data_location)
+			MainWindow.log_file_path: str = folder_path + "/log.txt"
+
+		# ----------------
 		# MEMBER VARIABLES
 		# ----------------
 		self.__thread_pool = QThreadPool()
 
-		self.initApplication()
 		self.initConnects()
 		self.initSessionView()
 		self.initTaskView()
