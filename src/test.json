@@ -18,7 +18,7 @@
                 "compression_method": 1,
                 "compression_level": 0
             },
-			"dst_raw_basename": "output_zip",
+            "dst_raw_basename": "output_zip",
             "dst_folder": "D:/Desktop"
         },
         {

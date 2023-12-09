@@ -131,6 +131,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 			self.onSaveAs(s)
 		else:
 			dst_file_path = self.__session.outputFile()
+			print("[onSave]", dst_file_path)
 			with open(dst_file_path, "w") as output_file:
 				json.dump(self.__session, output_file, cls=SessionEncoder, indent=4)
 

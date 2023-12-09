@@ -60,8 +60,7 @@ class Session(QAbstractTableModel):
 	
     # -------------------------------------------------------------------------
 	def outputFile(self) -> str:
-		basename = self.__name + ".json"
-		return os.path.join(self.__dirname, basename)
+		return os.path.join(self.__dirname, self.__name)
 
     # -------------------------------------------------------------------------
 	def tasks(self):
@@ -93,7 +92,7 @@ class Session(QAbstractTableModel):
 
     # -------------------------------------------------------------------------
 	def setName(self, path: str) -> None:
-		self.__name = os.path.basename(path)
+		self.__name = os.path.basename(path) + ".json"
 		self.__dirname = os.path.dirname(path)
 	
     # -------------------------------------------------------------------------
