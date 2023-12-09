@@ -3,6 +3,7 @@ author: Marie-Neige Chapel
 """
 
 # PyQt
+from PyQt6 import QtCore
 from PyQt6.QtCore import QAbstractListModel
 
 ###############################################################################
@@ -59,6 +60,11 @@ class Progression(QAbstractListModel):
 	###########################################################################
 	# SLOTS
 	###########################################################################
+
+    # -------------------------------------------------------------------------
+	def errorReported(self, msg: str):
+		self.__nb_error += 1
+		QtCore.qCritical(msg)
 
     # -------------------------------------------------------------------------
 	def updateTaskProgress(self, progress: int):

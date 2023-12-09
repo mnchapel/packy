@@ -43,9 +43,8 @@ class Packer(QRunnable):
 			self.__task.updateStatus(TaskStatus.SUCCESS)
 		except OSError as ex:
 			self.__task.updateStatus(TaskStatus.ERROR)
-			self.signals.error.emit((type(ex), ex))
-			print(type(ex), ": ", ex)
-			# QtCore.qCritical(type(ex), ": ", ex)
+			error_msg: str = type(ex), ": ", ex
+			self.signals.error.emit(error_msg)
 		finally:
 			self.cleanTmpFolder(tmp_folder_path)
 			self.signals.progress.emit(100)

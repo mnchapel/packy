@@ -8,6 +8,6 @@ from PyQt6.QtCore import QObject, pyqtSignal
 ###############################################################################
 class PackerSignals(QObject):
 
-	error = pyqtSignal(tuple)
+	error = pyqtSignal(str)
 	progress = pyqtSignal(int)
 	finish = pyqtSignal()

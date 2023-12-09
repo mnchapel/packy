@@ -47,7 +47,7 @@ def styleSheet(type: QtMsgType) -> str:
 
 # -------------------------------------------------------------------------
 def fileLogFormat(type: QtMsgType, ctx: QMessageLogContext, msg: str):
-	return f"[{currTime()}][{ctx.function}] {msgTypeToStr(type)}: {msg}"
+	return f"[{currTime()}][{msgTypeToStr(type)}][{ctx.function}] {msg}"
 
 # -------------------------------------------------------------------------
 def guiLogFormat(type: QtMsgType, ctx: QMessageLogContext, msg: str):

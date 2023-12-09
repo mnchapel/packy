@@ -210,7 +210,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		for task in tasks:
 			if task.isChecked() == Qt.CheckState.Checked.value:
 				packer = createPacker(task)
-				packer.signals.error.connect(lambda msg: QtCore.qCritical(msg))
+				packer.signals.error.connect(self.__progression.errorReported)
 				packer.signals.progress.connect(self.__progression.updateTaskProgress)
 				packer.signals.finish.connect(self.__progression.updateGlobalProgress)
 				self.__thread_pool.start(packer)
