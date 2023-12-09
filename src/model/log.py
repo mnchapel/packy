@@ -5,6 +5,7 @@ author: Marie-Neige Chapel
 # Python
 import os
 from time import localtime, strftime
+from typing import Self
 
 # PyQt
 from PyQt6.QtCore import QMessageLogContext, QtMsgType
@@ -33,12 +34,24 @@ def msgTypeToStr(type: QtMsgType):
 			raise Exception("[msgTypeToStr] Message type not recognized.")
 
 # -------------------------------------------------------------------------
+def styleSheet(type: QtMsgType) -> str:
+	match type:
+		case QtMsgType.QtInfoMsg:
+			return "QPlainTextEdit {color: black}"
+		case QtMsgType.QtWarningMsg:
+			return "QPlainTextEdit {color: yellow}"
+		case QtMsgType.QtCriticalMsg:
+			return "QPlainTextEdit {color: red}"
+		case _:
+			raise Exception("[styleSheet] Message type not recognized.")
+
+# -------------------------------------------------------------------------
 def fileLogFormat(type: QtMsgType, ctx: QMessageLogContext, msg: str):
 	return f"[{currTime()}][{ctx.function}] {msgTypeToStr(type)}: {msg}"
 
 # -------------------------------------------------------------------------
 def guiLogFormat(type: QtMsgType, ctx: QMessageLogContext, msg: str):
-	return f"[{currTime()}] {msgTypeToStr(type)}: {msg}"
+	return f"[{currTime()}] {msg}"
 
 # -------------------------------------------------------------------------
 def writeLogInFile(type: QtMsgType, ctx: QMessageLogContext, msg: str) -> None:
@@ -50,6 +63,7 @@ def writeLogInFile(type: QtMsgType, ctx: QMessageLogContext, msg: str) -> None:
 # -------------------------------------------------------------------------
 def printLogInGUI(type: QtMsgType, ctx: QMessageLogContext, msg: str) -> None:
 	if hasattr(MainWindow, "log_panel"):
+		MainWindow.log_panel.setStyleSheet(styleSheet(type))
 		MainWindow.log_panel.appendPlainText(guiLogFormat(type, ctx, msg))
 
 # -------------------------------------------------------------------------
