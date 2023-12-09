@@ -29,6 +29,7 @@ class Progression(QAbstractListModel):
     # -------------------------------------------------------------------------
 	def init(self):
 		self.__nb_task = 0
+		self.__nb_error = 0
 		self.__nb_task_finished = 0
 		self.__global_progress = 0
 		self.__task_progress = 0
@@ -45,6 +46,15 @@ class Progression(QAbstractListModel):
 				return self.__global_progress
 			elif index.row() == 1:
 				return self.__task_progress
+			
+    # -------------------------------------------------------------------------
+	def report(self) -> str:
+		report: str = str(self.__nb_task_finished) + " task(s) processed / " + str(self.__nb_error) + " errors."
+
+		if self.__nb_error > 0:
+			report += "\n See the log file for more information."
+
+		return report
 	
 	###########################################################################
 	# SLOTS

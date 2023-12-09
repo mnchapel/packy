@@ -6,6 +6,8 @@ author: Marie-Neige Chapel
 from PyQt6.QtCore import QObject, pyqtSignal
 
 ###############################################################################
-class PackerWorkerSignals(QObject):
-	
-	runTaskId = pyqtSignal(int)
+class PackerSignals(QObject):
+
+	error = pyqtSignal(tuple)
+	progress = pyqtSignal(int)
+	finish = pyqtSignal()

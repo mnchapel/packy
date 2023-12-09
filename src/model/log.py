@@ -3,7 +3,6 @@ author: Marie-Neige Chapel
 """
 
 # Python
-from os import write
 import os
 from time import localtime, strftime
 
@@ -34,22 +33,28 @@ def msgTypeToStr(type: QtMsgType):
 			raise Exception("[msgTypeToStr] Message type not recognized.")
 
 # -------------------------------------------------------------------------
-def formatLog(type: QtMsgType, ctx: QMessageLogContext, msg: str):
+def fileLogFormat(type: QtMsgType, ctx: QMessageLogContext, msg: str):
 	return f"[{currTime()}][{ctx.function}] {msgTypeToStr(type)}: {msg}"
+
+# -------------------------------------------------------------------------
+def guiLogFormat(type: QtMsgType, ctx: QMessageLogContext, msg: str):
+	return f"[{currTime()}] {msgTypeToStr(type)}: {msg}"
 
 # -------------------------------------------------------------------------
 def writeLogInFile(type: QtMsgType, ctx: QMessageLogContext, msg: str) -> None:
 	if hasattr(MainWindow, "log_file_path"):
 		os.makedirs(os.path.dirname(MainWindow.log_file_path), exist_ok=True)
 		with open(MainWindow.log_file_path, "a+") as log_file:
-			log_file.write(formatLog(type, ctx, msg))
+			log_file.write(fileLogFormat(type, ctx, msg) + "\n")
 
 # -------------------------------------------------------------------------
-def printLogInView(type: QtMsgType, ctx: QMessageLogContext, msg: str) -> None:
+def printLogInGUI(type: QtMsgType, ctx: QMessageLogContext, msg: str) -> None:
 	if hasattr(MainWindow, "log_panel"):
-		MainWindow.log_panel.appendPlainText(formatLog(type, ctx, msg))
+		MainWindow.log_panel.appendPlainText(guiLogFormat(type, ctx, msg))
 
 # -------------------------------------------------------------------------
 def messageHandler(type: QtMsgType, ctx: QMessageLogContext, msg: str) -> None:
 	writeLogInFile(type, ctx, msg)
-	printLogInView(type, ctx, msg)
+
+	if type in {QtMsgType.QtInfoMsg, QtMsgType.QtWarningMsg, QtMsgType.QtCriticalMsg}:
+		printLogInGUI(type, ctx, msg)
