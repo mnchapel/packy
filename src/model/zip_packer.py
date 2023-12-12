@@ -21,14 +21,16 @@ class ZipPacker(Packer):
 
 	# -------------------------------------------------------------------------
 	def packTmpFolder(self, task: Task, tmp_folder_path: str):
+		try:
+			destination_filename = task.destFile()
+			packer_data = task.packerData()
 
-		destination_filename = task.destFile()
-		packer_data = task.packerData()
+			[c_method, c_level] = self.convertPackerData(packer_data)
 
-		[c_method, c_level] = self.convertPackerData(packer_data)
-
-		with ZipFile(destination_filename, mode = "w", compression=c_method, compresslevel=c_level) as m_zip:
-			self.packDir(m_zip, tmp_folder_path)
+			with ZipFile(destination_filename, mode = "w", compression=c_method, compresslevel=c_level) as m_zip:
+				self.packDir(m_zip, tmp_folder_path)
+		except OSError as ex:
+			raise ex
 
 	# -------------------------------------------------------------------------
 	def convertPackerData(self, packer_data: PackerData):
@@ -57,12 +59,18 @@ class ZipPacker(Packer):
 				c_method = zipfile.ZIP_LZMA
 				level = None
 			case _:
-				print("Exception")
+				raise Exception("Packer extension not recognized")
 		
 		return [c_method, c_level]
 	
 	# -------------------------------------------------------------------------
 	def packDir(self, m_zip, path):
-		for root, _, files in os.walk(path):
-			for file in files:
-				m_zip.write(os.path.join(root, file), os.path.relpath(os.path.join(root, file), os.path.join(path, '..')))
+		try:
+			for root, _, files in os.walk(path):
+				for file in files:
+					info_msg: str = f"Packing \"{file}\""
+					self.signals.info.emit(info_msg)
+
+					m_zip.write(os.path.join(root, file), os.path.relpath(os.path.join(root, file), os.path.join(path, '..')))
+		except OSError as ex:
+			raise ex

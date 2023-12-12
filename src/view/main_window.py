@@ -35,15 +35,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		# STATIC VARIABLES
 		# ----------------
 		self.initApplication()
-
-		if not hasattr(MainWindow, "log_panel"):
-			MainWindow.log_panel: QPlainTextEdit = self.log_panel
-		
-		if not hasattr(MainWindow, "log_file_path"):
-			app_data_location = QStandardPaths.StandardLocation.AppDataLocation
-			folder_path = QStandardPaths.writableLocation(app_data_location)
-			MainWindow.log_file_path: str = folder_path + "/log.txt"
-			open(MainWindow.log_file_path, "w").close()
+		self.initLog()
 
 		# ----------------
 		# MEMBER VARIABLES
@@ -64,6 +56,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		QCoreApplication.setOrganizationName("PackYCorp")
 		QCoreApplication.setOrganizationDomain("packy.com")
 		QCoreApplication.setApplicationName("PackY")
+
+	# -------------------------------------------------------------------------
+	def initLog(self) -> None:
+		if not hasattr(MainWindow, "log_panel"):
+			MainWindow.log_panel: QPlainTextEdit = self.log_panel
+		
+		if not hasattr(MainWindow, "log_file_path"):
+			app_data_location = QStandardPaths.StandardLocation.AppDataLocation
+			folder_path = QStandardPaths.writableLocation(app_data_location)
+			MainWindow.log_file_path: str = folder_path + "/log.txt"
+			open(MainWindow.log_file_path, "w").close()
 
 	# -------------------------------------------------------------------------
 	def initConnects(self) -> None:
@@ -211,6 +214,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		for task in tasks:
 			if task.isChecked() == Qt.CheckState.Checked.value:
 				packer = createPacker(task)
+				packer.signals.info.connect(lambda msg: QtCore.qInfo(msg))
 				packer.signals.error.connect(self.__progression.errorReported)
 				packer.signals.progress.connect(self.__progression.updateTaskProgress)
 				packer.signals.finish.connect(self.__progression.updateGlobalProgress)

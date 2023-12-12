@@ -88,6 +88,8 @@ class Packer(QRunnable):
 
 			for item in items:
 				shutil.copy(item, tmp_folder_path)
+				info_msg = f"Copy \"{item}\" to \"{tmp_folder_path}\""
+				self.signals.info.emit(info_msg)
 		
 		except OSError as ex:
 			raise ex
