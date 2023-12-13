@@ -67,7 +67,6 @@ class Task(QAbstractListModel):
 	# -------------------------------------------------------------------------
 	def defaultInitialization(self) -> None:
 		qt_folder_location = QStandardPaths.StandardLocation.DownloadLocation
-		self.__dest_folder = QStandardPaths.writableLocation(qt_folder_location)
 
 		# ----------------
 		# MEMBER VARIABLES
@@ -75,9 +74,9 @@ class Task(QAbstractListModel):
 		self.__checked = Qt.CheckState.Checked
 		self.__packer_data = PackerData()
 		self.__files_selected = FilesModel()
-		self.__files_selected.setRootPath(self.__dest_folder)
 		self.__dest_raw_basename = "output"
-		self.__dest_folder = ""
+		self.__dest_folder = QStandardPaths.writableLocation(qt_folder_location)
+		self.__files_selected.setRootPath(self.__dest_folder)
 	
 	# -------------------------------------------------------------------------
 	def deserialization(self, json_dict: dict) -> None:
