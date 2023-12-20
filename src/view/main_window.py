@@ -123,10 +123,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	# -------------------------------------------------------------------------
 	def initTitle(self) -> None:
 		self.setWindowTitle("PackY - Untitled session")
-	
-	# -------------------------------------------------------------------------
-	def onNewSession(self) -> None:
-		self.__session = Session()
 
 	# -------------------------------------------------------------------------
 	def onSave(self, s) -> None:
@@ -378,22 +374,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.button_group_packer_type.setExclusive(True)
 		
 	###########################################################################
-	# CONNECT SLOTS TO SIGNALS
+	# CONNECT SIGNALS TO SLOTS
 	###########################################################################
 
 	# -------------------------------------------------------------------------
 	def connectFileMenuActions(self) -> None:
-		self.action_new_session.triggered.connect(self.onNewSession)
+		self.action_new_session.triggered.connect(self.createNewSession)
 		self.action_save.triggered.connect(self.onSave)
 		self.action_save_as.triggered.connect(self.onSaveAs)
 		self.action_open.triggered.connect(self.onOpen)
-		self.action_options.triggered.connect(self.optionsOpened)
+		self.action_options.triggered.connect(self.openOptions)
 		self.action_exit.triggered.connect(self.close)
 
 	# -------------------------------------------------------------------------
 	def connectHelpMenuActions(self) -> None:
 		self.action_documentation.triggered.connect(self.openDocumentation)
-		self.action_about.triggered.connect(self.aboutOpened)
+		self.action_about.triggered.connect(self.openAbout)
 	
 	# -------------------------------------------------------------------------
 	def connectTaskManagement(self) -> None:
@@ -408,28 +404,37 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 	# -------------------------------------------------------------------------
 	def connectTaskProperties(self) -> None:
-		self.push_button_source.clicked.connect(self.sourceFolderSelected)
-		self.push_button_destination.clicked.connect(self.destinationFileSelected)
-		self.button_group_packer_type.buttonClicked.connect(self.packerTypeUpdated)
+		self.push_button_check_integrity.clicked.connect(self.checkIntegrity)
+		self.push_button_source.clicked.connect(self.selectSourceFolder)
+		self.push_button_destination.clicked.connect(self.selectDestinationFile)
+		self.button_group_packer_type.buttonClicked.connect(self.updatePackerType)
 		self.cbox_compression_method.activated.connect(self.updateCompressionLevel)
 
 	###########################################################################
-	# SLOTS
+	# PUBLIC SLOTS
 	###########################################################################
 	
 	# -------------------------------------------------------------------------
-	def optionsOpened(self, s):
+	def createNewSession(self) -> None:
+		self.__session = Session()
+	
+	# -------------------------------------------------------------------------
+	def openOptions(self, s):
 		dlg = Options(self)
 		dlg.taskSuffixChanged.connect(self.__session.emitSuffixChanged)
 		dlg.exec()
 	
 	# -------------------------------------------------------------------------
-	def aboutOpened(self, s):
+	def openAbout(self, s):
 		dlg = About(self)
 		dlg.exec()
+
+	# -------------------------------------------------------------------------
+	def checkIntegrity(self):
+		self.__selected_task.checkIntegrity()
 	
 	# -------------------------------------------------------------------------
-	def sourceFolderSelected(self):
+	def selectSourceFolder(self):
 		files_model = self.__selected_task.filesSelected()
 		folder_selected = QFileDialog.getExistingDirectory(self, "Select folder", self.line_edit_source.text(), QFileDialog.Option.ShowDirsOnly)
 
@@ -439,7 +444,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 			self.tree_view_source.setRootIndex(files_model.index(folder_selected))
 	
 	# -------------------------------------------------------------------------
-	def destinationFileSelected(self):
+	def selectDestinationFile(self):
 		raw_dest_file = self.__selected_task.rawDestFile()
 		[raw_basename, _] = QFileDialog.getSaveFileName(self, "Select file", raw_dest_file)
 
@@ -447,7 +452,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 			self.__selected_task.setRawDstFile(raw_basename)
 
 	# -------------------------------------------------------------------------
-	def packerTypeUpdated(self, button: QtWidgets.QAbstractButton):
+	def updatePackerType(self, button: QtWidgets.QAbstractButton):
 		self.__packer_type_mapper.submit()
 		self.__task_view_mapper.submit()
 

@@ -15,7 +15,7 @@ from view.main_window import MainWindow
 # -----------------------------------------------------------------------------
 def initLog() -> None:
 	QtCore.qInstallMessageHandler(messageHandler)
-	QtCore.qDebug("Log starts")
+	QtCore.qDebug("Log starts debug")
 
 # -----------------------------------------------------------------------------
 app = QtWidgets.QApplication(sys.argv)

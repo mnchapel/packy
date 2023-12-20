@@ -57,7 +57,7 @@ def guiLogFormat(type: QtMsgType, ctx: QMessageLogContext, msg: str):
 def writeLogInFile(type: QtMsgType, ctx: QMessageLogContext, msg: str) -> None:
 	if hasattr(MainWindow, "log_file_path"):
 		os.makedirs(os.path.dirname(MainWindow.log_file_path), exist_ok=True)
-		with open(MainWindow.log_file_path, "a+") as log_file:
+		with open(MainWindow.log_file_path, "a") as log_file:
 			log_file.write(fileLogFormat(type, ctx, msg) + "\n")
 
 # -------------------------------------------------------------------------

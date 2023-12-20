@@ -171,7 +171,7 @@ class Task(QAbstractListModel):
 		Task.funcDstSuffix = func_dst_suffix
 
 	###########################################################################
-	# MEMBER FUNCTIONS
+	# PUBLIC MEMBER FUNCTIONS
 	###########################################################################
 
 	# -------------------------------------------------------------------------
@@ -212,7 +212,15 @@ class Task(QAbstractListModel):
 		self.statusChanged.emit(self.__id)
 
 	# -------------------------------------------------------------------------
-	def __suffixId(self)->str:
+	def checkIntegrity(self):
+		self.__files_selected.checkIntegrity()
+
+	###########################################################################
+	# PRIVATE MEMBER FUNCTIONS
+	###########################################################################
+
+	# -------------------------------------------------------------------------
+	def __suffixId(self) -> str:
 		# return "_id"
 	
 		last_id = self.__findLastSuffixId()
@@ -221,7 +229,7 @@ class Task(QAbstractListModel):
 		return suffix
 
 	# -------------------------------------------------------------------------
-	def __findLastSuffixId(self)->int:
+	def __findLastSuffixId(self) -> int:
 		regex = self.__dest_raw_basename + "_\d+." + self.__packer_data.extension()
 
 		last_id = -1
@@ -234,11 +242,11 @@ class Task(QAbstractListModel):
 		return last_id
 	
 	# -------------------------------------------------------------------------
-	def __suffixTimeStamp(self)->str:
+	def __suffixTimeStamp(self) -> str:
 		return date.today().strftime("%Y_%m_%d")
 	
 	# -------------------------------------------------------------------------
-	def __suffixNothing(self)->str:
+	def __suffixNothing(self) -> str:
 		return ""
 
 	# -------------------------------------------------------------------------
