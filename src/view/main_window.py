@@ -146,7 +146,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	
 	# -------------------------------------------------------------------------
 	def onOpen(self, s) -> None:
-		[filename, _] = QFileDialog.getOpenFileName(self, "Open session", "")
+		[filename, _] = QFileDialog.getOpenFileName(self, "Open session", "", "JSON (*.json)")
 		if filename:
 			with open(filename, "r") as file:
 				self.__session = json.load(file, cls=SessionDecoder)
