@@ -21,6 +21,7 @@ from model.session_encoder import SessionEncoder
 from model.session_decoder import SessionDecoder
 from view.about import About
 from view.options import Options
+from view.fix_warnings import FixWarnings
 from view.ui_main_window import Ui_MainWindow
 
 ###############################################################################
@@ -432,6 +433,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	# -------------------------------------------------------------------------
 	def checkIntegrity(self):
 		self.__selected_task.checkIntegrity()
+
+		dlg = FixWarnings(self.__selected_task.warnings(), self)
+		dlg.exec()
 	
 	# -------------------------------------------------------------------------
 	def selectSourceFolder(self):

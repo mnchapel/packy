@@ -131,6 +131,10 @@ class Task(QAbstractListModel):
 	# -------------------------------------------------------------------------
 	def isChecked(self) -> Qt.CheckState:
 		return self.__checked
+	
+	# -------------------------------------------------------------------------
+	def warnings(self):
+		return self.__files_selected.warnings()
 
 	###########################################################################
 	# SETTERS

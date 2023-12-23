@@ -4,20 +4,32 @@ author: Marie-Neige Chapel
 
 # Python
 import os
+from enum import Enum
 
 # PyQt
 from PyQt6 import QtCore
 from PyQt6.QtCore import Qt, QModelIndex, QDir
 from PyQt6.QtGui import QFileSystemModel
 
+# PackY
+from model.warnings import Warnings
+
+###############################################################################
+class FilesModelSerialKeys(Enum):
+	ROOT_PATH = "root_path"
+	CHECK = "check"
+
 ###############################################################################
 class FilesModel(QFileSystemModel):
 
 	###########################################################################
-	# MEMBER VARIABLES
+	# PRIVATE MEMBER VARIABLES
 	#
-	# * __check_state_items: a dict . If an item is not in the dict, its value is
-	#   Qt.CheckState.Unchecked.value by default.
+	# * __check_state_items: a dict with the check state for files and
+	#                        directories. If an item is not in the dict,
+	#                        its value is Qt.CheckState.Unchecked.value by
+	#                        default.
+	# - __warnings: an object which contains 
 	###########################################################################
 
 	# -------------------------------------------------------------------------
@@ -33,6 +45,10 @@ class FilesModel(QFileSystemModel):
 	# -------------------------------------------------------------------------
 	def checks(self):
 		return self.__check_state_items
+	
+	# -------------------------------------------------------------------------
+	def warnings(self):
+		return self.__warnings
 
 	###########################################################################
 	# PUBLIC MEMBER FUNCTIONS
@@ -78,7 +94,8 @@ class FilesModel(QFileSystemModel):
 			for name in files:
 				item = os.path.join(root, name).replace("\\","/")
 				if item not in self.__check_state_items:
-					print(f"[FilesModel][checkIntegrity] the item {item} has been added.")
+					self.__warnings.addAddedItem(item)
+					# print(f"[FilesModel][checkIntegrity] the item {item} has been added.")
 			# for name in dirs:
 			# 	item = os.path.join(root, name)
 			# 	print(f"[FilesModel][checkIntegrity] the dir {item}")
@@ -89,25 +106,23 @@ class FilesModel(QFileSystemModel):
 	def serialize(self):
 		dict = {}
 
-		dict["root_path"] = self.rootPath()
-		dict["check"] = self.__checksToStr()
+		dict[FilesModelSerialKeys.ROOT_PATH.value] = self.rootPath()
+		dict[FilesModelSerialKeys.CHECK.value] = self.__checksToStr()
 
 		return dict
 
 	# -------------------------------------------------------------------------
 	def checkIntegrity(self):
-		print("[FilesModel][checkIntegrity] starts")
 		for item in self.__check_state_items:
 			if self.__isItemChecked(item):
 				# Removed item?
 				if not self.__doesExists(item):
-					print(f"[FilesModel][checkIntegrity] the item {item} doesn't exist anymore.")
+					self.__warnings.addRemovedItem(item)
 				# Added item?
 				elif os.path.isdir(item):
 					self.listNewItems(item)
-				elif item in self.__added_items:
-					print(f"[FilesModel][checkIntegrity] the item {item} has been checked automatically.")
-		print("[FilesModel][checkIntegrity] ends")
+				elif self.__warnings.isInAddedCandidateItems(item):
+					self.__warnings.addAddedItem(item)
 
 	###########################################################################
 	# PRIVATE MEMBER FUNCTIONS
@@ -116,7 +131,7 @@ class FilesModel(QFileSystemModel):
 	# -------------------------------------------------------------------------
 	def __init(self, json_dict: dict):
 
-		self.__added_items = []
+		self.__warnings = Warnings()
 
 		if json_dict is None:
 			self.__defaultInit()
@@ -137,8 +152,8 @@ class FilesModel(QFileSystemModel):
 	
 	# -------------------------------------------------------------------------
 	def __jsonInit(self, json_dict: dict):
-		self.setRootPath(json_dict["root_path"])
-		self.__check_state_items = json_dict["check"]
+		self.setRootPath(json_dict[FilesModelSerialKeys.ROOT_PATH.value])
+		self.__check_state_items = json_dict[FilesModelSerialKeys.CHECK.value]
 		
 		self.checkIntegrity()			
 	
@@ -162,20 +177,24 @@ class FilesModel(QFileSystemModel):
 	# -------------------------------------------------------------------------
 	def __propagateCheckToParents(self, index: QModelIndex):
 		index_parent = index.parent()
-		if index_parent != QModelIndex():
-			
-			all_siblings_checked = True
-			for i in range(self.rowCount(index_parent)):
-				index_sibling = self.index(i, 0, index_parent)
-				if self.__checkState(index_sibling) != Qt.CheckState.Checked.value:
-					all_siblings_checked = False
-			
-			if all_siblings_checked:
-				self.__updateCheckState(index_parent, Qt.CheckState.Checked)
-				self.__propagateCheckToParents(index_parent)
-			elif self.__checkState(index_parent) == Qt.CheckState.Unchecked.value:
-				self.__updateCheckState(index_parent, Qt.CheckState.PartiallyChecked)
-				self.__propagateCheckToParents(index_parent)
+
+		if index_parent == QModelIndex():
+			return
+		if self.filePath(index_parent) == self.rootPath():
+			return
+
+		all_siblings_checked = True
+		for i in range(self.rowCount(index_parent)):
+			index_sibling = self.index(i, 0, index_parent)
+			if self.__checkState(index_sibling) != Qt.CheckState.Checked.value:
+				all_siblings_checked = False
+		
+		if all_siblings_checked:
+			self.__updateCheckState(index_parent, Qt.CheckState.Checked)
+			self.__propagateCheckToParents(index_parent)
+		elif self.__checkState(index_parent) == Qt.CheckState.Unchecked.value:
+			self.__updateCheckState(index_parent, Qt.CheckState.PartiallyChecked)
+			self.__propagateCheckToParents(index_parent)
 	
 	# -------------------------------------------------------------------------
 	def __propagateUncheckToParents(self, index: QModelIndex) -> None:
@@ -253,14 +272,10 @@ class FilesModel(QFileSystemModel):
 			return True
 		
 		return False
-	
-	# PRIVATE SLOTS
 
 	# -------------------------------------------------------------------------
 	def __checkIfAddedItems(self, parent: QModelIndex, first: int, last: int):
 		for i in range(first, last + 1):
 			child = self.index(i, 0, parent)
 			if self.__isItemUnchecked(child):
-				print(f"[__checkIfAddedItems] the item {self.filePath(child)} is new for the model.")
-				self.__added_items.append(self.filePath(child))
-			# print(f"[__checkIfAddedItems] new item {self.filePath(child)} and is checked? {self.__isItemChecked(child)}")
+				self.__warnings.addCandidateAddedItem(self.filePath(child))
