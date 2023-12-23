@@ -59,3 +59,9 @@ class Warnings():
 			return True
 		
 		return False
+	
+	# -------------------------------------------------------------------------
+	def clear(self):
+		self.__added_item_candidates.clear()
+		self.__added_items.clear()
+		self.__removed_items.clear()

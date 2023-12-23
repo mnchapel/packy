@@ -89,6 +89,14 @@ class FilesModel(QFileSystemModel):
 		return QFileSystemModel.flags(self, index) | Qt.ItemFlag.ItemIsUserCheckable
 	
 	# -------------------------------------------------------------------------
+	# @override
+	def setRootPath(self, path: str) -> QModelIndex:
+		self.__check_state_items.clear()
+		self.__warnings.clear()
+
+		return QFileSystemModel.setRootPath(self, path)
+	
+	# -------------------------------------------------------------------------
 	def listNewItems(self, dir_path: str):
 		for root, dirs, files in os.walk(dir_path):
 			for name in files:
@@ -131,31 +139,30 @@ class FilesModel(QFileSystemModel):
 	# -------------------------------------------------------------------------
 	def __init(self, json_dict: dict):
 
-		self.__warnings = Warnings()
+		self.__defaultInit()
 
-		if json_dict is None:
-			self.__defaultInit()
-		else:
+		if json_dict is not None:
 			self.__jsonInit(json_dict)
 
 		self.__initFilter()
 		self.rowsInserted.connect(self.__checkIfAddedItems)
 
 	# -------------------------------------------------------------------------
-	def __initFilter(self):
-		filter = self.filter()
-		self.setFilter(filter | QDir.Filter.Hidden)
-
-	# -------------------------------------------------------------------------
 	def __defaultInit(self):
 		self.__check_state_items = {}
+		self.__warnings = Warnings()
 	
 	# -------------------------------------------------------------------------
 	def __jsonInit(self, json_dict: dict):
 		self.setRootPath(json_dict[FilesModelSerialKeys.ROOT_PATH.value])
 		self.__check_state_items = json_dict[FilesModelSerialKeys.CHECK.value]
 		
-		self.checkIntegrity()			
+		self.checkIntegrity()
+
+	# -------------------------------------------------------------------------
+	def __initFilter(self):
+		filter = self.filter()
+		self.setFilter(filter | QDir.Filter.Hidden)	
 	
 	# -------------------------------------------------------------------------
 	def __updateChildFiles(self, index: QModelIndex, value, role: Qt.ItemDataRole):
