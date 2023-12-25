@@ -29,7 +29,8 @@ class FilesModel(QFileSystemModel):
 	#                      directories. If an item is not in the dict,
 	#                      its value is Qt.CheckState.Unchecked.value by
 	#                      default.
-	# __warnings: an object which contains 
+	# __warnings: an object which contains the modifications (added/removed
+	#             items) between the model and the current selection.
 	###########################################################################
 
 	# -------------------------------------------------------------------------
