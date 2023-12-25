@@ -25,11 +25,11 @@ class FilesModel(QFileSystemModel):
 	###########################################################################
 	# PRIVATE MEMBER VARIABLES
 	#
-	# * __check_state_items: a dict with the check state for files and
-	#                        directories. If an item is not in the dict,
-	#                        its value is Qt.CheckState.Unchecked.value by
-	#                        default.
-	# - __warnings: an object which contains 
+	# __check_state_items: a dict with the check state for files and
+	#                      directories. If an item is not in the dict,
+	#                      its value is Qt.CheckState.Unchecked.value by
+	#                      default.
+	# __warnings: an object which contains 
 	###########################################################################
 
 	# -------------------------------------------------------------------------
@@ -131,6 +131,18 @@ class FilesModel(QFileSystemModel):
 					self.listNewItems(item)
 				elif self.__warnings.isInAddedCandidateItems(item):
 					self.__warnings.addAddedItem(item)
+	
+	# -------------------------------------------------------------------------
+	def updateModel(self):
+		removed_items = self.__warnings.removedItems()
+		for item in removed_items:
+			del self.__check_state_items[item]
+
+		added_items = self.__warnings.addedItems()
+		for item in added_items:
+			self.__check_state_items[item] = Qt.CheckState.Checked.value
+		
+		self.__warnings.clear()
 
 	###########################################################################
 	# PRIVATE MEMBER FUNCTIONS

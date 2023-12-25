@@ -434,7 +434,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	def checkIntegrity(self):
 		self.__selected_task.checkIntegrity()
 
-		dlg = FixWarnings(self.__selected_task.warnings(), self)
+		dlg = FixWarnings(self.__selected_task.filesSelected(), self)
 		dlg.exec()
 	
 	# -------------------------------------------------------------------------
