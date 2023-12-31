@@ -158,9 +158,5 @@ def loadExpected(tmp_path, request):
 # -------------------------------------------------------------------------
 @pytest.mark.parametrize("test_name", ["test1", "test2"])
 def testCheckIntegrity(createFileHierarchy, computeWarnings, loadExpected, test_name):
-	createFileHierarchy
-	warnings = computeWarnings
-	expected = loadExpected
-
-	assert warnings == expected
+	assert computeWarnings == loadExpected
 	
