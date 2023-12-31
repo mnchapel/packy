@@ -3,7 +3,9 @@ author: Marie-Neige Chapel
 """
 
 # Python
+import json
 import os
+import pathlib
 import pytest
 
 # PyQt
@@ -11,6 +13,7 @@ from PyQt6.QtCore import Qt
 
 # PackY
 from model.files_model import FilesModel
+from model.warnings import Warnings
 
 # ------------------------------
 # tmp_path
@@ -21,7 +24,7 @@ from model.files_model import FilesModel
 # │  ├─ file_3.txt
 # │  └─ file_4.txt
 # └─ dir_3
-#    ├─ dir_4.txt
+#    ├─ dir_4
 #    │  └─ file_5.txt
 #    ├─ file_6.txt
 #    └─ file_7.txt
@@ -95,7 +98,17 @@ def testJsonInit2(tmp_path):
 # TEST CHECK INTEGRITY
 ###############################################################################
 
+# -------------------------------------------------------------------------
+# test1: test check integrity with no warnings
+# -------------------------------------------------------------------------
+# test2: test check integrity with warnings
+#
+# expected_added_items = ["tmp_path/dir_1/file_2.txt"]
+# expected_removed_items = ["tmp_path/dir_4/", "tmp_path/dir_4/file_7.txt""]
+# -------------------------------------------------------------------------
+
 # -----------------------------------------------------------------------------
+@pytest.fixture
 def createFileHierarchy(tmp_path):
 	for dir_path in DIR_PATHS:
 		os.makedirs(joinPath(tmp_path, dir_path))
@@ -104,98 +117,50 @@ def createFileHierarchy(tmp_path):
 		open(joinPath(tmp_path, file_path), "w").close()
 
 # -----------------------------------------------------------------------------
-def createJsonDict1(tmp_path) -> str:
-	# ------------------------------
-	# tmp_path
-	# ├─ dir_1            checked
-	# │  ├─ file_1.txt    checked
-	# │  └─ file_2.txt    checked
-	# ├─ dir_2            partially cheked
-	# │  ├─ file_3.txt    checked
-	# │  └─ file_4.txt    unchecked
-	# └─ dir_3            unchecked
-	#    ├─ file_5.txt    unchecked
-	#    └─ file_6.txt    unchecked
-	# ------------------------------
-
+@pytest.fixture
+def computeWarnings(tmp_path, request) -> str:
 	json_dict = {}
 	json_dict["root_path"] = str(tmp_path)
-	check_dict = {}
-	check_dict[joinPath(tmp_path, DIR_1)] = CHECKED
-	check_dict[joinPath(tmp_path, FILE_1)] = CHECKED
-	check_dict[joinPath(tmp_path, FILE_2)] = CHECKED
-	check_dict[joinPath(tmp_path, DIR_2)] = PARTIALLY_CHECKED
-	check_dict[joinPath(tmp_path, FILE_3)] = CHECKED
-	json_dict["check"] = check_dict
+	
+	file = pathlib.Path(request.config.rootdir, "tests", "test_files_model").with_suffix(".json")
+	data = json.loads(file.read_text())
+	test_name = request.getfixturevalue("test_name")
+	data_check = data[test_name]["data"]["check"]
+	new_data_check = {}
 
-	return json_dict
-
-# -----------------------------------------------------------------------------
-def createJsonDict2(tmp_path) -> str:
-	# ------------------------------
-	# tmp_path
-	# ├─ dir_1            checked
-	# │  └─ file_1.txt    checked
-	# ├─ dir_2            partially cheked
-	# │  ├─ file_3.txt    checked
-	# │  └─ file_4.txt    unchecked
-	# ├─ dir_3            unchecked
-	# │  └─ file_5.txt    unchecked
-	# └─ dir_4            checked
-	# │  └─ file_7.txt    checked
-	# ------------------------------
-
-	json_dict = {}
-	json_dict["root_path"] = str(tmp_path)
-	check_dict = {}
-	check_dict[joinPath(tmp_path, DIR_1)] = CHECKED
-	check_dict[joinPath(tmp_path, FILE_1)] = CHECKED
-	check_dict[joinPath(tmp_path, DIR_2)] = PARTIALLY_CHECKED
-	check_dict[joinPath(tmp_path, FILE_3)] = CHECKED
-	check_dict[joinPath(tmp_path, "dir_5/")] = CHECKED
-	check_dict[joinPath(tmp_path, "dir_5/file_8.txt")] = CHECKED
-	json_dict["check"] = check_dict
-
-	return json_dict
-		
-# -------------------------------------------------------------------------
-# Test check integrity with no warnings
-# -------------------------------------------------------------------------
-def testCheckIntegrity1(tmp_path):
-	createFileHierarchy(tmp_path)
-	json_dict = createJsonDict1(tmp_path)
+	for key in data_check:
+		new_key = joinPath(tmp_path, key)
+		new_data_check[new_key] = data_check[key]
+	
+	json_dict["check"] = new_data_check
 
 	files_model = FilesModel(json_dict)
 	warnings = files_model.warnings()
 
-	added_items = warnings.addedItems()
-	removed_items = warnings.removedItems()
+	yield warnings
 
-	expected_added_items = []
-	expected_removed_items = []
-
-	assert added_items == expected_added_items
-	assert removed_items == expected_removed_items
-		
 # -------------------------------------------------------------------------
-# Test check integrity with warnings
-#
-# expected_added_items = ["tmp_path/dir_1/file_2.txt"]
-# expected_removed_items = ["tmp_path/dir_4/", "tmp_path/dir_4/file_7.txt""]
+@pytest.fixture
+def loadExpected(tmp_path, request):
+	file = pathlib.Path(request.config.rootdir, "tests", "test_files_model").with_suffix(".json")
+	data = json.loads(file.read_text())
+	test_name = request.getfixturevalue("test_name")
+	warnings_data = data[test_name]["expected"]
+
+	expected_warnings = Warnings()
+	for item in warnings_data["added_items"]:
+		expected_warnings.addAddedItem(joinPath(tmp_path, item))
+	for item in warnings_data["removed_items"]:
+		expected_warnings.addRemovedItem(joinPath(tmp_path, item))
+
+	yield expected_warnings
+
 # -------------------------------------------------------------------------
-def testCheckIntegrity2(tmp_path):
-	createFileHierarchy(tmp_path)
-	json_dict = createJsonDict2(tmp_path)
+@pytest.mark.parametrize("test_name", ["test1", "test2"])
+def testCheckIntegrity(createFileHierarchy, computeWarnings, loadExpected, test_name):
+	createFileHierarchy
+	warnings = computeWarnings
+	expected = loadExpected
 
-	files_model = FilesModel(json_dict)
-	warnings = files_model.warnings()
-
-	added_items = warnings.addedItems()
-	removed_items = warnings.removedItems()
-
-	expected_added_items = [joinPath(tmp_path, FILE_2)]
-	expected_removed_items = [joinPath(tmp_path, "dir_5/"),
-						   joinPath(tmp_path, "dir_5/file_8.txt")]
-
-	assert added_items == expected_added_items
-	assert removed_items == expected_removed_items
+	assert warnings == expected
+	

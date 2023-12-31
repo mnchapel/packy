@@ -3,6 +3,9 @@ author: Marie-Neige Chapel
 """
 
 ###############################################################################
+from operator import le
+
+
 class Warnings():
 
 	###########################################################################
@@ -18,6 +21,17 @@ class Warnings():
 		self.__added_item_candidates = []
 		self.__added_items = []
 		self.__removed_items = []
+
+	# -------------------------------------------------------------------------
+	def __repr__(self):
+			repr_added_items = {str(item) for item in self.__added_items}
+			repr_removed_items = {str(item) for item in self.__removed_items}
+			return f"warnings: added_items = [{repr_added_items}], removed_items = [{repr_removed_items}]"
+	
+	# -------------------------------------------------------------------------
+	def __eq__(self, other):
+		return self.__added_items == other.__added_items and \
+		self.__removed_items == other.__removed_items
 
 	###########################################################################
 	# GETTERS

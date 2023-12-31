@@ -33,11 +33,19 @@ class FilesModel(QFileSystemModel):
 	#             items) between the model and the current selection.
 	###########################################################################
 
+	###########################################################################
+	# SPECIAL METHODS
+	###########################################################################
+
 	# -------------------------------------------------------------------------
 	def __init__(self, json_dict: dict = None, parent=None):
 		super(FilesModel, self).__init__()
 
 		self.__init(json_dict)
+
+	# -------------------------------------------------------------------------
+	def __repr__(self) -> str:
+		return f"files_model: root_path = {self.rootPath()}, check = {self.__checksToStr()}"
 
 	###########################################################################
 	# GETTERS
@@ -169,7 +177,6 @@ class FilesModel(QFileSystemModel):
 	def __jsonInit(self, json_dict: dict):
 		self.setRootPath(json_dict[FilesModelSerialKeys.ROOT_PATH.value])
 		self.__check_state_items = json_dict[FilesModelSerialKeys.CHECK.value]
-		
 		self.checkIntegrity()
 
 	# -------------------------------------------------------------------------
