@@ -1,0 +1,25 @@
+{
+	"test1":{
+		"data":{
+			"root_path": "tmp_path",
+			"check":{
+				"dir_1/": 2,
+				"dir_1/file_1.txt": 2,
+				"dir_1/file_2.txt": 2,
+				"dir_2/": 1,
+				"dir_2/file_3.txt": 2
+			}
+		},
+		"expected":{
+			"added_items": [],
+			"removed_items": []
+		}
+	},
+	"test2":{
+		"data":{
+		},
+		"expected":{
+			"assert": "KeyError"
+		}
+	}
+}
