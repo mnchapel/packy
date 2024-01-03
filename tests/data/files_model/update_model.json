@@ -1,0 +1,70 @@
+{
+	"test1":{
+		"data":{
+			"root_path": "tmp_path",
+			"check":{
+				"tmp_path/dir_1": 2,
+				"tmp_path/dir_1/file_1.txt": 2,
+				"tmp_path/dir_2": 1,
+				"tmp_path/dir_2/file_3.txt": 2
+			}
+		},
+		"expected":{
+			"root_path": "tmp_path",
+			"check":{
+				"tmp_path/dir_1": 2,
+				"tmp_path/dir_1/file_1.txt": 2,
+				"tmp_path/dir_1/file_2.txt": 2,
+				"tmp_path/dir_2": 1,
+				"tmp_path/dir_2/file_3.txt": 2
+			}
+		}
+	},
+	"test2":{
+		"data":{
+			"root_path": "tmp_path",
+			"check":{
+				"tmp_path/dir_1/": 2,
+				"tmp_path/dir_1/file_1.txt": 2,
+				"tmp_path/dir_1/file_2.txt": 2,
+				"tmp_path/dir_2/": 1,
+				"tmp_path/dir_2/file_3.txt": 2,
+				"tmp_path/dir_5": 2,
+				"tmp_path/dir_5/file_8.txt": 2
+			}
+		},
+		"expected":{
+			"root_path": "tmp_path",
+			"check":{
+				"tmp_path/dir_1/": 2,
+				"tmp_path/dir_1/file_1.txt": 2,
+				"tmp_path/dir_1/file_2.txt": 2,
+				"tmp_path/dir_2/": 1,
+				"tmp_path/dir_2/file_3.txt": 2
+			}
+		}
+	},
+	"test3":{
+		"data":{
+			"root_path": "tmp_path",
+			"check":{
+				"tmp_path/dir_1/": 2,
+				"tmp_path/dir_1/file_1.txt": 2,
+				"tmp_path/dir_2/": 1,
+				"tmp_path/dir_2/file_3.txt": 2,
+				"tmp_path/dir_5": 2,
+				"tmp_path/dir_5/file_8.txt": 2
+			}
+		},
+		"expected":{
+			"root_path": "tmp_path",
+			"check":{
+				"tmp_path/dir_1/": 2,
+				"tmp_path/dir_1/file_1.txt": 2,
+				"tmp_path/dir_1/file_2.txt": 2,
+				"tmp_path/dir_2/": 1,
+				"tmp_path/dir_2/file_3.txt": 2
+			}
+		}
+	}
+}

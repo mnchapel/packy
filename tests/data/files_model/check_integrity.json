@@ -1,12 +1,13 @@
 {
 	"test1":{
 		"data":{
+			"root_path": "tmp_path",
 			"check":{
-				"dir_1/": 2,
-				"dir_1/file_1.txt": 2,
-				"dir_1/file_2.txt": 2,
-				"dir_2/": 1,
-				"dir_2/file_3.txt": 2
+				"tmp_path/dir_1/": 2,
+				"tmp_path/dir_1/file_1.txt": 2,
+				"tmp_path/dir_1/file_2.txt": 2,
+				"tmp_path/dir_2/": 1,
+				"tmp_path/dir_2/file_3.txt": 2
 			}
 		},
 		"expected":{
@@ -16,18 +17,19 @@
 	},
 	"test2":{
 		"data":{
+			"root_path": "tmp_path",
 			"check":{
-				"dir_1/": 2,
-				"dir_1/file_1.txt": 2,
-				"dir_2/": 1,
-				"dir_2/file_3.txt": 2,
-				"dir_5": 2,
-				"dir_5/file_8.txt": 2
+				"tmp_path/dir_1/": 2,
+				"tmp_path/dir_1/file_1.txt": 2,
+				"tmp_path/dir_2/": 1,
+				"tmp_path/dir_2/file_3.txt": 2,
+				"tmp_path/dir_5": 2,
+				"tmp_path/dir_5/file_8.txt": 2
 			}
 		},
 		"expected":{
-			"added_items": ["dir_1/file_2.txt"],
-			"removed_items": ["dir_5", "dir_5/file_8.txt"]
+			"added_items": ["tmp_path/dir_1/file_2.txt"],
+			"removed_items": ["tmp_path/dir_5", "tmp_path/dir_5/file_8.txt"]
 		}
 	}
 }

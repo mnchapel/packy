@@ -45,7 +45,12 @@ class FilesModel(QFileSystemModel):
 
 	# -------------------------------------------------------------------------
 	def __repr__(self) -> str:
-		return f"files_model: root_path = {self.rootPath()}, check = {self.__checksToStr()}"
+		return f"files_model: root_path = {self.rootPath()}, check = {{{self.__checksToStr()}}}"
+	
+	# -------------------------------------------------------------------------
+	def __eq__(self, other):
+		return self.rootPath() == other.rootPath() and \
+		self.__check_state_items == other.__check_state_items
 
 	###########################################################################
 	# GETTERS
