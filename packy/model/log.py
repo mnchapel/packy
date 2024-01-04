@@ -34,16 +34,16 @@ def msgTypeToStr(type: QtMsgType):
 			raise Exception("[msgTypeToStr] Message type not recognized.")
 
 # -------------------------------------------------------------------------
-def styleSheet(type: QtMsgType) -> str:
+def htmlFontColor(type: QtMsgType) -> str:
 	match type:
 		case QtMsgType.QtInfoMsg:
-			return "QPlainTextEdit {color: black}"
+			return "<font color=\"black\">"
 		case QtMsgType.QtWarningMsg:
-			return "QPlainTextEdit {color: yellow}"
+			return "<font color=\"yellow\">"
 		case QtMsgType.QtCriticalMsg:
-			return "QPlainTextEdit {color: red}"
+			return "<font color=\"red\">"
 		case _:
-			raise Exception("[styleSheet] Message type not recognized.")
+			raise Exception("[htmlFontColor] Message type not recognized.")
 
 # -------------------------------------------------------------------------
 def fileLogFormat(type: QtMsgType, ctx: QMessageLogContext, msg: str):
@@ -63,8 +63,9 @@ def writeLogInFile(type: QtMsgType, ctx: QMessageLogContext, msg: str) -> None:
 # -------------------------------------------------------------------------
 def printLogInGUI(type: QtMsgType, ctx: QMessageLogContext, msg: str) -> None:
 	if hasattr(MainWindow, "log_panel"):
-		MainWindow.log_panel.setStyleSheet(styleSheet(type))
-		MainWindow.log_panel.appendPlainText(guiLogFormat(type, ctx, msg))
+		html_font_color: str = htmlFontColor(type)
+		html: str = html_font_color + guiLogFormat(type, ctx, msg) + "</font>"
+		MainWindow.log_panel.appendHtml(html)
 
 # -------------------------------------------------------------------------
 def messageHandler(type: QtMsgType, ctx: QMessageLogContext, msg: str) -> None:
