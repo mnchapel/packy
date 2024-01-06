@@ -4,6 +4,7 @@ author: Marie-Neige Chapel
 
 # Python
 import json
+import os
 from enum import Enum
 
 #PyQt
@@ -34,7 +35,9 @@ class PackerData(QAbstractListModel):
 
 	# -------------------------------------------------------------------------
 	def loadPackerInfo(self):
-		with open("../resources/packer_info.json", "r") as file:
+		current_dir = os.path.dirname(__file__)
+		file_path = os.path.join(current_dir, "../../resources/packer_info.json")
+		with open(file_path, "r") as file:
 			self.__info = json.load(file)
 
 	# -------------------------------------------------------------------------
