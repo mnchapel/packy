@@ -117,7 +117,6 @@ class FilesModel(QFileSystemModel):
 				item = os.path.join(root, name).replace("\\","/")
 				if item not in self.__check_state_items:
 					self.__warnings.addAddedItem(item)
-					# print(f"[FilesModel][checkIntegrity] the item {item} has been added.")
 			# for name in dirs:
 			# 	item = os.path.join(root, name)
 			# 	print(f"[FilesModel][checkIntegrity] the dir {item}")

@@ -63,7 +63,6 @@ class Task(QAbstractListModel):
 			suffix_value = settings.value(PreferencesKeys.TASK_SUFFIX.value, type = int)
 			self.updateDestSuffix(PreferencesTask(suffix_value))
 			
-
 	# -------------------------------------------------------------------------
 	def defaultInitialization(self) -> None:
 		qt_folder_location = QStandardPaths.StandardLocation.DownloadLocation
@@ -119,6 +118,10 @@ class Task(QAbstractListModel):
 		dst_suffix = Task.funcDstSuffix(self)
 		extension = self.__packer_data.extension()
 		return self.__dest_raw_basename + dst_suffix + "." + extension
+	
+	# -------------------------------------------------------------------------
+	def destExtension(self) -> str:
+		return self.__packer_data.extension()
 	
 	# -------------------------------------------------------------------------
 	def filesSelected(self):
@@ -225,8 +228,6 @@ class Task(QAbstractListModel):
 
 	# -------------------------------------------------------------------------
 	def __suffixId(self) -> str:
-		# return "_id"
-	
 		last_id = self.__findLastSuffixId()
 		suffix = "_" + str(last_id + 1)
 
