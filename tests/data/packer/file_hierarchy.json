@@ -1,0 +1,32 @@
+{
+	"root":[
+		{
+			"type": "folder",
+			"path": "tmp_path/results"
+		},
+		{
+			"type": "folder",
+			"path": "tmp_path/folder",
+			"children":[
+				{
+					"type": "file",
+					"path": "tmp_path/folder/file1.txt"
+				},
+				{
+					"type": "folder",
+					"path": "tmp_path/folder/dir1",
+					"children": [
+						{
+							"type": "file",
+							"path": "tmp_path/folder/dir1/file2.txt"
+						},
+						{
+							"type": "file",
+							"path": "tmp_path/folder/dir1/file3.txt"
+						}
+					]
+				}
+			]
+		}
+	]
+}

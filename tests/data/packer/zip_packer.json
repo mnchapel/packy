@@ -1,0 +1,71 @@
+{
+	"test_pack_file1":{
+		"data":{
+			"id": 0,
+			"checked": 2,
+			"files_model": {
+				"root_path": "tmp_path/folder",
+				"check": {
+					"tmp_path/folder/file1.txt": 2
+				}
+			},
+			"packer_data": {
+				"type": 0,
+				"compression_method": 1,
+				"compression_level": 0
+			},
+			"dst_raw_basename": "output",
+			"dst_folder": "tmp_path/results"
+		},
+		"expected":{
+			"dst_folder": "tmp_path/results",
+			"dst_raw_basename": "output"
+		}
+	},
+	"test_pack_file2":{
+		"data":{
+			"id": 0,
+			"checked": 2,
+			"files_model": {
+				"root_path": "tmp_path/folder",
+				"check": {
+					"tmp_path/folder/dir1/file2.txt": 2
+				}
+			},
+			"packer_data": {
+				"type": 0,
+				"compression_method": 1,
+				"compression_level": 0
+			},
+			"dst_raw_basename": "output",
+			"dst_folder": "tmp_path/results"
+		},
+		"expected":{
+			"dst_folder": "tmp_path/results",
+			"dst_raw_basename": "output"
+		}
+	},
+	"test_pack_folder1":{
+		"data":{
+			"id": 0,
+			"checked": 2,
+			"files_model": {
+				"root_path": "tmp_path/folder",
+				"check": {
+					"tmp_path/folder/dir1": 2
+				}
+			},
+			"packer_data": {
+				"type": 0,
+				"compression_method": 1,
+				"compression_level": 0
+			},
+			"dst_raw_basename": "output",
+			"dst_folder": "tmp_path/results"
+		},
+		"expected":{
+			"dst_folder": "tmp_path/results",
+			"dst_raw_basename": "output"
+		}
+	}
+}
