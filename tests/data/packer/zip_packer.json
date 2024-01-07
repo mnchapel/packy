@@ -1,12 +1,12 @@
 {
-	"test_pack_file1":{
+	"test_pack_file_1":{
 		"data":{
 			"id": 0,
 			"checked": 2,
 			"files_model": {
 				"root_path": "tmp_path/folder",
 				"check": {
-					"tmp_path/folder/file1.txt": 2
+					"tmp_path/folder/file_1.txt": 2
 				}
 			},
 			"packer_data": {
@@ -22,14 +22,14 @@
 			"dst_raw_basename": "output"
 		}
 	},
-	"test_pack_file2":{
+	"test_pack_file_2":{
 		"data":{
 			"id": 0,
 			"checked": 2,
 			"files_model": {
 				"root_path": "tmp_path/folder",
 				"check": {
-					"tmp_path/folder/dir1/file2.txt": 2
+					"tmp_path/folder/dir_1/file_2.txt": 2
 				}
 			},
 			"packer_data": {
@@ -45,14 +45,14 @@
 			"dst_raw_basename": "output"
 		}
 	},
-	"test_pack_folder1":{
+	"test_pack_folder_1":{
 		"data":{
 			"id": 0,
 			"checked": 2,
 			"files_model": {
 				"root_path": "tmp_path/folder",
 				"check": {
-					"tmp_path/folder/dir1": 2
+					"tmp_path/folder/dir_1": 2
 				}
 			},
 			"packer_data": {

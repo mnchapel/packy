@@ -99,14 +99,34 @@ def createFileHierarchy(loadFileHierarchy):
 # TEST ZIP PACKER
 #
 # -----------------------------------------------------------------------------
-# testPackFile
+# test_pack_file_1
 # -----------------------------------------------------------------------------
 #
 # Description:
-#		TODO
+#		Pack a file at the root.
 #
 # Expected:
-#		TODO
+#		tmp_path/output_<snapshot_retention_options>.zip
+#
+# -----------------------------------------------------------------------------
+# test_pack_file_2
+# -----------------------------------------------------------------------------
+#
+# Description:
+#		Pack a file inside a folder.
+#
+# Expected:
+#		tmp_path/output_<snapshot_retention_options>.zip
+#
+# -----------------------------------------------------------------------------
+# test_pack_folder_1
+# -----------------------------------------------------------------------------
+#
+# Description:
+#		Pack a folder and the files inside.
+#
+# Expected:
+#		tmp_path/output_<snapshot_retention_options>.zip
 #
 ###############################################################################
 class TestZipPacker():
@@ -142,7 +162,7 @@ class TestZipPacker():
 			yield ""
 
 	# -------------------------------------------------------------------------
-	@pytest.mark.parametrize("test_name", ["test_pack_file1", "test_pack_file2", "test_pack_folder1"])
+	@pytest.mark.parametrize("test_name", ["test_pack_file_1", "test_pack_file_2", "test_pack_folder_1"])
 	def testPackFile(self, createFileHierarchy, runZipPacker, outputPath, test_name):
 		output_path = outputPath
 

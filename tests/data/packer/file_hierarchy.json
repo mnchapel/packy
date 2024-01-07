@@ -10,19 +10,19 @@
 			"children":[
 				{
 					"type": "file",
-					"path": "tmp_path/folder/file1.txt"
+					"path": "tmp_path/folder/file_1.txt"
 				},
 				{
 					"type": "folder",
-					"path": "tmp_path/folder/dir1",
+					"path": "tmp_path/folder/dir_1",
 					"children": [
 						{
 							"type": "file",
-							"path": "tmp_path/folder/dir1/file2.txt"
+							"path": "tmp_path/folder/dir_1/file_2.txt"
 						},
 						{
 							"type": "file",
-							"path": "tmp_path/folder/dir1/file3.txt"
+							"path": "tmp_path/folder/dir_1/file_3.txt"
 						}
 					]
 				}
