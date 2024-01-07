@@ -9,14 +9,14 @@ import pathlib
 import pytest
 import re
 
-# PyQt
-from PyQt6.QtCore import Qt
-
 # PackY
 from model.files_model import FilesModel
 from model.warnings import Warnings
 
-# ------------------------------
+###############################################################################
+# FILE HIERARCHY
+# -----------------------------------------------------------------------------
+#
 # tmp_path
 # ├─ dir_1
 # │  ├─ file_1.txt
@@ -29,32 +29,12 @@ from model.warnings import Warnings
 #    │  └─ file_5.txt
 #    ├─ file_6.txt
 #    └─ file_7.txt
-# ------------------------------
+#
+###############################################################################
 
-DIR_1 = "dir_1/"
-FILE_1 = "dir_1/file_1.txt"
-FILE_2 = "dir_1/file_2.txt"
-DIR_2 = "dir_2/"
-FILE_3 = "dir_2/file_3.txt"
-FILE_4 = "dir_2/file_4.txt"
-DIR_3 = "dir_3/"
-DIR_4 = "dir_3/dir_4/"
-FILE_5 = "dir_3/dir_4/file_5.txt"
-FILE_6 = "dir_3/file_6.txt"
-FILE_7 = "dir_3/file_7.txt"
-
-DIR_PATHS = [DIR_1,
-			 DIR_2,
-			 DIR_3,
-			 DIR_4]
-
-FILE_PATHS = [FILE_1,
-			  FILE_2,
-			  FILE_3,
-			  FILE_4,
-			  FILE_5,
-			  FILE_6,
-			  FILE_7]
+###############################################################################
+# GLOBAL VARIABLES
+###############################################################################
 
 test_data_folder = pathlib.Path("tests", "data", "files_model")
 
@@ -69,7 +49,7 @@ def joinPath(path_1, path_2):
 # -----------------------------------------------------------------------------
 def camelCaseToSnakeCase(value: str) -> str:
 	print("camelCaseToSnakeCase, value = ", value)
-	return re.sub(r'(?<!^)(?=[A-Z])', '_', value).lower()
+	return re.sub(r"(?<!^)(?=[A-Z])", "_", value).lower()
 
 ###############################################################################
 # MODULE FIXTURE SCOPE
@@ -77,12 +57,14 @@ def camelCaseToSnakeCase(value: str) -> str:
 
 # -----------------------------------------------------------------------------
 @pytest.fixture
-def createFileHierarchy(tmp_path):
-	for dir_path in DIR_PATHS:
-		os.makedirs(joinPath(tmp_path, dir_path))
-	
-	for file_path in FILE_PATHS:
-		open(joinPath(tmp_path, file_path), "w").close()
+def loadFileHierarchy(request, tmp_path):
+	file = pathlib.Path(request.config.rootdir, test_data_folder, "file_hierarchy").with_suffix(".json")
+	file_txt = file.read_text()
+	a_tmp_path = str(tmp_path).replace("\\", "/")
+	file_txt = file_txt.replace("tmp_path", a_tmp_path)
+	data = json.loads(file_txt)
+
+	yield data
 
 # -----------------------------------------------------------------------------
 @pytest.fixture
@@ -95,6 +77,29 @@ def loadData(request, tmp_path):
 	data = json.loads(file_txt)
 
 	yield data
+
+# -----------------------------------------------------------------------------
+def recursive(fh_dict):
+	for node in fh_dict:
+		type = node["type"]
+
+		match type:
+			case "file":
+				open(node["path"], "w").close()
+			case "folder":
+				os.makedirs(node["path"])
+			case _:
+				raise Exception("")
+
+		if "children" in node:
+			recursive(node["children"])
+
+# -----------------------------------------------------------------------------
+@pytest.fixture
+def createFileHierarchy(loadFileHierarchy):
+	fh_dict = loadFileHierarchy
+
+	recursive(fh_dict["root"])
 
 ###############################################################################
 # TEST JSON INITIALIZATION
@@ -122,7 +127,7 @@ def loadData(request, tmp_path):
 ###############################################################################
 class TestJsonInit():
 		
-	# -----------------------------------------------------------------------------
+	# -------------------------------------------------------------------------
 	@pytest.fixture
 	def createJsonDict(self, loadData, request, tmp_path):
 		test_name = request.getfixturevalue("test_name")
@@ -130,13 +135,13 @@ class TestJsonInit():
 
 		yield data
 
-	# -----------------------------------------------------------------------------
+	# -------------------------------------------------------------------------
 	@pytest.mark.parametrize("test_name", ["test1"])
 	def test(self, test_name, createFileHierarchy, createJsonDict):
 		json_dict = createJsonDict
 		FilesModel(json_dict)
 	
-	# -----------------------------------------------------------------------------
+	# -------------------------------------------------------------------------
 	@pytest.mark.parametrize("test_name", ["test2"])
 	def testKeyError(self, test_name, createFileHierarchy, createJsonDict):
 		with pytest.raises(KeyError):
@@ -176,7 +181,7 @@ class TestJsonInit():
 ###############################################################################
 class TestCheckIntegrity():
 
-	# -----------------------------------------------------------------------------
+	# -------------------------------------------------------------------------
 	@pytest.fixture
 	def computeWarnings(self, loadData, tmp_path, request) -> str:		
 		test_name = request.getfixturevalue("test_name")
@@ -187,7 +192,7 @@ class TestCheckIntegrity():
 
 		yield warnings
 
-	# -----------------------------------------------------------------------------
+	# -------------------------------------------------------------------------
 	@pytest.fixture
 	def loadExpected(self, loadData, tmp_path, request):
 		test_name = request.getfixturevalue("test_name")
@@ -201,7 +206,7 @@ class TestCheckIntegrity():
 
 		yield expected_warnings
 
-	# -----------------------------------------------------------------------------
+	# -------------------------------------------------------------------------
 	@pytest.mark.parametrize("test_name", ["test1", "test2"])
 	def test(self, createFileHierarchy, computeWarnings, loadExpected, test_name):
 		assert computeWarnings == loadExpected
@@ -266,7 +271,7 @@ class TestCheckIntegrity():
 ###############################################################################
 class TestUpdateModel():
 
-	# -----------------------------------------------------------------------------
+	# -------------------------------------------------------------------------
 	@pytest.fixture
 	def computeFilesModel(self, loadData, tmp_path, request):
 		test_name = request.getfixturevalue("test_name")
@@ -277,7 +282,7 @@ class TestUpdateModel():
 
 		yield files_model
 
-	# -----------------------------------------------------------------------------
+	# -------------------------------------------------------------------------
 	@pytest.fixture
 	def loadExpected(self, loadData, tmp_path, request):
 		test_name = request.getfixturevalue("test_name")
