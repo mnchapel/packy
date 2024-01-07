@@ -6,7 +6,7 @@ author: Marie-Neige Chapel
 import json
 import os
 import pathlib
-from zipfile import is_zipfile
+from zipfile import is_zipfile, ZipFile
 import pytest
 import re
 
@@ -44,6 +44,12 @@ test_data_folder = pathlib.Path("tests", "data", "packer")
 # -----------------------------------------------------------------------------
 def camelCaseToSnakeCase(value: str) -> str:
 	return re.sub(r"(?<!^)(?=[A-Z])", "_", value).lower()
+
+# -----------------------------------------------------------------------------
+def existsInZip(zip, item) -> bool:
+
+
+	return False
 
 ###############################################################################
 # MODULE FIXTURE SCOPE
@@ -94,6 +100,21 @@ def createFileHierarchy(loadFileHierarchy):
 	fh_dict = loadFileHierarchy
 
 	recursive(fh_dict["root"])
+
+# -----------------------------------------------------------------------------
+@pytest.fixture
+def checkArchiveHierarchy(loadTestData, outputPath, test_name):
+	data = loadTestData[test_name]["expected"]
+	expected_hierarchy = data["archive_hierarchy"]
+
+	output_path = outputPath
+	zip = ZipFile(output_path)
+
+	output_name = os.path.basename(output_path)
+	output_name = output_name.rsplit(".", 1)[0]
+	expected_hierarchy = [output_name + "/" + item for item in expected_hierarchy]
+
+	assert zip.namelist() == expected_hierarchy
 
 ###############################################################################
 # TEST ZIP PACKER
@@ -163,7 +184,7 @@ class TestZipPacker():
 
 	# -------------------------------------------------------------------------
 	@pytest.mark.parametrize("test_name", ["test_pack_file_1", "test_pack_file_2", "test_pack_folder_1"])
-	def testPackFile(self, createFileHierarchy, runZipPacker, outputPath, test_name):
+	def testPackFile(self, createFileHierarchy, runZipPacker, outputPath, checkArchiveHierarchy, test_name):
 		output_path = outputPath
 
 		assert output_path

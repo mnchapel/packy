@@ -19,7 +19,10 @@
 		},
 		"expected":{
 			"dst_folder": "tmp_path/results",
-			"dst_raw_basename": "output"
+			"dst_raw_basename": "output",
+			"archive_hierarchy":[
+				"file_1.txt"
+			]
 		}
 	},
 	"test_pack_file_2":{
@@ -42,7 +45,11 @@
 		},
 		"expected":{
 			"dst_folder": "tmp_path/results",
-			"dst_raw_basename": "output"
+			"dst_raw_basename": "output",
+			"archive_hierarchy":[
+				"dir_1",
+				"dir_1/file_2.txt"
+			]
 		}
 	},
 	"test_pack_folder_1":{
@@ -65,7 +72,11 @@
 		},
 		"expected":{
 			"dst_folder": "tmp_path/results",
-			"dst_raw_basename": "output"
+			"dst_raw_basename": "output",
+			"archive_hierarchy":[
+				"dir_1/file_2.txt",
+				"dir_1/file_3.txt"
+			]
 		}
 	}
 }
