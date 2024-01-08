@@ -36,13 +36,12 @@ class Packer(QRunnable):
     # -------------------------------------------------------------------------
 	def run(self):
 		try:
-			tmp_folder_path = self.tmpFolderPath()
+			tmp_folder_path = self.__tmpFolderPath()
 
-			checked_items = self.__task.filesSelected().checks()
-			items_to_pack = self.filterSelectedFiles(checked_items)
+			items_to_pack = self.__filterSelectedFiles()
 			self.signals.progress.emit(25)
 
-			self.copyItemsToTmpFolder(items_to_pack, tmp_folder_path)
+			self.__copyItemsToTmpFolder(items_to_pack, tmp_folder_path)
 			self.signals.progress.emit(50)
 
 			self.packTmpFolder(self.__task, tmp_folder_path)
@@ -59,31 +58,9 @@ class Packer(QRunnable):
 			self.cleanTmpFolder(tmp_folder_path)
 			self.signals.progress.emit(100)
 			self.signals.finish.emit()
-
-    # -------------------------------------------------------------------------
-	def filterSelectedFiles(self, checked_items: dict):
-		items_to_pack = []
-		
-		items_to_pack = {k: v for k, v in checked_items.items() if v == Qt.CheckState.Checked.value}
-
-		dir_items = {item for item in items_to_pack if os.path.isdir(item)}
-		files_items = {item for item in items_to_pack if os.path.isfile(item)}
-		files_to_pack = {item for item in items_to_pack if os.path.isfile(item)}
-		
-		items_to_pack.clear()
-		items_to_pack = dir_items
-
-		for dir in dir_items:
-			for file in files_items:
-				if dir in file:
-					files_to_pack.remove(file)
-		
-		items_to_pack = dir_items | files_to_pack
-
-		return items_to_pack
 	
     # -------------------------------------------------------------------------
-	def tmpFolderPath(self)->str:
+	def __tmpFolderPath(self)->str:
 		destination_file = self.__task.destFile()
 		basename = os.path.basename(destination_file)
 		basename_no_ext = os.path.splitext(basename)[0]
@@ -93,19 +70,27 @@ class Packer(QRunnable):
 		tmp_task_path = os.path.join(tmp_path, basename_no_ext)
 
 		return tmp_task_path
+
+    # -------------------------------------------------------------------------
+	def __filterSelectedFiles(self):
+		checked_items = self.__task.filesSelected().checks()
+		items_to_pack = {k: v for k, v in checked_items.items() if v != Qt.CheckState.Unchecked.value}
+
+		return items_to_pack
 	
     # -------------------------------------------------------------------------
-	def copyItemsToTmpFolder(self, items: set, tmp_folder_path: str):
+	def __copyItemsToTmpFolder(self, items: set, tmp_folder_path: str):
 		try:
+			root_path = self.__task.filesSelected().rootPath()
 			os.mkdir(tmp_folder_path)
 
 			for item in items:
+				tmp_item_path = item.replace(root_path, tmp_folder_path)
+
 				if os.path.isfile(item):
-					shutil.copy(item, tmp_folder_path)
+					shutil.copy(item, tmp_item_path)
 				else:
-					dir_basename = os.path.basename(os.path.normpath(item))
-					tmp_sub_folder_path = os.path.join(tmp_folder_path, dir_basename)
-					shutil.copytree(item, tmp_sub_folder_path)
+					os.mkdir(tmp_item_path)
 				
 				info_msg = f"Copy \"{item}\" to \"{tmp_folder_path}\""
 				self.signals.info.emit(info_msg)
@@ -115,7 +100,7 @@ class Packer(QRunnable):
 	
     # -------------------------------------------------------------------------
 	def __applySnapshotRetention(self):
-		settings: QSettings = QSettings()
+		settings = QSettings()
 		snapshot_retention = settings.value(PreferencesKeys.GENERAL_SR.value, type = int)
 
 		if snapshot_retention == PreferencesGeneral.SR_NB_SNAPSHOT.value:
@@ -137,7 +122,7 @@ class Packer(QRunnable):
 	
     # -------------------------------------------------------------------------
 	def __removeSnapshots(self, snapshots):
-		settings: QSettings = QSettings()
+		settings = QSettings()
 		nb_snapshot = settings.value(PreferencesKeys.GENERAL_NB_SNAPSHOT.value, type = int)
 		
 		raw_dest_file = self.__task.rawDestFile()
@@ -153,7 +138,7 @@ class Packer(QRunnable):
 
     # -------------------------------------------------------------------------
 	def __snapshotSuffixPattern(self) -> str:
-		settings: QSettings = QSettings()
+		settings = QSettings()
 		task_suffix = settings.value(PreferencesKeys.TASK_SUFFIX.value, type = int)
 		
 		suffix_pattern = ""

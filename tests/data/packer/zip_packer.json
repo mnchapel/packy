@@ -32,6 +32,7 @@
 			"files_model": {
 				"root_path": "tmp_path/folder",
 				"check": {
+					"tmp_path/folder/dir_1": 1,
 					"tmp_path/folder/dir_1/file_2.txt": 2
 				}
 			},
@@ -47,7 +48,6 @@
 			"dst_folder": "tmp_path/results",
 			"dst_raw_basename": "output",
 			"archive_hierarchy":[
-				"dir_1",
 				"dir_1/file_2.txt"
 			]
 		}
@@ -59,7 +59,9 @@
 			"files_model": {
 				"root_path": "tmp_path/folder",
 				"check": {
-					"tmp_path/folder/dir_1": 2
+					"tmp_path/folder/dir_1": 2,
+					"tmp_path/folder/dir_1/file_2.txt": 2,
+					"tmp_path/folder/dir_1/file_3.txt": 2
 				}
 			},
 			"packer_data": {

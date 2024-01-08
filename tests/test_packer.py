@@ -108,6 +108,7 @@ def checkArchiveHierarchy(loadTestData, outputPath, test_name):
 	expected_hierarchy = data["archive_hierarchy"]
 
 	output_path = outputPath
+	print(f"output_path = {output_path}")
 	zip = ZipFile(output_path)
 
 	output_name = os.path.basename(output_path)
@@ -176,6 +177,7 @@ class TestZipPacker():
 		snapshot_version = [f for f in filter(re.compile(file_pattern_version).match, os.listdir(dirname))]
 
 		snapshot = snapshot_date + snapshot_version
+		print(f"dirname = {dirname}")
 
 		if len(snapshot) == 1:
 			yield os.path.join(dirname, snapshot[0])
