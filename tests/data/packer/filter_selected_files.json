@@ -1,0 +1,30 @@
+{
+	"no_item":{
+		"input":{},
+		"expected":{}
+	},
+	"item_checked":{
+		"input":{"file":2},
+		"expected":{"file":2}
+	},
+	"item_partially_checked":{
+		"input":{"file":1},
+		"expected":{"file":1}
+	},
+	"item_unchecked":{
+		"input":{"file":0},
+		"expected":{}
+	},
+	"item_mixed":{
+		"input":{
+			"file_1":0,
+			"dir_1":1,
+			"dir_1/file_2": 2,
+			"dir_1/file_3": 0
+		},
+		"expected":{
+			"dir_1": 1,
+			"dir_1/file_2": 2
+		}
+	}
+}

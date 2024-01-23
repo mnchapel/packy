@@ -6,12 +6,18 @@ author: Marie-Neige Chapel
 import json
 import os
 import pathlib
-from zipfile import is_zipfile, ZipFile
 import pytest
 import re
+from unittest.mock import MagicMock, Mock, patch
+from zipfile import is_zipfile, ZipFile
+
+# PyQt
+from PyQt6.QtCore import QSettings
 
 # PackY
+from model.preferences import PreferencesKeys
 from model.task import Task
+from model.files_model import FilesModel
 from model.zip_packer import ZipPacker
 
 ###############################################################################
@@ -44,12 +50,6 @@ test_data_folder = pathlib.Path("tests", "data", "packer")
 # -----------------------------------------------------------------------------
 def camelCaseToSnakeCase(value: str) -> str:
 	return re.sub(r"(?<!^)(?=[A-Z])", "_", value).lower()
-
-# -----------------------------------------------------------------------------
-def existsInZip(zip, item) -> bool:
-
-
-	return False
 
 ###############################################################################
 # MODULE FIXTURE SCOPE
@@ -191,3 +191,84 @@ class TestZipPacker():
 
 		assert output_path
 		assert is_zipfile(output_path)
+
+###############################################################################
+# TEST SNAPSHOT RETENTION
+#
+# -----------------------------------------------------------------------------
+# testNoRemove
+# -----------------------------------------------------------------------------
+#
+# Description:
+#		TODO
+#
+# Expected:
+#		TODO
+#
+###############################################################################
+# class TestSnapshotRetention():
+
+# 	# -------------------------------------------------------------------------
+# 	@pytest.fixture
+# 	def setPreferences(self, loadTestData, test_name):
+# 		settings = QSettings()
+# 		snapshot_retention = settings.value(PreferencesKeys.GENERAL_SR.value, type = int)
+# 		nb_snapshot = settings.value(PreferencesKeys.GENERAL_NB_SNAPSHOT.value, type = int)
+		
+# 		data = loadTestData[test_name]["data"]
+
+# 		settings.setValue(PreferencesKeys.GENERAL_SR.value, data["preferences"]["general_sr"])
+# 		settings.setValue(PreferencesKeys.GENERAL_NB_SNAPSHOT.value, data["preferences"]["nb_snapshot"])
+
+# 		yield settings
+
+# 		settings.setValue(PreferencesKeys.GENERAL_SR.value, snapshot_retention)
+# 		settings.setValue(PreferencesKeys.GENERAL_NB_SNAPSHOT.value, nb_snapshot)
+
+# 	# -------------------------------------------------------------------------
+# 	@pytest.mark.parametrize("test_name", ["test_no_remove_1"])
+# 	def testNoRemove(self, createFileHierarchy, setPreferences, test_name):
+# 		task_dict = loadTestData[test_name]["data"]["task"]
+# 		task = Task(task_dict["id"], task_dict)
+# 		zip_packer = ZipPacker(task)
+
+# 		for :
+# 			zip_packer.run()
+
+# 		assert False
+	
+# 	# -------------------------------------------------------------------------
+# 	def testRemove(self):
+# 		assert False
+
+###############################################################################
+# TEST FILTER SELECTED FILES
+#
+# -----------------------------------------------------------------------------
+# test
+# -----------------------------------------------------------------------------
+#
+# Description:
+#		TODO
+#
+# Expected:
+#		TODO
+#
+###############################################################################
+class TestFilterSelectedFiles():
+
+	# -------------------------------------------------------------------------
+	@pytest.mark.parametrize("test_name", ["no_item", "item_checked", "item_partially_checked", "item_unchecked"])
+	def test(self, loadTestData, test_name):
+		input = loadTestData[test_name]["input"]
+		expected = loadTestData[test_name]["expected"]
+
+		mock = Mock(Task)
+		mock_files_model = Mock(FilesModel)
+		mock_files_model.checks = MagicMock(return_value = input)
+		mock.filesSelected = MagicMock(return_value = mock_files_model)
+
+		zip_packer = ZipPacker(mock)
+		items_to_pack = zip_packer._Packer__filterSelectedFiles()
+
+		assert items_to_pack == expected
