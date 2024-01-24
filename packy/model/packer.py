@@ -74,7 +74,7 @@ class Packer(QRunnable):
     # -------------------------------------------------------------------------
 	def __filterSelectedFiles(self):
 		checked_items = self.__task.filesSelected().checks()
-		items_to_pack = {k: v for k, v in checked_items.items() if v != Qt.CheckState.Unchecked.value}
+		items_to_pack = [k for k, v in checked_items.items() if v != Qt.CheckState.Unchecked.value]
 
 		return items_to_pack
 	
