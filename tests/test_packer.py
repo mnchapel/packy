@@ -8,13 +8,14 @@ import os
 import pathlib
 import pytest
 import re
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, Mock
 from zipfile import is_zipfile, ZipFile
 
 # PyQt
-from PyQt6.QtCore import QSettings
+from PyQt6.QtCore import QSettings, QStandardPaths
 
 # PackY
+import model.task
 from model.preferences import PreferencesKeys
 from model.task import Task
 from model.files_model import FilesModel
@@ -240,25 +241,66 @@ class TestZipPacker():
 # 	# -------------------------------------------------------------------------
 # 	def testRemove(self):
 # 		assert False
+		
+###############################################################################
+# TEST TMP FOLDER PATH
+#
+# -----------------------------------------------------------------------------
+# Description:
+#
+###############################################################################
+class TestTmpFolderPath():
+
+	test_list = [
+		"simple_test",
+		"complex_test",
+		"spaces_test"
+	]
+
+	# -------------------------------------------------------------------------
+	@pytest.mark.parametrize("test_name", test_list)
+	def test(self, loadTestData, test_name):
+		input = loadTestData[test_name]["input"]
+		expected = loadTestData[test_name]["expected"]
+
+		mock_task = Mock(Task)
+		mock_task.destFile = MagicMock(return_value = input)
+		
+		zip_packer = ZipPacker(mock_task)
+		tmp_folder_path = zip_packer._Packer__tmpFolderPath()
+
+		expected = os.path.join(os.path.dirname(model.task.__file__), expected)
+
+		assert tmp_folder_path == expected
 
 ###############################################################################
 # TEST FILTER SELECTED FILES
 #
 # -----------------------------------------------------------------------------
-# test
-# -----------------------------------------------------------------------------
-#
 # Description:
-#		TODO
+#		The function selects the items (files and directories) that are checked
+#		or partially checked to be packed.
 #
-# Expected:
-#		TODO
+# -----------------------------------------------------------------------------
+# - no_item: 
+# - item_checked: 
+# - item_partially_checked: 
+# - item_unchecked: 
+# - item_mixed: 
 #
 ###############################################################################
 class TestFilterSelectedFiles():
 
+	test_list = [
+		"no_item",
+		"item_checked",
+		"item_partially_checked",
+		"item_unchecked",
+		"item_mixed"
+	]
+
 	# -------------------------------------------------------------------------
-	@pytest.mark.parametrize("test_name", ["no_item", "item_checked", "item_partially_checked", "item_unchecked"])
+	@pytest.mark.parametrize("test_name", test_list)
 	def test(self, loadTestData, test_name):
 		input = loadTestData[test_name]["input"]
 		expected = loadTestData[test_name]["expected"]
@@ -272,3 +314,46 @@ class TestFilterSelectedFiles():
 		items_to_pack = zip_packer._Packer__filterSelectedFiles()
 
 		assert items_to_pack == expected
+
+
+###############################################################################
+# TEST COPY ITEMS TO TMP FOLDER
+#
+# Description:
+#		TODO.
+#
+# -----------------------------------------------------------------------------
+# no_item
+# -----------------------------------------------------------------------------
+#
+# "input":{}
+#
+# "expected":
+#
+###############################################################################
+class TestCopyItemsToTmpFolder():
+
+	test_list = [
+		"no_item",
+		"one_file",
+		"complete_dir"
+	]
+
+	# -------------------------------------------------------------------------
+	@pytest.mark.parametrize("test_name", test_list)
+	def test(self, createFileHierarchy, loadTestData, test_name, tmp_path):
+		input = loadTestData[test_name]["input"]
+		expected = loadTestData[test_name]["expected"]
+		
+		mock_files_model = Mock(FilesModel)
+		mock_files_model.rootPath = MagicMock(return_value = os.path.join(tmp_path, "folder").replace("\\", "/"))
+
+		mock_task = Mock(Task)
+		mock_task.filesSelected = MagicMock(return_value = mock_files_model)
+
+		zip_packer = ZipPacker(mock_task)
+		tmp_path_task = os.path.join(tmp_path, "results", test_name).replace("\\", "/")
+		zip_packer._Packer__copyItemsToTmpFolder(input, tmp_path_task)
+
+		for item in expected:
+			assert os.path.exists(item)
