@@ -9,7 +9,7 @@ import pathlib
 import pytest
 import re
 from unittest.mock import MagicMock, Mock
-from zipfile import is_zipfile, ZipFile
+from zipfile import is_zipfile, ZipFile, ZipInfo
 
 # PyQt
 from PyQt6.QtCore import QSettings, QStandardPaths
@@ -89,6 +89,11 @@ def recursive(fh_dict):
 				open(node["path"], "w").close()
 			case "folder":
 				os.makedirs(node["path"])
+			case "zip":
+				path = node["path"]
+				print(f"zip in creation at {path}")
+				with ZipFile(node["path"], mode = "w") as zip:
+					zip.writestr(ZipInfo("empty/"), "")
 			case _:
 				raise Exception("")
 
@@ -192,61 +197,18 @@ class TestZipPacker():
 
 		assert output_path
 		assert is_zipfile(output_path)
-
-###############################################################################
-# TEST SNAPSHOT RETENTION
-#
-# -----------------------------------------------------------------------------
-# testNoRemove
-# -----------------------------------------------------------------------------
-#
-# Description:
-#		TODO
-#
-# Expected:
-#		TODO
-#
-###############################################################################
-# class TestSnapshotRetention():
-
-# 	# -------------------------------------------------------------------------
-# 	@pytest.fixture
-# 	def setPreferences(self, loadTestData, test_name):
-# 		settings = QSettings()
-# 		snapshot_retention = settings.value(PreferencesKeys.GENERAL_SR.value, type = int)
-# 		nb_snapshot = settings.value(PreferencesKeys.GENERAL_NB_SNAPSHOT.value, type = int)
-		
-# 		data = loadTestData[test_name]["data"]
-
-# 		settings.setValue(PreferencesKeys.GENERAL_SR.value, data["preferences"]["general_sr"])
-# 		settings.setValue(PreferencesKeys.GENERAL_NB_SNAPSHOT.value, data["preferences"]["nb_snapshot"])
-
-# 		yield settings
-
-# 		settings.setValue(PreferencesKeys.GENERAL_SR.value, snapshot_retention)
-# 		settings.setValue(PreferencesKeys.GENERAL_NB_SNAPSHOT.value, nb_snapshot)
-
-# 	# -------------------------------------------------------------------------
-# 	@pytest.mark.parametrize("test_name", ["test_no_remove_1"])
-# 	def testNoRemove(self, createFileHierarchy, setPreferences, test_name):
-# 		task_dict = loadTestData[test_name]["data"]["task"]
-# 		task = Task(task_dict["id"], task_dict)
-# 		zip_packer = ZipPacker(task)
-
-# 		for :
-# 			zip_packer.run()
-
-# 		assert False
-	
-# 	# -------------------------------------------------------------------------
-# 	def testRemove(self):
-# 		assert False
 		
 ###############################################################################
 # TEST TMP FOLDER PATH
 #
 # -----------------------------------------------------------------------------
 # Description:
+#		Produce the temporary folder path according to the output archive name.
+#
+# -----------------------------------------------------------------------------
+# - simple_test: output archive name with one word.
+# - complex_test: output archive name with several words (separated by "_").
+# - spaces_test: output archive name with several words (separated by " ").
 #
 ###############################################################################
 class TestTmpFolderPath():
@@ -282,17 +244,17 @@ class TestTmpFolderPath():
 #		or partially checked to be packed.
 #
 # -----------------------------------------------------------------------------
-# - no_item: 
-# - item_checked: 
-# - item_partially_checked: 
-# - item_unchecked: 
-# - item_mixed: 
+# - no_items: no items.
+# - item_checked: one item is checked.
+# - item_partially_checked: one item is partially cheched.
+# - item_unchecked: one item is unchecked.
+# - item_mixed: items are unchecked, checked and partially checked.
 #
 ###############################################################################
 class TestFilterSelectedFiles():
 
 	test_list = [
-		"no_item",
+		"no_items",
 		"item_checked",
 		"item_partially_checked",
 		"item_unchecked",
@@ -319,22 +281,20 @@ class TestFilterSelectedFiles():
 ###############################################################################
 # TEST COPY ITEMS TO TMP FOLDER
 #
+# -----------------------------------------------------------------------------
 # Description:
-#		TODO.
+#		Copy items to pack into a temporary folder.
 #
 # -----------------------------------------------------------------------------
-# no_item
-# -----------------------------------------------------------------------------
-#
-# "input":{}
-#
-# "expected":
+# - no_items: no items.
+# - one_file: one file.
+# - complete_dir: a folder and its files.
 #
 ###############################################################################
 class TestCopyItemsToTmpFolder():
 
 	test_list = [
-		"no_item",
+		"no_items",
 		"one_file",
 		"complete_dir"
 	]
@@ -354,6 +314,84 @@ class TestCopyItemsToTmpFolder():
 		zip_packer = ZipPacker(mock_task)
 		tmp_path_task = os.path.join(tmp_path, "results", test_name).replace("\\", "/")
 		zip_packer._Packer__copyItemsToTmpFolder(input, tmp_path_task)
+
+		for item in expected:
+			assert os.path.exists(item)
+
+###############################################################################
+# TEST FIND SNAPSHOTS
+#
+# -----------------------------------------------------------------------------
+# Description
+#		TODO
+#
+# -----------------------------------------------------------------------------
+# - input: 
+# - expected: 
+#
+# -----------------------------------------------------------------------------
+# - 
+#
+###############################################################################
+# class TestFindSnapshots():
+
+# 	test_list = [
+# 		""
+# 	]
+
+# 	# -------------------------------------------------------------------------
+# 	@pytest.mark.parametrize("test_name", test_list)
+# 	def test(self, createFileHierarchy, setPreferences, test_name):
+# 		input = loadTestData[test_name]["input"]
+# 		expected = loadTestData[test_name]["expected"]
+		
+# 		mock_task = Mock(Task)
+# 		mock_task.rawDestFile = MagicMock(return_value = "")
+# 		mock_task.destExtension = MagicMock(return_value = ".zip")
+
+# 		zip_packer = ZipPacker(mock_task)
+# 		snapshots = zip_packer._Packer__findSnapshots()
+
+# 		assert False
+
+###############################################################################
+###############################################################################
+class TestRemoveSnapshots():
+
+	test_list = [
+		"no_snapshot_to_remove",
+		"one_snapshot_to_remove",
+		"several_snapshot_to_remove"
+	]
+
+	# -------------------------------------------------------------------------
+	@pytest.fixture
+	def configureSettings(self, loadTestData, test_name):
+		settings = QSettings()
+		nb_snapshot = settings.value(PreferencesKeys.GENERAL_NB_SNAPSHOT.value, type = int)
+
+		test_nb_snapshot = loadTestData[test_name]["input"]["nb_snapshot"]
+		settings.setValue(PreferencesKeys.GENERAL_NB_SNAPSHOT.value, test_nb_snapshot)
+
+		yield 
+
+		settings.setValue(PreferencesKeys.GENERAL_NB_SNAPSHOT.value, nb_snapshot)
+
+	# -------------------------------------------------------------------------
+	@pytest.mark.parametrize("test_name", test_list)
+	def test(self, createFileHierarchy, loadTestData, configureSettings, test_name, tmp_path):
+		input = loadTestData[test_name]["input"]
+		expected = loadTestData[test_name]["expected"]
+
+		mock_task = Mock(Task)
+		raw_dest_file = input["raw_dest_file"]
+		mock_task.rawDestFile = MagicMock(return_value = raw_dest_file)
+
+		zip_packer = ZipPacker(mock_task)
+		zip_packer._Packer__removeSnapshots(input["snapshots"])
+
+		snapshots_dir = os.path.dirname(raw_dest_file)
+		assert len(os.listdir(snapshots_dir)) == len(expected)
 
 		for item in expected:
 			assert os.path.exists(item)
