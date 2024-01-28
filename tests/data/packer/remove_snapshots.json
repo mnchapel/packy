@@ -1,16 +1,16 @@
 {
 	"no_snapshot_to_remove":{
-		"input": {
+		"input":{
 			"snapshots":[
-				"tmp_path/snapshots/output_1.zip",
-				"tmp_path/snapshots/output_2.zip",
-				"tmp_path/snapshots/output_3.zip",
-				"tmp_path/snapshots/output_4.zip"
+				"output_1.zip",
+				"output_2.zip",
+				"output_3.zip",
+				"output_4.zip"
 			],
 			"raw_dest_file": "tmp_path/snapshots/output_4.zip",
 			"nb_snapshot": 5
 		},
-		"expected": [
+		"expected":[
 			"tmp_path/snapshots/output_1.zip",
 			"tmp_path/snapshots/output_2.zip",
 			"tmp_path/snapshots/output_3.zip",
@@ -18,34 +18,34 @@
 		]
 	},
 	"one_snapshot_to_remove":{
-		"input": {
+		"input":{
 			"snapshots":[
-				"tmp_path/snapshots/output_1.zip",
-				"tmp_path/snapshots/output_2.zip",
-				"tmp_path/snapshots/output_3.zip",
-				"tmp_path/snapshots/output_4.zip"
+				"output_1.zip",
+				"output_2.zip",
+				"output_3.zip",
+				"output_4.zip"
 			],
-			"raw_dest_file": "tmp_path/snapshots/output_4.zip",
+			"raw_dest_file": "tmp_path/snapshots/output",
 			"nb_snapshot": 3
 		},
-		"expected": [
+		"expected":[
 			"tmp_path/snapshots/output_2.zip",
 			"tmp_path/snapshots/output_3.zip",
 			"tmp_path/snapshots/output_4.zip"
 		]
 	},
 	"several_snapshot_to_remove":{
-		"input": {
+		"input":{
 			"snapshots":[
-				"tmp_path/snapshots/output_1.zip",
-				"tmp_path/snapshots/output_2.zip",
-				"tmp_path/snapshots/output_3.zip",
-				"tmp_path/snapshots/output_4.zip"
+				"output_1.zip",
+				"output_2.zip",
+				"output_3.zip",
+				"output_4.zip"
 			],
-			"raw_dest_file": "tmp_path/snapshots/output_4.zip",
+			"raw_dest_file": "tmp_path/snapshots/output",
 			"nb_snapshot": 2
 		},
-		"expected": [
+		"expected":[
 			"tmp_path/snapshots/output_3.zip",
 			"tmp_path/snapshots/output_4.zip"
 		]
