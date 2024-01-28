@@ -90,8 +90,6 @@ def recursive(fh_dict):
 			case "folder":
 				os.makedirs(node["path"])
 			case "zip":
-				path = node["path"]
-				print(f"zip in creation at {path}")
 				with ZipFile(node["path"], mode = "w") as zip:
 					zip.writestr(ZipInfo("empty/"), "")
 			case _:
@@ -333,28 +331,53 @@ class TestCopyItemsToTmpFolder():
 # - 
 #
 ###############################################################################
-# class TestFindSnapshots():
+class TestFindSnapshots():
 
-# 	test_list = [
-# 		""
-# 	]
+	test_list = [
+		"find_4_snapshots"
+	]
 
-# 	# -------------------------------------------------------------------------
-# 	@pytest.mark.parametrize("test_name", test_list)
-# 	def test(self, createFileHierarchy, setPreferences, test_name):
-# 		input = loadTestData[test_name]["input"]
-# 		expected = loadTestData[test_name]["expected"]
+	# -------------------------------------------------------------------------
+	@pytest.fixture
+	def configureSettings(self, loadTestData, test_name):
+		settings = QSettings()
+		task_suffix = settings.value(PreferencesKeys.TASK_SUFFIX.value, type = int)
+
+		test_task_suffix = loadTestData[test_name]["input"]["task_suffix"]
+		settings.setValue(PreferencesKeys.TASK_SUFFIX.value, test_task_suffix)
+
+		yield 
+
+		settings.setValue(PreferencesKeys.TASK_SUFFIX.value, task_suffix)
+
+	# -------------------------------------------------------------------------
+	@pytest.mark.parametrize("test_name", test_list)
+	def test(self, createFileHierarchy, loadTestData, configureSettings, test_name):
+		input = loadTestData[test_name]["input"]
+		expected = loadTestData[test_name]["expected"]
 		
-# 		mock_task = Mock(Task)
-# 		mock_task.rawDestFile = MagicMock(return_value = "")
-# 		mock_task.destExtension = MagicMock(return_value = ".zip")
+		mock_task = Mock(Task)
+		mock_task.rawDestFile = MagicMock(return_value = input["raw_dest_file"])
+		mock_task.destExtension = MagicMock(return_value = input["dest_extension"])
 
-# 		zip_packer = ZipPacker(mock_task)
-# 		snapshots = zip_packer._Packer__findSnapshots()
+		zip_packer = ZipPacker(mock_task)
+		snapshots = zip_packer._Packer__findSnapshots()
 
-# 		assert False
+		print(f"snapshots = {snapshots}")
+
+		assert snapshots == expected
 
 ###############################################################################
+# TEST REMOVE SNAPSHOTS
+#
+# -----------------------------------------------------------------------------
+# Description
+#		Remove snapshots according to the snapshot retention.
+#
+# -----------------------------------------------------------------------------
+# - input: 
+# - expected: 
+#
 ###############################################################################
 class TestRemoveSnapshots():
 
@@ -379,7 +402,7 @@ class TestRemoveSnapshots():
 
 	# -------------------------------------------------------------------------
 	@pytest.mark.parametrize("test_name", test_list)
-	def test(self, createFileHierarchy, loadTestData, configureSettings, test_name, tmp_path):
+	def test(self, createFileHierarchy, loadTestData, configureSettings, test_name):
 		input = loadTestData[test_name]["input"]
 		expected = loadTestData[test_name]["expected"]
 

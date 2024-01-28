@@ -1,0 +1,15 @@
+{
+	"find_4_snapshots":{
+		"input":{
+			"raw_dest_file": "tmp_path/snapshots/output",
+			"dest_extension": "zip",
+			"task_suffix": 1
+		},
+		"expected":[
+			"output_1.zip",
+			"output_2.zip",
+			"output_3.zip",
+			"output_4.zip"
+		]
+	}
+}
