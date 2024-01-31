@@ -2,6 +2,9 @@
 author: Marie-Neige Chapel
 """
 
+# Python
+import os
+
 # PyQt
 from PyQt6.QtWidgets import QDialog, QAbstractButton
 from PyQt6.uic import loadUi
@@ -9,6 +12,7 @@ from PyQt6.uic import loadUi
 # PackY
 from model.files_model import FilesModel
 from model.warnings import Warnings
+from utils.resources_access import resources_path
 
 ###############################################################################
 class FixWarnings(QDialog):
@@ -28,7 +32,8 @@ class FixWarnings(QDialog):
 	def __init__(self, files_model: FilesModel, parent=None) -> None:
 		super(FixWarnings, self).__init__()
 
-		self.__ui = loadUi("../resources/fix_warnings.ui", self)
+		ui_path = os.path.join(resources_path(), "fix_warnings.ui")
+		self.__ui = loadUi(ui_path, self)
 		self.__model = files_model
 		self.__init()
 

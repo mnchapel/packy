@@ -3,6 +3,7 @@ author: Marie-Neige Chapel
 """
 
 # PyQt
+import os
 from asyncio import Task
 from PyQt6.QtCore import QSettings, pyqtSignal
 from PyQt6.QtWidgets import QDialog, QAbstractButton
@@ -11,6 +12,7 @@ from PyQt6.uic import loadUi
 # PackY
 from model.preferences import PreferencesKeys, PreferencesTask
 from model.task import Task
+from utils.resources_access import resources_path
 
 ###############################################################################
 class Options(QDialog):
@@ -24,7 +26,8 @@ class Options(QDialog):
 		# ----------------
 		# MEMBER VARIABLES
 		# ----------------
-		self.__ui = loadUi("../resources/options.ui", self)
+		ui_path = os.path.join(resources_path(), "options.ui")
+		self.__ui = loadUi(ui_path, self)
 		self.__settings = QSettings()
 
 		self.initGeneralSection()

@@ -12,6 +12,7 @@ from PyQt6.QtCore import QAbstractListModel
 
 # PackY
 from model.packer_type_data import PackerTypeData
+from utils.resources_access import resources_path
 
 ###############################################################################
 class DataName(Enum):
@@ -35,8 +36,7 @@ class PackerData(QAbstractListModel):
 
 	# -------------------------------------------------------------------------
 	def loadPackerInfo(self):
-		current_dir = os.path.dirname(__file__)
-		file_path = os.path.join(current_dir, "../../resources/packer_info.json")
+		file_path = os.path.join(resources_path(), "packer_info.json")
 		with open(file_path, "r") as file:
 			self.__info = json.load(file)
 
