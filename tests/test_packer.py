@@ -12,7 +12,7 @@ from unittest.mock import MagicMock, Mock
 from zipfile import is_zipfile, ZipFile, ZipInfo
 
 # PyQt
-from PyQt6.QtCore import QSettings, QStandardPaths
+from PyQt6.QtCore import QSettings
 
 # PackY
 import model.task
@@ -418,3 +418,33 @@ class TestRemoveSnapshots():
 
 		for item in expected:
 			assert os.path.exists(item)
+
+###############################################################################
+# TEST CLEAN TMP FOLDER
+#
+# -----------------------------------------------------------------------------
+# Description
+#		TODO
+#
+# -----------------------------------------------------------------------------
+# - input:  
+#
+###############################################################################
+class TestCleanTmpFolder():
+
+	test_list = [
+		"files",
+		"tree_hierarchy"
+	]
+
+	# -------------------------------------------------------------------------
+	@pytest.mark.parametrize("test_name", test_list)
+	def test(self, createFileHierarchy, loadTestData, test_name):
+		input = loadTestData[test_name]["input"]
+
+		mock_task = Mock(Task)
+
+		zip_packer = ZipPacker(mock_task)
+		zip_packer._Packer__cleanTmpFolder(input)
+
+		assert os.path.exists(input) is False

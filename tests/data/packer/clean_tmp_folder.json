@@ -1,0 +1,8 @@
+{
+	"files":{
+		"input": "tmp_path/folder/dir_1"
+	},
+	"tree_hierarchy":{
+		"input": "tmp_path/folder"
+	}
+}
