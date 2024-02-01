@@ -8,7 +8,7 @@ import json
 # PyQt
 from PyQt6 import QtCore, QtWidgets
 from PyQt6.QtCore import Qt, QCoreApplication, QItemSelection, QThreadPool, QStandardPaths
-from PyQt6.QtWidgets import QFileDialog, QPlainTextEdit
+from PyQt6.QtWidgets import QFileDialog, QPlainTextEdit, QMessageBox
 
 # PackY
 from model.packer_data import DataName, PackerData
@@ -207,9 +207,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.__progression.setNbTask(self.__session.nbCheckedTasks())
 
 		tasks = self.__session.tasks()
+		last_packer = None
 
 		for task in tasks:
-			if task.isChecked() == Qt.CheckState.Checked.value:
+			if task.isChecked() == Qt.CheckState.Checked:
 				packer = createPacker(task)
 				packer.signals.info.connect(lambda msg: QtCore.qInfo(msg))
 				packer.signals.error.connect(self.__progression.errorReported)
@@ -218,7 +219,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 				self.__thread_pool.start(packer)
 				last_packer = packer
 
-		last_packer.signals.finish.connect(self.runAllFinished)
+		if last_packer is not None:
+			last_packer.signals.finish.connect(self.runAllFinished)
+		else:
+			msg = QMessageBox()
+			msg.setIcon(QMessageBox.Icon.Warning)
+			msg.setText("No task selected!")
+			msg.setInformativeText("Nothing to run.")
+			msg.setWindowTitle("Warning")
+			msg.exec()
 
 	# -------------------------------------------------------------------------
 	def initTasksStatus(self) -> None:
