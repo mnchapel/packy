@@ -259,7 +259,7 @@ class Task(QAbstractListModel):
 		dict = {}
 
 		dict["id"] = self.__id
-		dict["checked"] = self.__checked
+		dict["checked"] = self.__checked.value
 		dict["files_model"] = self.__files_selected
 		dict["packer_data"] = self.__packer_data
 		dict["dst_raw_basename"] = self.__dest_raw_basename
