@@ -12,7 +12,7 @@ import shutil
 # debugpy.debug_this_thread()
 
 # PyQt
-from PyQt6.QtCore import Qt, QRunnable, QSettings
+from PyQt6.QtCore import Qt, QRunnable, QSettings, QStandardPaths
 
 # PackY
 from model.preferences import PreferencesGeneral, PreferencesKeys, PreferencesTask
@@ -55,7 +55,7 @@ class Packer(QRunnable):
 			self.signals.error.emit(error_msg)
 			print(error_msg)
 		finally:
-			self.cleanTmpFolder(tmp_folder_path)
+			self.__cleanTmpFolder(tmp_folder_path)
 			self.signals.progress.emit(100)
 			self.signals.finish.emit()
 	
@@ -65,9 +65,10 @@ class Packer(QRunnable):
 		basename = os.path.basename(destination_file)
 		basename_no_ext = os.path.splitext(basename)[0]
 		
-		current_dir = os.path.dirname(__file__)
-		tmp_path = os.path.join(current_dir, "../../tmp/")
-		tmp_task_path = os.path.join(tmp_path, basename_no_ext)
+		tmp_location = QStandardPaths.StandardLocation.TempLocation
+		tmp_path = QStandardPaths.writableLocation(tmp_location)
+		packy_tmp_path = os.path.join(tmp_path, "packy_tmp")
+		tmp_task_path = os.path.join(packy_tmp_path, basename_no_ext)
 
 		return tmp_task_path
 
@@ -82,7 +83,7 @@ class Packer(QRunnable):
 	def __copyItemsToTmpFolder(self, items: set, tmp_folder_path: str):
 		try:
 			root_path = self.__task.filesSelected().rootPath()
-			os.mkdir(tmp_folder_path)
+			os.makedirs(tmp_folder_path)
 
 			for item in items:
 				tmp_item_path = item.replace(root_path, tmp_folder_path)
@@ -151,6 +152,6 @@ class Packer(QRunnable):
 		return suffix_pattern
 
     # -------------------------------------------------------------------------
-	def cleanTmpFolder(self, tmp_folder_path: str):
+	def __cleanTmpFolder(self, tmp_folder_path: str):
 		if os.path.exists(tmp_folder_path):
 			shutil.rmtree(tmp_folder_path)
