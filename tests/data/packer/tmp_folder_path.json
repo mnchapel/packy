@@ -1,14 +1,14 @@
 {
 	"simple_test":{
 		"input": "folder_1/folder_2/output.zip",
-		"expected": "../../tmp/output"
+		"expected": "tmp_os_path/packy_tmp/output"
 	},
 	"complex_test":{
 		"input": "folder_1/folder_2/output_with_several_words.zip",
-		"expected": "../../tmp/output_with_several_words"
+		"expected": "tmp_os_path/packy_tmp/output_with_several_words"
 	},
 	"spaces_test":{
 		"input": "folder_1/folder_2/output with spaces.zip",
-		"expected": "../../tmp/output with spaces"
+		"expected": "tmp_os_path/packy_tmp/output with spaces"
 	}
 }

@@ -12,7 +12,7 @@ from unittest.mock import MagicMock, Mock
 from zipfile import is_zipfile, ZipFile, ZipInfo
 
 # PyQt
-from PyQt6.QtCore import QSettings
+from PyQt6.QtCore import QSettings, QStandardPaths
 
 # PackY
 import model.task
@@ -73,8 +73,17 @@ def loadTestData(request, tmp_path):
 	json_filename = camelCaseToSnakeCase(request.cls.__name__[4:])
 	file = pathlib.Path(request.config.rootdir, test_data_folder, json_filename).with_suffix(".json")
 	file_txt = file.read_text()
+	
+	# Replace tmp_path
 	a_tmp_path = str(tmp_path).replace("\\", "/")
 	file_txt = file_txt.replace("tmp_path", a_tmp_path)
+
+	# Replace tmp_os_path
+	tmp_os_location = QStandardPaths.StandardLocation.TempLocation
+	tmp_os_path = QStandardPaths.writableLocation(tmp_os_location)
+	tmp_os_path = tmp_os_path.replace("\\", "/")
+	file_txt = file_txt.replace("tmp_os_path", tmp_os_path)
+
 	data = json.loads(file_txt)
 
 	yield data
@@ -228,6 +237,7 @@ class TestTmpFolderPath():
 		
 		zip_packer = ZipPacker(mock_task)
 		tmp_folder_path = zip_packer._Packer__tmpFolderPath()
+		tmp_folder_path = tmp_folder_path.replace("\\", "/")
 
 		expected = os.path.join(os.path.dirname(model.task.__file__), expected)
 
