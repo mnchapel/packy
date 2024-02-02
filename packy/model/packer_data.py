@@ -36,7 +36,7 @@ class PackerData(QAbstractListModel):
 
 	# -------------------------------------------------------------------------
 	def loadPackerInfo(self):
-		file_path = os.path.join(resources_path(), "packer_info.json")
+		file_path = os.path.join(resources_path(), "json/packer_info.json")
 		with open(file_path, "r") as file:
 			self.__info = json.load(file)
 

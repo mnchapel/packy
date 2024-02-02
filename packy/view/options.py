@@ -26,7 +26,7 @@ class Options(QDialog):
 		# ----------------
 		# MEMBER VARIABLES
 		# ----------------
-		ui_path = os.path.join(resources_path(), "options.ui")
+		ui_path = os.path.join(resources_path(), "ui/options.ui")
 		self.__ui = loadUi(ui_path, self)
 		self.__settings = QSettings()
 

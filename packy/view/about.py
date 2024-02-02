@@ -17,5 +17,5 @@ class About(QDialog):
 	# -------------------------------------------------------------------------
 	def __init__(self, parent=None):
 		super().__init__(parent)
-		ui_path = os.path.join(resources_path(), "about.ui")
+		ui_path = os.path.join(resources_path(), "ui/about.ui")
 		loadUi(ui_path, self)

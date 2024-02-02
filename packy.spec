@@ -4,10 +4,7 @@ a = Analysis(
     ['packy/main.py'],
     pathex=[],
     binaries=[],
-    datas=[
-		('resources', 'resources'),
-		('assets', 'assets')
-	],
+    datas=[('resources', 'resources')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -28,12 +25,13 @@ exe = EXE(
     strip=False,
     upx=True,
     console=False,
-	icon='assets/logo.ico',
+	icon='resources/img/logo.ico',
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+	version=0.9a0,
 )
 coll = COLLECT(
     exe,
