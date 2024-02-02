@@ -224,8 +224,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		else:
 			msg = QMessageBox()
 			msg.setIcon(QMessageBox.Icon.Warning)
-			msg.setText("No task selected!")
-			msg.setInformativeText("Nothing to run.")
+			msg.setText("Nothing to run!")
+			msg.setInformativeText("Please, select at least one task.")
 			msg.setWindowTitle("Warning")
 			msg.exec()
 
