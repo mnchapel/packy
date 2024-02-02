@@ -9,12 +9,13 @@ from datetime import date
 from enum import Enum, auto
 
 # PyQt
-from PyQt6.QtCore import Qt, QSettings, QStandardPaths, QAbstractListModel, pyqtSignal
+from PyQt6.QtCore import Qt, QStandardPaths, QAbstractListModel, pyqtSignal
 
 # PackY
 from model.files_model import FilesModel
 from model.packer_data import PackerData
 from model.preferences import PreferencesTask, PreferencesKeys
+from utils.settings_access import packySettings
 
 ###############################################################################
 class TaskProperties(Enum):
@@ -59,7 +60,7 @@ class Task(QAbstractListModel):
 	# # -------------------------------------------------------------------------
 	def initStaticMembers(self) -> None:
 		if not hasattr(Task, "funcDstSuffix"):
-			settings: QSettings = QSettings()
+			settings = packySettings()
 			suffix_value = settings.value(PreferencesKeys.TASK_SUFFIX.value, type = int)
 			self.updateDestSuffix(PreferencesTask(suffix_value))
 			

@@ -5,7 +5,7 @@ author: Marie-Neige Chapel
 # PyQt
 import os
 from asyncio import Task
-from PyQt6.QtCore import QSettings, pyqtSignal
+from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QDialog, QAbstractButton
 from PyQt6.uic import loadUi
 
@@ -13,6 +13,7 @@ from PyQt6.uic import loadUi
 from model.preferences import PreferencesKeys, PreferencesTask
 from model.task import Task
 from utils.resources_access import resources_path
+from utils.settings_access import packySettings
 
 ###############################################################################
 class Options(QDialog):
@@ -28,7 +29,7 @@ class Options(QDialog):
 		# ----------------
 		ui_path = os.path.join(resources_path(), "ui/options.ui")
 		self.__ui = loadUi(ui_path, self)
-		self.__settings = QSettings()
+		self.__settings = packySettings()
 
 		self.initGeneralSection()
 		self.initTaskSection()

@@ -12,7 +12,7 @@ from unittest.mock import MagicMock, Mock
 from zipfile import is_zipfile, ZipFile, ZipInfo
 
 # PyQt
-from PyQt6.QtCore import QSettings, QStandardPaths
+from PyQt6.QtCore import QStandardPaths
 
 # PackY
 import model.task
@@ -20,6 +20,7 @@ from model.preferences import PreferencesKeys
 from model.task import Task
 from model.files_model import FilesModel
 from model.zip_packer import ZipPacker
+from utils.settings_access import packySettings
 
 # PackY tests
 from utils_func import camelCaseToSnakeCase
@@ -348,7 +349,7 @@ class TestFindSnapshots():
 	# -------------------------------------------------------------------------
 	@pytest.fixture
 	def configureSettings(self, loadTestData, test_name):
-		settings = QSettings()
+		settings = packySettings()
 		task_suffix = settings.value(PreferencesKeys.TASK_SUFFIX.value, type = int)
 
 		test_task_suffix = loadTestData[test_name]["input"]["task_suffix"]
@@ -398,7 +399,7 @@ class TestRemoveSnapshots():
 	# -------------------------------------------------------------------------
 	@pytest.fixture
 	def configureSettings(self, loadTestData, test_name):
-		settings = QSettings()
+		settings = packySettings()
 		nb_snapshot = settings.value(PreferencesKeys.GENERAL_NB_SNAPSHOT.value, type = int)
 
 		test_nb_snapshot = loadTestData[test_name]["input"]["nb_snapshot"]

@@ -12,12 +12,13 @@ import shutil
 # debugpy.debug_this_thread()
 
 # PyQt
-from PyQt6.QtCore import Qt, QRunnable, QSettings, QStandardPaths
+from PyQt6.QtCore import Qt, QRunnable, QStandardPaths
 
 # PackY
 from model.preferences import PreferencesGeneral, PreferencesKeys, PreferencesTask
 from model.task import Task, TaskStatus
 from model.packer_signals import PackerSignals
+from utils.settings_access import packySettings
 
 ###############################################################################
 class Packer(QRunnable):
@@ -101,7 +102,7 @@ class Packer(QRunnable):
 	
     # -------------------------------------------------------------------------
 	def __applySnapshotRetention(self):
-		settings = QSettings()
+		settings = packySettings()
 		snapshot_retention = settings.value(PreferencesKeys.GENERAL_SR.value, type = int)
 
 		if snapshot_retention == PreferencesGeneral.SR_NB_SNAPSHOT.value:
@@ -123,7 +124,7 @@ class Packer(QRunnable):
 	
     # -------------------------------------------------------------------------
 	def __removeSnapshots(self, snapshots):
-		settings = QSettings()
+		settings = packySettings()
 		nb_snapshot = settings.value(PreferencesKeys.GENERAL_NB_SNAPSHOT.value, type = int)
 		
 		raw_dest_file = self.__task.rawDestFile()
@@ -139,7 +140,7 @@ class Packer(QRunnable):
 
     # -------------------------------------------------------------------------
 	def __snapshotSuffixPattern(self) -> str:
-		settings = QSettings()
+		settings = packySettings()
 		task_suffix = settings.value(PreferencesKeys.TASK_SUFFIX.value, type = int)
 		
 		suffix_pattern = ""
