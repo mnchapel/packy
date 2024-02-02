@@ -7,16 +7,18 @@ import json
 import os
 import pathlib
 import pytest
-import re
 
 # PackY
 from model.files_model import FilesModel
 from model.warnings import Warnings
 
+# PackY tests
+from utils_func import camelCaseToSnakeCase
+
 ###############################################################################
 # FILE HIERARCHY
-# -----------------------------------------------------------------------------
 #
+# -----------------------------------------------------------------------------
 # tmp_path
 # ├─ dir_1
 # │  ├─ file_1.txt
@@ -37,19 +39,6 @@ from model.warnings import Warnings
 ###############################################################################
 
 test_data_folder = pathlib.Path("tests", "data", "files_model")
-
-###############################################################################
-# UTIL FUNCTIONS
-###############################################################################
-
-# -----------------------------------------------------------------------------
-def joinPath(path_1, path_2):
-	return os.path.join(path_1, path_2).replace("\\", "/")
-
-# -----------------------------------------------------------------------------
-def camelCaseToSnakeCase(value: str) -> str:
-	print("camelCaseToSnakeCase, value = ", value)
-	return re.sub(r"(?<!^)(?=[A-Z])", "_", value).lower()
 
 ###############################################################################
 # MODULE FIXTURE SCOPE

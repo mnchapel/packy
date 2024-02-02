@@ -21,20 +21,26 @@ from model.task import Task
 from model.files_model import FilesModel
 from model.zip_packer import ZipPacker
 
+# PackY tests
+from utils_func import camelCaseToSnakeCase
+from utils_func import joinPath
+
 ###############################################################################
 # FILE HIERARCHY
-# -----------------------------------------------------------------------------
 #
+# -----------------------------------------------------------------------------
 # tmp_path
 # ├─ folder
 # │  ├─ file1.txt
 # │  └─ dir1
 # │     ├─ file2.txt
 # │     └─ file3.txt
-# └─ results
-#
-# - tmp_path/folder: contains the files and the folders that will be packed.
-# - tmp_path/results: contains the archive (result of the packer). 
+# ├─ snapshots
+# │  ├─ output_1.zip
+# │  ├─ output_2.zip
+# │  ├─ output_3.zip
+# │  └─ output_4.zip
+# └─ results 
 #
 ###############################################################################
 
@@ -43,14 +49,6 @@ from model.zip_packer import ZipPacker
 ###############################################################################
 
 test_data_folder = pathlib.Path("tests", "data", "packer")
-
-###############################################################################
-# UTIL FUNCTIONS
-###############################################################################
-
-# -----------------------------------------------------------------------------
-def camelCaseToSnakeCase(value: str) -> str:
-	return re.sub(r"(?<!^)(?=[A-Z])", "_", value).lower()
 
 ###############################################################################
 # MODULE FIXTURE SCOPE
@@ -193,7 +191,7 @@ class TestZipPacker():
 		print(f"dirname = {dirname}")
 
 		if len(snapshot) == 1:
-			yield os.path.join(dirname, snapshot[0])
+			yield joinPath(dirname, snapshot[0])
 		else:
 			yield ""
 
@@ -239,7 +237,7 @@ class TestTmpFolderPath():
 		tmp_folder_path = zip_packer._Packer__tmpFolderPath()
 		tmp_folder_path = tmp_folder_path.replace("\\", "/")
 
-		expected = os.path.join(os.path.dirname(model.task.__file__), expected)
+		expected = joinPath(os.path.dirname(model.task.__file__), expected)
 
 		assert tmp_folder_path == expected
 
@@ -314,13 +312,13 @@ class TestCopyItemsToTmpFolder():
 		expected = loadTestData[test_name]["expected"]
 		
 		mock_files_model = Mock(FilesModel)
-		mock_files_model.rootPath = MagicMock(return_value = os.path.join(tmp_path, "folder").replace("\\", "/"))
+		mock_files_model.rootPath = MagicMock(return_value = joinPath(tmp_path, "folder"))
 
 		mock_task = Mock(Task)
 		mock_task.filesSelected = MagicMock(return_value = mock_files_model)
 
 		zip_packer = ZipPacker(mock_task)
-		tmp_path_task = os.path.join(tmp_path, "results", test_name).replace("\\", "/")
+		tmp_path_task = joinPath(tmp_path, "results", test_name)
 		zip_packer._Packer__copyItemsToTmpFolder(input, tmp_path_task)
 
 		for item in expected:
