@@ -1,5 +1,9 @@
 """
-author: Marie-Neige Chapel
+Copyright 2023-present, Marie-Neige Chapel
+All rights reserved.
+
+This source code is licensed under the license found in the
+COPYING.md file in the root directory of this source tree.
 """
 
 # Python
@@ -23,6 +27,22 @@ from utils.settings_access import packySettings
 ###############################################################################
 class Packer(QRunnable):
 
+	###########################################################################
+	# PUBLIC MEMBER VARIABLES
+	#
+	# signals: 
+	###########################################################################
+
+	###########################################################################
+	# PRIVATE MEMBER VARIABLES
+	#
+	# __task: 
+	###########################################################################
+
+	###########################################################################
+	# SIGNALS
+	###########################################################################
+
     # -------------------------------------------------------------------------
 	def __init__(self, task: Task):
 		super(Packer, self).__init__()
@@ -31,7 +51,7 @@ class Packer(QRunnable):
 		self.__task = task
 
 	###########################################################################
-	# MEMBER FUNCTIONS
+	# PUBLIC MEMBER FUNCTIONS
 	###########################################################################
 
     # -------------------------------------------------------------------------
@@ -54,11 +74,14 @@ class Packer(QRunnable):
 			self.__task.updateStatus(TaskStatus.ERROR)
 			error_msg: str = type(ex).__name__ + ": " + str(ex)
 			self.signals.error.emit(error_msg)
-			print(error_msg)
 		finally:
 			self.__cleanTmpFolder(tmp_folder_path)
 			self.signals.progress.emit(100)
 			self.signals.finish.emit()
+
+	###########################################################################
+	# PRIVATE MEMBER FUNCTIONS
+	###########################################################################
 	
     # -------------------------------------------------------------------------
 	def __tmpFolderPath(self)->str:

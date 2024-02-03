@@ -1,16 +1,20 @@
 """
-author: Marie-Neige Chapel
+Copyright 2023-present, Marie-Neige Chapel
+All rights reserved.
+
+This source code is licensed under the license found in the
+COPYING.md file in the root directory of this source tree.
 """
 
 ###############################################################################
 class Warnings():
 
 	###########################################################################
-	# MEMBER VARIABLES
+	# PRIVATE MEMBER VARIABLES
 	#
-	# - __added_item_candidates: 
-	# - __added_items: 
-	# - __removed_items: 
+	# __added_item_candidates: 
+	# __added_items: 
+	# __removed_items: 
 	###########################################################################
 
 	###########################################################################

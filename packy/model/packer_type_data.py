@@ -1,5 +1,9 @@
 """
-author: Marie-Neige Chapel
+Copyright 2023-present, Marie-Neige Chapel
+All rights reserved.
+
+This source code is licensed under the license found in the
+COPYING.md file in the root directory of this source tree.
 """
 
 # Python
@@ -10,6 +14,16 @@ from PyQt6 import QtCore
 
 ###############################################################################
 class PackerTypeData(QtCore.QAbstractListModel):
+
+	###########################################################################
+	# PRIVATE MEMBER VARIABLES
+	#
+	# __type_index: 
+	###########################################################################
+
+	###########################################################################
+	# SPECIAL METHODS
+	###########################################################################
     
 	# -------------------------------------------------------------------------
 	def __init__(self, type_index = None):
@@ -45,7 +59,7 @@ class PackerTypeData(QtCore.QAbstractListModel):
 		return self.__type_index
 
 	###########################################################################
-	# MEMBER FUNCTIONS
+	# PUBLIC MEMBER FUNCTIONS
 	###########################################################################
 	
 	# -------------------------------------------------------------------------

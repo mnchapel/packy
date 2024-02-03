@@ -1,5 +1,9 @@
 """
-author: Marie-Neige Chapel
+Copyright 2023-present, Marie-Neige Chapel
+All rights reserved.
+
+This source code is licensed under the license found in the
+COPYING.md file in the root directory of this source tree.
 """
 
 # Python
@@ -15,25 +19,37 @@ from model.task import Task
 ###############################################################################
 class ZipPacker(Packer):
 
+	###########################################################################
+	# SPECIAL METHODS
+	###########################################################################
+
     # -------------------------------------------------------------------------
 	def __init__(self, task: Task):
 		super(ZipPacker, self).__init__(task)
 
+	###########################################################################
+	# PUBLIC MEMBER FUNCTIONS
+	###########################################################################
+		
 	# -------------------------------------------------------------------------
 	def packTmpFolder(self, task: Task, tmp_folder_path: str):
 		try:
 			destination_filename = task.destFile()
 			packer_data = task.packerData()
 
-			[c_method, c_level] = self.convertPackerData(packer_data)
+			[c_method, c_level] = self.__convertPackerData(packer_data)
 
 			with ZipFile(destination_filename, mode = "w", compression=c_method, compresslevel=c_level) as m_zip:
-				self.packDir(m_zip, tmp_folder_path)
+				self.__packDir(m_zip, tmp_folder_path)
 		except OSError as ex:
 			raise ex
+	
+	###########################################################################
+	# PRIVATE MEMBER FUNCTIONS
+	###########################################################################
 
 	# -------------------------------------------------------------------------
-	def convertPackerData(self, packer_data: PackerData):
+	def __convertPackerData(self, packer_data: PackerData):
 		extension = packer_data.extension()
 		method = packer_data.compressionMethod()
 		level = packer_data.compressionLevel()
@@ -62,9 +78,9 @@ class ZipPacker(Packer):
 				raise Exception("Packer extension not recognized")
 		
 		return [c_method, c_level]
-	
+
 	# -------------------------------------------------------------------------
-	def packDir(self, m_zip, path):
+	def __packDir(self, m_zip, path):
 		try:
 			for root, _, files in os.walk(path):
 				for file in files:

@@ -1,5 +1,9 @@
 """
-author: Marie-Neige Chapel
+Copyright 2023-present, Marie-Neige Chapel
+All rights reserved.
+
+This source code is licensed under the license found in the
+COPYING.md file in the root directory of this source tree.
 """
 
 # Python
@@ -120,7 +124,6 @@ def checkArchiveHierarchy(loadTestData, outputPath, test_name):
 	expected_hierarchy = data["archive_hierarchy"]
 
 	output_path = outputPath
-	print(f"output_path = {output_path}")
 	zip = ZipFile(output_path)
 
 	output_name = os.path.basename(output_path)
@@ -189,7 +192,6 @@ class TestZipPacker():
 		snapshot_version = [f for f in filter(re.compile(file_pattern_version).match, os.listdir(dirname))]
 
 		snapshot = snapshot_date + snapshot_version
-		print(f"dirname = {dirname}")
 
 		if len(snapshot) == 1:
 			yield joinPath(dirname, snapshot[0])
@@ -371,8 +373,6 @@ class TestFindSnapshots():
 
 		zip_packer = ZipPacker(mock_task)
 		snapshots = zip_packer._Packer__findSnapshots()
-
-		print(f"snapshots = {snapshots}")
 
 		assert snapshots == expected
 

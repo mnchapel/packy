@@ -1,9 +1,15 @@
 """
-author: Marie-Neige Chapel
+Copyright 2023-present, Marie-Neige Chapel
+All rights reserved.
+
+This source code is licensed under the license found in the
+COPYING.md file in the root directory of this source tree.
 """
 
 # Python
 import os
+from enum import Enum
+from typing_extensions import override
 
 # PyQt
 from PyQt6 import QtCore
@@ -13,38 +19,38 @@ from PyQt6.QtCore import Qt, QAbstractTableModel, QModelIndex
 from model.task import Task
 
 ###############################################################################
+class SessionSerialKeys(Enum):
+	NAME = "session_name"
+	DIRNAME = "dirname"
+	TASKS = "tasks"
+
+###############################################################################
 class Session(QAbstractTableModel):
+
+	###########################################################################
+	# PRIVATE MEMBER VARIABLES
+	#
+	# __headers: 
+	# __tasks:
+	# __name: 
+	# __dirname: 
+	###########################################################################
+
+	###########################################################################
+	# SPECIAL METHODS
+	###########################################################################
     
 	# -------------------------------------------------------------------------
 	def __init__(self, json_dict = None):
 		super(Session, self).__init__()
 
-		# ----------------
-		# MEMBER VARIABLES
-		# ----------------
 		self.__headers = ["", "Status", "Output", "Size"]
 		self.__tasks = []
 
 		if json_dict is None:
-			self.defaultInitialization()
+			self.__defaultInitialization()
 		else:
-			self.jsonInitialization(json_dict)
-
-	# -------------------------------------------------------------------------
-	def defaultInitialization(self):
-		# ----------------
-		# MEMBER VARIABLES
-		# ----------------
-		self.__name: str = ""
-		self.__dirname = ""
-	
-	# -------------------------------------------------------------------------
-	def jsonInitialization(self, json_dict: dict):
-		# ----------------
-		# MEMBER VARIABLES
-		# ----------------
-		self.__name: str = json_dict["session_name"]
-		self.__dirname = json_dict["dirname"]
+			self.__jsonInitialization(json_dict)
 
 	###########################################################################
 	# GETTERS
@@ -100,21 +106,23 @@ class Session(QAbstractTableModel):
 		self.__tasks = tasks
 		for task in self.__tasks:
 			task.statusChanged.connect(self.emitDataChanged)
-			
 
 	###########################################################################
-	# MEMBER FUNCTIONS
+	# PUBLIC MEMBER FUNCTIONS
 	###########################################################################
 		
     # -------------------------------------------------------------------------
+	@override
 	def rowCount(self, index: QModelIndex = None) -> int:
 		return len(self.__tasks)
 
     # -------------------------------------------------------------------------
+	@override
 	def columnCount(self, index: QModelIndex = None) -> int:
 		return len(self.__headers)
 
     # -------------------------------------------------------------------------
+	@override
 	def data(self, index: QModelIndex, role) -> (QModelIndex|None):
 		match role:
 			case Qt.ItemDataRole.DisplayRole:
@@ -125,6 +133,7 @@ class Session(QAbstractTableModel):
 				return self.dataCheckStateRole(index)
 	
     # -------------------------------------------------------------------------
+	@override
 	def dataDisplayRole(self, index: QModelIndex) -> (QModelIndex|None):
 		task = self.__tasks[index.row()]
 
@@ -135,6 +144,7 @@ class Session(QAbstractTableModel):
 				return task.destBasename()
 	
     # -------------------------------------------------------------------------
+	@override
 	def dataTextAlignmentRole(self, index: QModelIndex) -> (QModelIndex|None):
 		if index.column() == 1:
 			return Qt.AlignmentFlag.AlignCenter
@@ -142,12 +152,14 @@ class Session(QAbstractTableModel):
 			return Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
 		
     # -------------------------------------------------------------------------
+	@override
 	def dataCheckStateRole(self, index) -> (QModelIndex|None):
 		if index.column() == 0:
 			task = self.__tasks[index.row()]
 			return task.isChecked()
 	
     # -------------------------------------------------------------------------
+	@override
 	def setData(self, index, value, role) -> bool:
 		if role == Qt.ItemDataRole.CheckStateRole:
 			task = self.__tasks[index.row()]
@@ -157,16 +169,19 @@ class Session(QAbstractTableModel):
 		return False
 	
     # -------------------------------------------------------------------------
+	@override
 	def headerData(self, section: int, orientation, role) -> (str|None):
 		if role == Qt.ItemDataRole.DisplayRole:
 			if orientation == Qt.Orientation.Horizontal:
 				return self.__headers[section]
 	
     # -------------------------------------------------------------------------
+	@override
 	def flags(self, index) -> Qt.ItemFlag:
 		return super().flags(index) | Qt.ItemFlag.ItemIsUserCheckable
 	
     # -------------------------------------------------------------------------
+	@override
 	def insertRow(self)->int:
 		row = self.rowCount()
 		self.rowsAboutToBeInserted.emit(QtCore.QModelIndex(), row, row)
@@ -193,6 +208,20 @@ class Session(QAbstractTableModel):
 			self.rowsRemoved.emit(QtCore.QModelIndex(), row, row)
 
     # -------------------------------------------------------------------------
+	def serialize(self) -> dict:
+		dict = {}
+
+		dict[SessionSerialKeys.NAME.value] = self.__name
+		dict[SessionSerialKeys.DIRNAME.value] = self.__dirname
+		dict[SessionSerialKeys.TASKS.value] = self.__tasks
+
+		return dict
+
+	###########################################################################
+	# PUBLIC SLOTS
+	###########################################################################
+
+    # -------------------------------------------------------------------------
 	def emitDataChanged(self, task_id: int) -> None:
 		row = self.taskRowById(task_id)
 
@@ -202,11 +231,6 @@ class Session(QAbstractTableModel):
 	
     # -------------------------------------------------------------------------
 	def emitSuffixChanged(self) -> None:
-			print("[Session][emitSuffixChanged]")
-
-			# task: Task = self.__tasks[0]
-			# task.dataChanged.emit(task.index(0, 0), task.index(5, 0))
-
 			first_row = 0
 			last_row = self.rowCount()
 			col = 2
@@ -215,12 +239,16 @@ class Session(QAbstractTableModel):
 			for task in self.__tasks:
 				task.dataChanged.emit(task.index(0, 0), task.index(task.rowCount() - 1, 0))
 
-    # -------------------------------------------------------------------------
-	def serialize(self) -> dict:
-		dict = {}
+	###########################################################################
+	# PRIVATE MEMBER FUNCTIONS
+	###########################################################################
 
-		dict["session_name"] = self.__name
-		dict["dirname"] = self.__dirname
-		dict["tasks"] = self.__tasks
-
-		return dict
+	# -------------------------------------------------------------------------
+	def __defaultInitialization(self):
+		self.__name = ""
+		self.__dirname = ""
+	
+	# -------------------------------------------------------------------------
+	def __jsonInitialization(self, json_dict: dict):
+		self.__name = json_dict[SessionSerialKeys.NAME.value]
+		self.__dirname = json_dict[SessionSerialKeys.DIRNAME.value]

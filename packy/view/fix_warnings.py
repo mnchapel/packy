@@ -1,5 +1,9 @@
 """
-author: Marie-Neige Chapel
+Copyright 2023-present, Marie-Neige Chapel
+All rights reserved.
+
+This source code is licensed under the license found in the
+COPYING.md file in the root directory of this source tree.
 """
 
 # Python
@@ -18,14 +22,14 @@ from utils.resources_access import resources_path
 class FixWarnings(QDialog):
 
 	###########################################################################
-	# MEMBER VARIABLES
+	# PRIVATE MEMBER VARIABLES
 	#
 	# __ui : 
 	# __model: the model
 	###########################################################################
 
 	###########################################################################
-	# CONSTRUCTOR
+	# SPECIAL METHODS
 	###########################################################################
 
 	# -------------------------------------------------------------------------
@@ -61,10 +65,14 @@ class FixWarnings(QDialog):
 
 	# -------------------------------------------------------------------------
 	def __initConnect(self) -> None:
-		self.__ui.button_box.clicked.connect(self.buttonClicked)
+		self.__ui.button_box.clicked.connect(self.__buttonClicked)
+
+	###########################################################################
+	# PRIVATE SLOT
+	###########################################################################
 
 	# -------------------------------------------------------------------------
-	def buttonClicked(self, button: QAbstractButton) -> None:
+	def __buttonClicked(self, button: QAbstractButton) -> None:
 		if button.text() == "Apply":
 			self.__model.updateModel()
 			super().accept()

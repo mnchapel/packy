@@ -1,5 +1,9 @@
 """
-author: Marie-Neige Chapel
+Copyright 2023-present, Marie-Neige Chapel
+All rights reserved.
+
+This source code is licensed under the license found in the
+COPYING.md file in the root directory of this source tree.
 """
 
 # Python
@@ -15,6 +19,12 @@ from model.packer_type_data import PackerTypeData
 from utils.resources_access import resources_path
 
 ###############################################################################
+class PackerDataSerialKeys(Enum):
+	TYPE = "type"
+	COMPRESSION_METHOD = "compression_method"
+	COMPRESSION_LEVEL = "compression_level"
+
+###############################################################################
 class DataName(Enum):
 	PACKER_TYPE = 0
 	COMPRESSION_LEVEL = 1
@@ -22,35 +32,30 @@ class DataName(Enum):
 
 ###############################################################################
 class PackerData(QAbstractListModel):
+
+	###########################################################################
+	# PRIVATE MEMBER VARIABLES
+	#
+	# __packer_type_data: 
+	# __compression_method_index: 
+	# __compression_level_index: 
+	# __info: 
+	###########################################################################
     
+	###########################################################################
+	# SPECIAL METHODS
+	###########################################################################
+
 	# -------------------------------------------------------------------------
 	def __init__(self, json_dict: dict = None):
 		super(PackerData, self).__init__()
 
 		if json_dict is None:
-			self.defaultInitialization()
+			self.__defaultInitialization()
 		else:
-			self.jsonInitialization(json_dict)
+			self.__jsonInitialization(json_dict)
 			
-		self.loadPackerInfo()
-
-	# -------------------------------------------------------------------------
-	def loadPackerInfo(self):
-		file_path = os.path.join(resources_path(), "json/packer_info.json")
-		with open(file_path, "r") as file:
-			self.__info = json.load(file)
-
-	# -------------------------------------------------------------------------
-	def defaultInitialization(self):
-		self.__packer_type_data = PackerTypeData()
-		self.__compression_method_index = 0
-		self.__compression_level_index = 0
-	
-	# -------------------------------------------------------------------------
-	def jsonInitialization(self, json_dict: dict):
-		self.__packer_type_data = PackerTypeData(json_dict["type"])
-		self.__compression_method_index = json_dict["compression_method"]
-		self.__compression_level_index = json_dict["compression_level"]
+		self.__loadPackerInfo()
 
 	###########################################################################
 	# GETTERS
@@ -128,3 +133,25 @@ class PackerData(QAbstractListModel):
 		dict["compression_level"] = self.__compression_level_index
 
 		return dict
+
+	###########################################################################
+	# PRIVATE MEMBER FUNCTIONS
+	###########################################################################
+
+	# -------------------------------------------------------------------------
+	def __loadPackerInfo(self):
+		file_path = os.path.join(resources_path(), "json/packer_info.json")
+		with open(file_path, "r") as file:
+			self.__info = json.load(file)
+
+	# -------------------------------------------------------------------------
+	def __defaultInitialization(self):
+		self.__packer_type_data = PackerTypeData()
+		self.__compression_method_index = 0
+		self.__compression_level_index = 0
+	
+	# -------------------------------------------------------------------------
+	def __jsonInitialization(self, json_dict: dict):
+		self.__packer_type_data = PackerTypeData(json_dict[PackerDataSerialKeys.TYPE.value])
+		self.__compression_method_index = json_dict[PackerDataSerialKeys.COMPRESSION_METHOD.value]
+		self.__compression_level_index = json_dict[PackerDataSerialKeys.COMPRESSION_LEVEL.value]

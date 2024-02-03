@@ -1,5 +1,9 @@
 """
-author: Marie-Neige Chapel
+Copyright 2023-present, Marie-Neige Chapel
+All rights reserved.
+
+This source code is licensed under the license found in the
+COPYING.md file in the root directory of this source tree.
 """
 
 # Python
@@ -117,11 +121,6 @@ class FilesModel(QFileSystemModel):
 				item = os.path.join(root, name).replace("\\","/")
 				if item not in self.__check_state_items:
 					self.__warnings.addAddedItem(item)
-			# for name in dirs:
-			# 	item = os.path.join(root, name)
-			# 	print(f"[FilesModel][checkIntegrity] the dir {item}")
-			# 	if item not in self.__check_state_items:
-			# 		print(f"[FilesModel][checkIntegrity] the item {item} has been added.")
 
 	# -------------------------------------------------------------------------
 	def serialize(self):

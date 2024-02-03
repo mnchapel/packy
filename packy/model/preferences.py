@@ -1,5 +1,9 @@
 """
-author: Marie-Neige Chapel
+Copyright 2023-present, Marie-Neige Chapel
+All rights reserved.
+
+This source code is licensed under the license found in the
+COPYING.md file in the root directory of this source tree.
 """
 
 # Python
@@ -13,7 +17,7 @@ class PreferencesGeneral(Enum):
 
 ###############################################################################
 class PreferencesTask(Enum):
-	SUFFIX_CURR_DATE = 0	# "Output format": "Add the current date"
+	SUFFIX_CURR_DATE = 0		# "Output format": "Add the current date"
 	SUFFIX_VERSION_NUM = auto()	# "Output format": "Add version numbers"
 	SUFFIX_NOTHING = auto()		# "Output format": "Add nothing"
 
