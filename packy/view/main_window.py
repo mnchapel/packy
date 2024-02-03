@@ -501,7 +501,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		last_packer = None
 
 		for task in tasks:
-			if task.isChecked() == Qt.CheckState.Checked:
+			if task.isChecked() == Qt.CheckState.Checked.value:
 				packer = createPacker(task)
 				packer.signals.info.connect(lambda msg: QtCore.qInfo(msg))
 				packer.signals.error.connect(self.__progression.errorReported)
@@ -513,6 +513,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		if last_packer is not None:
 			last_packer.signals.finish.connect(self.__runAllFinished)
 		else:
+			self.enableTask()
 			msg = QMessageBox()
 			msg.setIcon(QMessageBox.Icon.Warning)
 			msg.setText("Nothing to run!")

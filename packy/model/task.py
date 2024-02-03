@@ -103,7 +103,7 @@ class Task(QAbstractListModel):
 	def defaultInitialization(self) -> None:
 		qt_folder_location = QStandardPaths.StandardLocation.DownloadLocation
 
-		self.__checked = Qt.CheckState.Checked
+		self.__checked = Qt.CheckState.Checked.value
 		self.__packer_data = PackerData()
 		self.__files_selected = FilesModel()
 		self.__dest_raw_basename = "output"
