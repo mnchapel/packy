@@ -199,7 +199,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.__packer_mapper.addMapping(self.cbox_compression_method, DataName.COMPRESSION_METHOD.value, b"currentIndex")
 		self.__packer_mapper.toFirst()
 
-		self.updateCompressionLevel()
+		self.__updateCompressionLevel()
 		
 		self.__packer_mapper.addMapping(self.cbox_compression_level, DataName.COMPRESSION_LEVEL.value, b"currentIndex")
 		self.__packer_mapper.toFirst()
