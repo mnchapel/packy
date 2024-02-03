@@ -11,7 +11,8 @@ import json
 
 # PyQt
 from PyQt6 import QtCore, QtWidgets
-from PyQt6.QtCore import Qt, QCoreApplication, QItemSelection, QThreadPool, QStandardPaths
+from PyQt6.QtCore import Qt, QCoreApplication, QItemSelection, QThreadPool, QStandardPaths, QUrl
+from PyQt6.QtGui import QDesktopServices
 from PyQt6.QtWidgets import QFileDialog, QPlainTextEdit, QMessageBox
 
 # PackY
@@ -35,6 +36,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	# PRIVATE MEMBER VARIABLES
 	# 
 	# __thread_pool: 
+	# __session: the current opened session.
+	# __selected_task: the current selected task.
+	# __progression: the progression model.
+	# __progression_mapper: 
+	# __task_view_mapper:
+	# __packer_mapper: 
+	# __packer_type_mapper: 
 	###########################################################################
     
 	###########################################################################
@@ -302,7 +310,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 	# -------------------------------------------------------------------------
 	def connectHelpMenuActions(self) -> None:
-		self.action_documentation.triggered.connect(self.__openDocumentation)
+		self.action_github_repo.triggered.connect(self.__openGitHubRepo)
 		self.action_about.triggered.connect(self.__openAbout)
 	
 	# -------------------------------------------------------------------------
@@ -407,8 +415,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		dlg.exec()
 
 	# -------------------------------------------------------------------------
-	def __openDocumentation(self, s) -> None:
-		print("openDocumentation (not implemented yet)")
+	def __openGitHubRepo(self, s) -> None:
+		QDesktopServices.openUrl(QUrl("https://github.com/mnchapel/packy"))
 	
 	# -------------------------------------------------------------------------
 	def __openAbout(self, s):

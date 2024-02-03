@@ -469,7 +469,7 @@
     <property name="title">
      <string>Help</string>
     </property>
-    <addaction name="action_documentation"/>
+    <addaction name="action_github_repo"/>
     <addaction name="action_about"/>
    </widget>
    <addaction name="menu_file"/>
@@ -486,9 +486,9 @@
     <string>Exit</string>
    </property>
   </action>
-  <action name="action_documentation">
+  <action name="action_github_repo">
    <property name="text">
-    <string>Documentation</string>
+    <string>GitHub Repository</string>
    </property>
   </action>
   <action name="action_options">
