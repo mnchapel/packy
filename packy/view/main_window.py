@@ -523,8 +523,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	# -------------------------------------------------------------------------
 	def __cancelRun(self) -> None:
 		self.__thread_pool.clear()
-		QtCore.qInfo("Cancel")
-		QtCore.qInfo("Finishing the current task...")
+		QtCore.qInfo("<b>Cancel. Waiting for the current task to finish.<b>")
 
 	# -------------------------------------------------------------------------
 	def __runAllFinished(self):

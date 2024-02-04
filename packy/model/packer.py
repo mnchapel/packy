@@ -57,6 +57,7 @@ class Packer(QRunnable):
     # -------------------------------------------------------------------------
 	def run(self):
 		try:
+			self.__sendStartLog()
 			tmp_folder_path = self.__tmpFolderPath()
 
 			items_to_pack = self.__filterSelectedFiles()
@@ -72,7 +73,7 @@ class Packer(QRunnable):
 			self.__task.updateStatus(TaskStatus.SUCCESS)
 		except OSError as ex:
 			self.__task.updateStatus(TaskStatus.ERROR)
-			error_msg: str = type(ex).__name__ + ": " + str(ex)
+			error_msg = type(ex).__name__ + ": " + str(ex)
 			self.signals.error.emit(error_msg)
 		finally:
 			self.__cleanTmpFolder(tmp_folder_path)
@@ -82,6 +83,11 @@ class Packer(QRunnable):
 	###########################################################################
 	# PRIVATE MEMBER FUNCTIONS
 	###########################################################################
+			
+    # -------------------------------------------------------------------------
+	def __sendStartLog(self)->None:
+		info_msg = f"<b>Run task {self.__task.rawDestFile()}</b>"
+		self.signals.info.emit(info_msg)
 	
     # -------------------------------------------------------------------------
 	def __tmpFolderPath(self)->str:
