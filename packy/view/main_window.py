@@ -12,7 +12,7 @@ import json
 # PyQt
 from PyQt6 import QtCore, QtWidgets
 from PyQt6.QtCore import Qt, QCoreApplication, QItemSelection, QThreadPool, QStandardPaths, QUrl
-from PyQt6.QtGui import QDesktopServices
+from PyQt6.QtGui import QDesktopServices, QPalette, QColor
 from PyQt6.QtWidgets import QFileDialog, QPlainTextEdit, QMessageBox
 
 # PackY
@@ -43,6 +43,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	# __task_view_mapper:
 	# __packer_mapper: 
 	# __packer_type_mapper: 
+	# __is_canceled: 
 	###########################################################################
     
 	###########################################################################
@@ -59,6 +60,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 		self.__thread_pool = QThreadPool()
 		self.__thread_pool.setMaxThreadCount(1)
+		self.__is_canceled = False
 
 		self.__initConnects()
 		self.__initSessionView()
@@ -491,7 +493,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	
 	# -------------------------------------------------------------------------
 	def __runAll(self) -> None:
-
 		nb_checked_tasks = self.__session.nbCheckedTasks()
 
 		if nb_checked_tasks == 0:
@@ -507,6 +508,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 			self.__progression.init()
 			self.__progression.setNbTask(self.__session.nbCheckedTasks())
+			
+			self.pbar_global_progress.setFormat("%p%")
+			self.pbar_task_progress.setFormat("%p%")
 
 			tasks = self.__session.tasks()
 
@@ -525,10 +529,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.__thread_pool.clear()
 		QtCore.qInfo("<b>Cancel. Waiting for the current task to finish.<b>")
 
+		self.pbar_global_progress.setFormat("Stopping...")
+		self.pbar_task_progress.setFormat("Stopping...")
+		self.__is_canceled = True
+
 	# -------------------------------------------------------------------------
 	def __runAllFinished(self):
 		if self.__thread_pool.activeThreadCount() == 0:
+			
+			if self.__is_canceled:
+				self.pbar_global_progress.setFormat("Stopped")
+				self.pbar_task_progress.setFormat("Stopped")
+				self.__is_canceled = False
+
 			self.enableTask()
 
-			report: str = self.__progression.report()
+			report = f"<b>{self.__progression.report()}</b>"
 			QtCore.qInfo(report)
