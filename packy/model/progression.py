@@ -52,6 +52,7 @@ class Progression(QAbstractListModel):
 		self.__nb_task_finished = 0
 		self.__global_progress = 0
 		self.__task_progress = 0
+		self.dataChanged.emit(self.index(0, 0), self.index(1, 0))
 
     # -------------------------------------------------------------------------
 	def rowCount(self, index=None):

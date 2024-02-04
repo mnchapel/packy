@@ -12,7 +12,7 @@ import json
 # PyQt
 from PyQt6 import QtCore, QtWidgets
 from PyQt6.QtCore import Qt, QCoreApplication, QItemSelection, QThreadPool, QStandardPaths, QUrl
-from PyQt6.QtGui import QDesktopServices, QPalette, QColor
+from PyQt6.QtGui import QDesktopServices
 from PyQt6.QtWidgets import QFileDialog, QPlainTextEdit, QMessageBox
 
 # PackY
@@ -93,11 +93,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 	# -------------------------------------------------------------------------
 	def __initConnects(self) -> None:
-		self.connectFileMenuActions()
-		self.connectHelpMenuActions()
-		self.connectTaskManagement()
-		self.connectTaskRunning()
-		self.connectTaskProperties()
+		self.__connectFileMenuActions()
+		self.__connectHelpMenuActions()
+		self.__connectTaskManagement()
+		self.__connectTaskRunning()
+		self.__connectTaskProperties()
 	
 	# -------------------------------------------------------------------------
 	def __initSessionView(self) -> None:
@@ -108,7 +108,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	# -------------------------------------------------------------------------
 	def __updateSessionViewModel(self) -> None:
 		self.table_view_session.setModel(self.__session)
-		self.table_view_session.selectionModel().selectionChanged.connect(self.mapViewWithTask)
+		self.table_view_session.selectionModel().selectionChanged.connect(self.__mapViewWithTask)
 
 	# -------------------------------------------------------------------------
 	def __initTaskView(self) -> None:
@@ -155,22 +155,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.setWindowTitle(title)
 
 	# -------------------------------------------------------------------------
-	def initTasksStatus(self) -> None:
+	def __initTasksStatus(self) -> None:
 		tasks = self.__session.tasks()
 		for task in tasks:
 			task.initStatus()
-
-	# -------------------------------------------------------------------------
-	def mapViewWithTask(self, selected: QItemSelection, deselected: QItemSelection) -> None:
-		selected_row = self.table_view_session.currentIndex().row()
-		self.__selected_task = self.__session.taskAt(selected_row)
-
-		self.updateTaskViewMapper()
-		self.updatePackerViewMapper()
-		self.updateFilesSelection()
 	
 	# -------------------------------------------------------------------------
-	def updateTaskViewMapper(self) -> None:
+	def __updateTaskViewMapper(self) -> None:
 		task: Task = self.__selected_task
 		self.__task_view_mapper.setModel(task)
 		self.__task_view_mapper.addMapping(self.line_edit_source, TaskProperties.SRC_FOLDER.value, b"text")
@@ -178,7 +169,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.__task_view_mapper.toFirst()
 	
 	# -------------------------------------------------------------------------
-	def updateFilesSelection(self) -> None:
+	def __updateFilesSelection(self) -> None:
 		files_model = self.__selected_task.filesSelected()
 
 		self.tree_view_source.setModel(files_model)
@@ -187,10 +178,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		for col_index in range(1, files_model.columnCount()):
 			self.tree_view_source.setColumnHidden(col_index, True)
 
-		files_model.directoryLoaded.connect(self.updateTreeChildren)
+		files_model.directoryLoaded.connect(self.__updateTreeChildren)
 	
 	# -------------------------------------------------------------------------
-	def updateTreeChildren(self, path: str) -> None:
+	def __updateTreeChildren(self, path: str) -> None:
 		files_model = self.__selected_task.filesSelected()
 		index = files_model.index(path)
 
@@ -199,7 +190,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 			files_model.setData(index, parent_check_state, Qt.ItemDataRole.CheckStateRole)
 	
 	# -------------------------------------------------------------------------
-	def updatePackerViewMapper(self) -> None:
+	def __updatePackerViewMapper(self) -> None:
 		packer_data = self.__selected_task.packerData()
 
 		self.__updateCompressionMethod()
@@ -241,7 +232,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.group_box_file_selection.setEnabled(True)
 		self.group_box_output_properties.setEnabled(True)
 		self.group_box_statistics.setEnabled(False)
-		self.disableUnavailablePackerType()
+		self.__disableUnavailablePackerType()
 
 		self.push_button_create.setEnabled(False)
 		self.push_button_remove.setEnabled(False)
@@ -252,7 +243,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.table_view_session.setEnabled(False)
 	
 	# -------------------------------------------------------------------------
-	def disableUnavailablePackerType(self) -> None:
+	def __disableUnavailablePackerType(self) -> None:
 		self.rbutton_tar.setEnabled(False)
 		self.rbutton_bz2.setEnabled(False)
 		self.rbutton_tbz.setEnabled(False)
@@ -276,7 +267,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.table_view_session.setEnabled(True)
 
 	# -------------------------------------------------------------------------
-	def disableTask(self) -> None:
+	def __disableTask(self) -> None:
 		self.push_button_create.setEnabled(False)
 		self.push_button_remove.setEnabled(False)
 		self.push_button_edit.setEnabled(False)
@@ -284,7 +275,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.push_button_cancel.setEnabled(True)
 
 	# -------------------------------------------------------------------------
-	def enableTask(self) -> None:
+	def __enableTask(self) -> None:
 		self.push_button_create.setEnabled(True)
 		self.push_button_remove.setEnabled(True)
 		self.push_button_edit.setEnabled(True)
@@ -292,7 +283,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.push_button_cancel.setEnabled(False)
 
 	# -------------------------------------------------------------------------
-	def clearTaskProperties(self) -> None:
+	def __clearTaskProperties(self) -> None:
 		self.line_edit_source.setText("")
 		self.line_edit_destination.setText("")
 		self.cbox_compression_method.clear()
@@ -309,7 +300,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	# -------------------------------------------------------------------------
 
 	# -------------------------------------------------------------------------
-	def connectFileMenuActions(self) -> None:
+	def __connectFileMenuActions(self) -> None:
 		self.action_new_session.triggered.connect(self.__createNewSession)
 		self.action_save.triggered.connect(self.__saveSession)
 		self.action_save_as.triggered.connect(self.__saveSessionAs)
@@ -318,23 +309,23 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.action_exit.triggered.connect(self.close)
 
 	# -------------------------------------------------------------------------
-	def connectHelpMenuActions(self) -> None:
+	def __connectHelpMenuActions(self) -> None:
 		self.action_github_repo.triggered.connect(self.__openGitHubRepo)
 		self.action_about.triggered.connect(self.__openAbout)
 	
 	# -------------------------------------------------------------------------
-	def connectTaskManagement(self) -> None:
+	def __connectTaskManagement(self) -> None:
 		self.push_button_create.clicked.connect(self.__createNewTask)
 		self.push_button_remove.clicked.connect(self.__removeTask)
 		self.push_button_edit.clicked.connect(self.__editTask)
 	
 	# -------------------------------------------------------------------------
-	def connectTaskRunning(self) -> None:
+	def __connectTaskRunning(self) -> None:
 		self.push_button_run_all.clicked.connect(self.__runAll)
 		self.push_button_cancel.clicked.connect(self.__cancelRun)
 
 	# -------------------------------------------------------------------------
-	def connectTaskProperties(self) -> None:
+	def __connectTaskProperties(self) -> None:
 		self.push_button_check_integrity.clicked.connect(self.__checkIntegrity)
 		self.push_button_source.clicked.connect(self.__selectSourceFolder)
 		self.push_button_destination.clicked.connect(self.__selectDestinationFile)
@@ -348,6 +339,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	# -------------------------------------------------------------------------
 	def __createNewSession(self) -> None:
 		self.__session = Session()
+		self.__updateSessionViewModel()
+		self.push_button_remove.setEnabled(False)
+		self.push_button_edit.setEnabled(False)
+		self.push_button_run_all.setEnabled(False)
+		self.__clearTaskProperties()
+		self.pbar_global_progress.setFormat("%p%")
+		self.pbar_task_progress.setFormat("%p%")
+		self.__progression.init()
 		self.__setTitle()
 	
 	# -------------------------------------------------------------------------
@@ -403,7 +402,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 			self.push_button_remove.setEnabled(False)
 			self.push_button_edit.setEnabled(False)
 			self.push_button_run_all.setEnabled(False)
-			self.clearTaskProperties()
+			self.__clearTaskProperties()
 			return
 		elif current_row > self.__session.nbTasks():
 			current_row -= 1
@@ -500,6 +499,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 			self.cbox_compression_level.setCurrentIndex(curr_index)
 		else:
 			self.cbox_compression_level.setCurrentIndex(0)
+
+	# -------------------------------------------------------------------------
+	def __mapViewWithTask(self, selected: QItemSelection, deselected: QItemSelection) -> None:
+		selected_row = self.table_view_session.currentIndex().row()
+		self.__selected_task = self.__session.taskAt(selected_row)
+
+		self.__updateTaskViewMapper()
+		self.__updatePackerViewMapper()
+		self.__updateFilesSelection()
 	
 	# -------------------------------------------------------------------------
 	def __runAll(self) -> None:
@@ -513,8 +521,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 			msg.setWindowTitle("Warning")
 			msg.exec()
 		else:
-			self.initTasksStatus()
-			self.disableTask()
+			self.__initTasksStatus()
+			self.__disableTask()
 
 			self.__progression.init()
 			self.__progression.setNbTask(self.__session.nbCheckedTasks())
@@ -552,7 +560,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 				self.pbar_task_progress.setFormat("Stopped")
 				self.__is_canceled = False
 
-			self.enableTask()
+			self.__enableTask()
 
 			report = f"<b>{self.__progression.report()}</b>"
 			QtCore.qInfo(report)
