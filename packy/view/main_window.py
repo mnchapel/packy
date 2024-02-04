@@ -66,7 +66,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.__initSessionView()
 		self.__initTaskView()
 		self.__initProgressionView()
-		self.__initTitle()
+		self.__setTitle()
 
 		self.show()
     
@@ -144,8 +144,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.__packer_type_mapper.setOrientation(Qt.Orientation.Vertical)
 
 	# -------------------------------------------------------------------------
-	def __initTitle(self) -> None:
-		self.setWindowTitle("PackY - Untitled session")
+	def __setTitle(self, session_name=None) -> None:
+		title = "PackY - "
+
+		if session_name is None:
+			title = title + "Untitled session"
+		else:
+			title = title + session_name
+
+		self.setWindowTitle(title)
 
 	# -------------------------------------------------------------------------
 	def initTasksStatus(self) -> None:
@@ -341,6 +348,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	# -------------------------------------------------------------------------
 	def __createNewSession(self) -> None:
 		self.__session = Session()
+		self.__setTitle()
 	
 	# -------------------------------------------------------------------------
 	def __openSession(self, s) -> None:
@@ -349,6 +357,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 			with open(filename, "r") as file:
 				self.__session = json.load(file, cls=SessionDecoder)
 				self.__updateSessionViewModel()
+				self.__setTitle(self.__session.name())
 				if self.__session.nbTasks() > 0:
 					self.__selected_task = self.__session.taskAt(0)
 					self.table_view_session.selectRow(0)
@@ -368,6 +377,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		[filename, _] = QFileDialog.getSaveFileName(self, "Save As", "")
 		if filename:
 			self.__session.setName(filename)
+			self.__setTitle(self.__session.name())
 			dst_file_path = self.__session.outputFile()
 			with open(dst_file_path, "w") as output_file:
 				json.dump(self.__session, output_file, cls=SessionEncoder, indent=4)
