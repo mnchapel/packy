@@ -355,7 +355,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	# -------------------------------------------------------------------------
 	def __saveSession(self, s) -> None:
 		if not self.__session.name():
-			self.onSaveAs(s)
+			self.__saveSessionAs(s)
 		else:
 			dst_file_path = self.__session.outputFile()
 			with open(dst_file_path, "w") as output_file:
@@ -491,43 +491,45 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	
 	# -------------------------------------------------------------------------
 	def __runAll(self) -> None:
-		self.initTasksStatus()
-		self.disableTask()
 
-		self.__progression.init()
-		self.__progression.setNbTask(self.__session.nbCheckedTasks())
+		nb_checked_tasks = self.__session.nbCheckedTasks()
 
-		tasks = self.__session.tasks()
-		last_packer = None
-
-		for task in tasks:
-			if task.isChecked() == Qt.CheckState.Checked.value:
-				packer = createPacker(task)
-				packer.signals.info.connect(lambda msg: QtCore.qInfo(msg))
-				packer.signals.error.connect(self.__progression.errorReported)
-				packer.signals.progress.connect(self.__progression.updateTaskProgress)
-				packer.signals.finish.connect(self.__progression.updateGlobalProgress)
-				self.__thread_pool.start(packer)
-				last_packer = packer
-
-		if last_packer is not None:
-			last_packer.signals.finish.connect(self.__runAllFinished)
-		else:
-			self.enableTask()
+		if nb_checked_tasks == 0:
 			msg = QMessageBox()
 			msg.setIcon(QMessageBox.Icon.Warning)
 			msg.setText("Nothing to run!")
-			msg.setInformativeText("Please, select at least one task.")
+			msg.setInformativeText("Please select at least one task.")
 			msg.setWindowTitle("Warning")
 			msg.exec()
+		else:
+			self.initTasksStatus()
+			self.disableTask()
+
+			self.__progression.init()
+			self.__progression.setNbTask(self.__session.nbCheckedTasks())
+
+			tasks = self.__session.tasks()
+
+			for task in tasks:
+				if task.isChecked() == Qt.CheckState.Checked.value:
+					packer = createPacker(task)
+					packer.signals.info.connect(lambda msg: QtCore.qInfo(msg))
+					packer.signals.error.connect(self.__progression.errorReported)
+					packer.signals.progress.connect(self.__progression.updateTaskProgress)
+					packer.signals.finish.connect(self.__progression.updateGlobalProgress)
+					self.__thread_pool.start(packer)
+					packer.signals.finish.connect(self.__runAllFinished)
 	
 	# -------------------------------------------------------------------------
 	def __cancelRun(self) -> None:
-		print("cancelRun (not implemented yet)")
+		self.__thread_pool.clear()
+		QtCore.qInfo("Cancel")
+		QtCore.qInfo("Finishing the current task...")
 
 	# -------------------------------------------------------------------------
 	def __runAllFinished(self):
-		self.enableTask()
+		if self.__thread_pool.activeThreadCount() == 0:
+			self.enableTask()
 
-		report: str = self.__progression.report()
-		QtCore.qInfo(report)
+			report: str = self.__progression.report()
+			QtCore.qInfo(report)

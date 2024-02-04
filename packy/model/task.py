@@ -190,7 +190,7 @@ class Task(QAbstractListModel):
 		self.__files_selected = files_selected
 	
 	# -------------------------------------------------------------------------
-	def setChecked(self, value:Qt.CheckState):
+	def setChecked(self, value):
 		self.__checked = value
 
 	# -------------------------------------------------------------------------
@@ -264,7 +264,7 @@ class Task(QAbstractListModel):
 		dict = {}
 
 		dict[TaskSerialKeys.ID.value] = self.__id
-		dict[TaskSerialKeys.CHECKED.value] = self.__checked.value
+		dict[TaskSerialKeys.CHECKED.value] = self.__checked
 		dict[TaskSerialKeys.FILES_SELECTED.value] = self.__files_selected
 		dict[TaskSerialKeys.PACKER_DATA.value] = self.__packer_data
 		dict[TaskSerialKeys.DEST_RAW_BASENAME.value] = self.__dest_raw_basename
