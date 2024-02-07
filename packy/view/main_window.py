@@ -76,8 +76,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 	# -------------------------------------------------------------------------
 	def __initApplication(self) -> None:
-		QCoreApplication.setOrganizationName("PackYCorp")
-		QCoreApplication.setOrganizationDomain("packy.com")
+		QCoreApplication.setOrganizationName("PackY")
+		QCoreApplication.setOrganizationDomain("packy.fr")
 		QCoreApplication.setApplicationName("PackY")
 
 	# -------------------------------------------------------------------------
@@ -89,7 +89,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 			app_data_location = QStandardPaths.StandardLocation.AppDataLocation
 			folder_path = QStandardPaths.writableLocation(app_data_location)
 			MainWindow.log_file_path: str = folder_path + "/log.txt"
-			open(MainWindow.log_file_path, "w").close()
 
 	# -------------------------------------------------------------------------
 	def __initConnects(self) -> None:
