@@ -298,7 +298,7 @@ class Task(QAbstractListModel):
 	
 	# -------------------------------------------------------------------------
 	def __suffixTimeStamp(self) -> str:
-		return date.today().strftime("%Y_%m_%d")
+		return date.today().strftime("_%Y_%m_%d")
 	
 	# -------------------------------------------------------------------------
 	def __suffixNothing(self) -> str:
