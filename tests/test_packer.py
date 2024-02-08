@@ -374,7 +374,7 @@ class TestFindSnapshots():
 		zip_packer = ZipPacker(mock_task)
 		snapshots = zip_packer._Packer__findSnapshots()
 
-		assert snapshots == expected
+		assert sorted(snapshots) == sorted(expected)
 
 ###############################################################################
 # TEST REMOVE SNAPSHOTS
