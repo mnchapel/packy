@@ -76,9 +76,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 	# -------------------------------------------------------------------------
 	def __initApplication(self) -> None:
-		QCoreApplication.setOrganizationName("PackY")
-		QCoreApplication.setOrganizationDomain("packy.fr")
 		QCoreApplication.setApplicationName("PackY")
+		QCoreApplication.setApplicationVersion("0.9.0.0")
 
 	# -------------------------------------------------------------------------
 	def __initLog(self) -> None:
@@ -88,6 +87,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		if not hasattr(MainWindow, "log_file_path"):
 			app_data_location = QStandardPaths.StandardLocation.AppDataLocation
 			folder_path = QStandardPaths.writableLocation(app_data_location)
+			print(f"folder_path = {folder_path}")
 			MainWindow.log_file_path: str = folder_path + "/log.txt"
 
 	# -------------------------------------------------------------------------
