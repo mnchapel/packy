@@ -379,7 +379,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 	# -------------------------------------------------------------------------
 	def __saveSessionAs(self, s) -> None:
-		[filename, _] = QFileDialog.getSaveFileName(self, "Save As", "")
+		[filename, _] = QFileDialog.getSaveFileName(self, "Save As", "", "JSON (*.json)")
 		if filename:
 			self.__session.setName(filename)
 			self.__setTitle(self.__session.name())

@@ -7,6 +7,7 @@ COPYING.md file in the root directory of this source tree.
 """
 
 # Python
+from email.mime import base
 import os
 from enum import Enum
 from typing_extensions import override
@@ -99,7 +100,8 @@ class Session(QAbstractTableModel):
 
     # -------------------------------------------------------------------------
 	def setName(self, path: str) -> None:
-		self.__name = os.path.basename(path) + ".json"
+		raw_basename = os.path.basename(path).removesuffix(".json")
+		self.__name = raw_basename + ".json"
 		self.__dirname = os.path.dirname(path)
 	
     # -------------------------------------------------------------------------
