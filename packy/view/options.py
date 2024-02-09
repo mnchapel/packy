@@ -7,7 +7,6 @@ COPYING.md file in the root directory of this source tree.
 """
 
 # PyQt
-import os
 from asyncio import Task
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QDialog, QAbstractButton
