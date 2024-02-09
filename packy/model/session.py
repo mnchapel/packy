@@ -13,7 +13,7 @@ from typing_extensions import override
 
 # PyQt
 from PyQt6 import QtCore
-from PyQt6.QtCore import Qt, QAbstractTableModel, QModelIndex
+from PyQt6.QtCore import Qt, QAbstractTableModel, QModelIndex, QCoreApplication
 
 # PackY
 from model.task import Task
@@ -23,6 +23,7 @@ class SessionSerialKeys(Enum):
 	NAME = "session_name"
 	DIRNAME = "dirname"
 	TASKS = "tasks"
+	VERSION = "version"
 
 ###############################################################################
 class Session(QAbstractTableModel):
@@ -214,6 +215,7 @@ class Session(QAbstractTableModel):
 		dict[SessionSerialKeys.NAME.value] = self.__name
 		dict[SessionSerialKeys.DIRNAME.value] = self.__dirname
 		dict[SessionSerialKeys.TASKS.value] = self.__tasks
+		dict[SessionSerialKeys.VERSION.value] = QCoreApplication.applicationVersion()
 
 		return dict
 
