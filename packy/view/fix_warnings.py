@@ -16,7 +16,7 @@ from PyQt6.uic import loadUi
 # PackY
 from model.files_model import FilesModel
 from model.warnings import Warnings
-from utils.resources_access import resources_path
+from utils.external_data_access import ExternalData, external_data_path
 
 ###############################################################################
 class FixWarnings(QDialog):
@@ -36,7 +36,7 @@ class FixWarnings(QDialog):
 	def __init__(self, files_model: FilesModel, parent=None) -> None:
 		super(FixWarnings, self).__init__()
 
-		ui_path = os.path.join(resources_path(), "ui/fix_warnings.ui")
+		ui_path = external_data_path(ExternalData.UI_FIX_WARNINGS)
 		self.__ui = loadUi(ui_path, self)
 		self.__model = files_model
 		self.__init()

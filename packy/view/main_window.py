@@ -8,6 +8,7 @@ COPYING.md file in the root directory of this source tree.
 
 #Python
 import json
+import yaml
 
 # PyQt
 from PyQt6 import QtCore, QtWidgets
@@ -24,6 +25,7 @@ from model.task import TaskProperties
 from model.session import Session
 from model.session_encoder import SessionEncoder
 from model.session_decoder import SessionDecoder
+from utils.external_data_access import ExternalData, external_data_path
 from view.about import About
 from view.options import Options
 from view.fix_warnings import FixWarnings
@@ -76,8 +78,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 	# -------------------------------------------------------------------------
 	def __initApplication(self) -> None:
-		QCoreApplication.setApplicationName("PackY")
-		QCoreApplication.setApplicationVersion("0.9.0.0")
+		metadata_path = external_data_path(ExternalData.METADATA)
+		with open(metadata_path, "r") as metadata_file:
+			metadata = yaml.safe_load(metadata_file)
+			QCoreApplication.setOrganizationName(metadata["CompanyName"])
+			QCoreApplication.setApplicationName(metadata["ProductName"])
+			QCoreApplication.setOrganizationDomain("packy.fr")
+			QCoreApplication.setApplicationVersion(metadata["Version"])
 
 	# -------------------------------------------------------------------------
 	def __initLog(self) -> None:
@@ -87,7 +94,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		if not hasattr(MainWindow, "log_file_path"):
 			app_data_location = QStandardPaths.StandardLocation.AppDataLocation
 			folder_path = QStandardPaths.writableLocation(app_data_location)
-			print(f"folder_path = {folder_path}")
 			MainWindow.log_file_path: str = folder_path + "/log.txt"
 
 	# -------------------------------------------------------------------------

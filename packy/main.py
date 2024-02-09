@@ -7,7 +7,6 @@ COPYING.md file in the root directory of this source tree.
 """
 
 # Python
-import os
 import sys
 
 # PyQt
@@ -17,7 +16,7 @@ from PyQt6.QtGui import QIcon
 # PackY
 from model.log import messageHandler
 from view.main_window import MainWindow
-from utils.resources_access import resources_path
+from utils.external_data_access import ExternalData, external_data_path
 
 # -----------------------------------------------------------------------------
 def initLog() -> None:
@@ -26,7 +25,7 @@ def initLog() -> None:
 
 # -----------------------------------------------------------------------------
 app = QtWidgets.QApplication(sys.argv)
-icon_path = os.path.join(resources_path(), "img/logo.ico")
+icon_path = external_data_path(ExternalData.LOGO)
 app.setWindowIcon(QIcon(icon_path))
 main_window = MainWindow()
 initLog()

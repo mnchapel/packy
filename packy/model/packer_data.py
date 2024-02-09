@@ -8,7 +8,6 @@ COPYING.md file in the root directory of this source tree.
 
 # Python
 import json
-import os
 from enum import Enum
 
 #PyQt
@@ -16,7 +15,7 @@ from PyQt6.QtCore import QAbstractListModel
 
 # PackY
 from model.packer_type_data import PackerTypeData
-from utils.resources_access import resources_path
+from utils.external_data_access import ExternalData, external_data_path
 
 ###############################################################################
 class PackerDataSerialKeys(Enum):
@@ -140,7 +139,7 @@ class PackerData(QAbstractListModel):
 
 	# -------------------------------------------------------------------------
 	def __loadPackerInfo(self):
-		file_path = os.path.join(resources_path(), "json/packer_info.json")
+		file_path = external_data_path(ExternalData.PACKER_INFO)
 		with open(file_path, "r") as file:
 			self.__info = json.load(file)
 
