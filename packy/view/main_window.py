@@ -290,9 +290,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.tree_view_source.setModel(None)
 
 		checked_button = self.button_group_packer_type.checkedButton()
-		self.button_group_packer_type.setExclusive(False)
-		checked_button.setChecked(False)
-		self.button_group_packer_type.setExclusive(True)
+		if checked_button:
+			self.button_group_packer_type.setExclusive(False)
+			checked_button.setChecked(False)
+			self.button_group_packer_type.setExclusive(True)
 		
 	# -------------------------------------------------------------------------
 	# CONNECT SIGNALS TO SLOTS
