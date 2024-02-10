@@ -8,6 +8,8 @@ COPYING.md file in the root directory of this source tree.
 
 #Python
 import json
+import os
+import shutil
 import yaml
 
 # PyQt
@@ -95,6 +97,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 			app_data_location = QStandardPaths.StandardLocation.AppDataLocation
 			folder_path = QStandardPaths.writableLocation(app_data_location)
 			MainWindow.log_file_path: str = folder_path + "/log.txt"
+
+			if not os.path.exists(MainWindow.log_file_path):
+				os.makedirs(os.path.dirname(MainWindow.log_file_path))
+			
+			self.__cleanPreviousSessionLog()
+	
+	# -------------------------------------------------------------------------
+	def __cleanPreviousSessionLog(self) -> None:
+			open(MainWindow.log_file_path, "w").close()
 
 	# -------------------------------------------------------------------------
 	def __initConnects(self) -> None:
@@ -374,8 +385,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 			self.__saveSessionAs(s)
 		else:
 			dst_file_path = self.__session.outputFile()
-			with open(dst_file_path, "w") as output_file:
+			tmp_dst_file_path = dst_file_path + "~"
+			
+			try:
+				output_file = open(tmp_dst_file_path, "w")
 				json.dump(self.__session, output_file, cls=SessionEncoder, indent=4)
+				output_file.close()
+			except (IOError, shutil.SameFileError) as ex:
+				error_msg = type(ex).__name__ + ": " + str(ex)
+				QtCore.qCritical(error_msg)
+			else:
+				shutil.copy(tmp_dst_file_path, dst_file_path)
+			finally:
+				os.remove(tmp_dst_file_path)
 
 	# -------------------------------------------------------------------------
 	def __saveSessionAs(self, s) -> None:

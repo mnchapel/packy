@@ -7,7 +7,6 @@ COPYING.md file in the root directory of this source tree.
 """
 
 # Python
-from email.mime import base
 import os
 from enum import Enum
 from typing_extensions import override
