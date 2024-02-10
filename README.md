@@ -1,4 +1,4 @@
-<p align="center"><img src="https://github.com/mnchapel/packy/tree/main/resources/img/logo.png" width="160px"></p>
+<p align="center"><img src="https://github.com/mnchapel/packy/blob/main/resources/img/logo.png" width="160px"></p>
 
 # PackY
 
