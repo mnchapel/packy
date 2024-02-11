@@ -16,6 +16,7 @@ class ExternalData(Enum):
 	METADATA = "yaml/metadata.yml"
 	LOGO = "img/logo.ico"
 	PACKER_INFO = "json/packer_info.json"
+	JSON_SCHEMA = "json/session_schema.json"
 	UI_ABOUT = "ui/about.ui"
 	UI_FIX_WARNINGS = "ui/fix_warnings.ui"
 	UI_OPTIONS = "ui/options.ui"
@@ -23,6 +24,7 @@ class ExternalData(Enum):
 # -----------------------------------------------------------------------------
 def external_data_path(ExternalData):
 	resources_path = ""
+	
 	if hasattr(sys, "_MEIPASS"):
 		resources_path =  os.path.join(sys._MEIPASS, "resources")
 	else:

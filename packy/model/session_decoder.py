@@ -8,10 +8,15 @@ COPYING.md file in the root directory of this source tree.
 
 # Python
 import json
+from jsonschema import SchemaError, ValidationError, validate
+
+# PyQt
+from PyQt6 import QtCore
 
 # PackY
 from model.session import Session
 from model.task import Task
+from utils.external_data_access import ExternalData, external_data_path
 
 ###############################################################################
 class SessionDecoder(json.JSONDecoder):
@@ -30,10 +35,24 @@ class SessionDecoder(json.JSONDecoder):
 	
 	# -------------------------------------------------------------------------
 	def __decodeSession(self, dict):
-		if dict.get("session_name"):
-			return self.__deserializeSession(dict)
-		
-		return dict
+		try:
+			if dict.get("session_name"):
+				self.__validateJson(dict)
+				return self.__deserializeSession(dict)
+			
+			return dict
+		except (ValidationError, SchemaError) as ex:
+			debug_msg = type(ex).__name__ + ": " + str(ex)
+			QtCore.qDebug(debug_msg)
+
+			critical_msg = "Cannot open the file. Wrong format detected."
+			QtCore.qCritical(critical_msg)
+	
+	# -------------------------------------------------------------------------
+	def __validateJson(self, session_dict):
+		session_schema_path = external_data_path(ExternalData.JSON_SCHEMA)
+		session_schema = json.load(open(session_schema_path))
+		validate(session_dict, session_schema)
 	
 	# -------------------------------------------------------------------------
 	def __deserializeSession(self, dict):

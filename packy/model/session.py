@@ -213,10 +213,10 @@ class Session(QAbstractTableModel):
 	def serialize(self) -> dict:
 		dict = {}
 
+		dict[SessionSerialKeys.VERSION.value] = QCoreApplication.applicationVersion()
 		dict[SessionSerialKeys.NAME.value] = self.__name
 		dict[SessionSerialKeys.DIRNAME.value] = self.__dirname
 		dict[SessionSerialKeys.TASKS.value] = self.__tasks
-		dict[SessionSerialKeys.VERSION.value] = QCoreApplication.applicationVersion()
 
 		return dict
 

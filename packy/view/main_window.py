@@ -372,12 +372,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		if filename:
 			with open(filename, "r") as file:
 				self.__session = json.load(file, cls=SessionDecoder)
-				self.__updateSessionViewModel()
-				self.__setTitle(self.__session.name())
-				if self.__session.nbTasks() > 0:
-					self.__selected_task = self.__session.taskAt(0)
-					self.table_view_session.selectRow(0)
-					self.__disableTaskProperties()
+				if self.__session is not None:
+					self.__updateSessionViewModel()
+					self.__setTitle(self.__session.name())
+					if self.__session.nbTasks() > 0:
+						self.__selected_task = self.__session.taskAt(0)
+						self.table_view_session.selectRow(0)
+						self.__disableTaskProperties()
 		
 	# -------------------------------------------------------------------------
 	def __saveSession(self, s) -> None:

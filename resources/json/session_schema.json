@@ -1,0 +1,35 @@
+{
+	"type": "object",
+	"properties": {
+		"version": {"type": "string"},
+		"session_name": {"type": "string"},
+		"dirname": {"type": "string"},
+    	"tasks": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"id": {"type": "number"},
+					"checked": {"type": "number"},
+					"files_model": {
+						"type": "object",
+						"properties": {
+							"root_path": {"type": "string"},
+							"check": {}
+						}
+					},
+					"packer_data": {
+						"type": "object",
+						"properties": {
+							"type": {"type": "number"},
+							"compression_method": {"type": "number"},
+							"compression_level": {"type": "number"}
+						}
+					},
+					"dst_raw_basename": {"type": "string"},
+					"dst_folder": {"type": "string"}
+				}
+			}
+		}
+	}
+}
