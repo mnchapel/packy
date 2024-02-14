@@ -6,6 +6,15 @@ PackY is a simple and intuitive software for creating batch file archives. A com
 
 ## Installation
 
+### Windows
+
+- Go to the [Releases page](https://github.com/mnchapel/packy/releases)
+- Download the Windows installer named `PackYInstaller-x.x.x.x` in the assets of the latest release.
+- Run the installer and follow the steps.
+
+### Linux
+
+Unfortunately, the software is currently only available for Windows but a Linux installer will soon be avaible, so stay tuned!
 
 ## Report issue
 
