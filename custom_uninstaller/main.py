@@ -60,25 +60,13 @@ def packyExtraFiles():
 	return extra_files
 
 # -----------------------------------------------------------------------------
-# Create a file to log custome_uninstaller
-curr_path = os.path.dirname(__file__)
-log_file = open("log_custom_uninstaller.txt", "w")
-
-# Modify Uninstall.dat file
-
 uninstall_dat_path = "../Uninstall.dat"
 if os.path.exists(uninstall_dat_path):
-	log_file.write("The file Uninstall.dat exists.\n")
-	log_file.write(f"	metadata_path = {metadataPath()}\n")
 	initApplication()
-	log_file.write("test.\n")
 
 	file_content = []
 	with open(uninstall_dat_path, "r") as uninstall_file:
 		file_content = uninstall_file.readlines()
-
-	log_file.write("Uninstall.dat file content:\n")
-	log_file.writelines(file_content)
 
 	# Add folders
 	folders_index = [i for i, item in enumerate(file_content) if re.search("^\s*\"Folders\"\s*:\s*\[", item)]
@@ -104,8 +92,3 @@ if os.path.exists(uninstall_dat_path):
 	# Write the new content in the .dat file
 	with open(uninstall_dat_path, "w") as uninstall_file:
 		uninstall_file.writelines(file_content)
-
-else:
-	log_file.write("The file Uninstall.dat doesn't exist.")
-
-log_file.close()
