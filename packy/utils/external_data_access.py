@@ -25,10 +25,12 @@ class ExternalData(Enum):
 def external_data_path(ExternalData):
 	resources_path = ""
 	
-	if hasattr(sys, "_MEIPASS"):
-		resources_path =  os.path.join(sys._MEIPASS, "resources")
+	if getattr(sys, "frozen", False):
+		resources_path = os.path.join(os.path.dirname(sys.executable), "resources")
+		print(f"frozen {resources_path}")
 	else:
 		current_dir = os.path.dirname(__file__)
 		resources_path = os.path.join(current_dir, "../../resources")
+		print(f"dev {resources_path}")
 	
 	return os.path.join(resources_path, ExternalData.value)

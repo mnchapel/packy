@@ -1,0 +1,9 @@
+[project]
+name = "PackY"
+version = "0.9.0.0"
+description = "PackY is a simple and intuitive software for creating batch file archives."
+
+[tool.distutils.build_exe]
+includes = ["model", "view", "utils"]
+excludes = ["tkinter", "unittest"]
+include_files = ["resources"]
