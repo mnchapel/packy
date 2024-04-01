@@ -87,6 +87,6 @@ class ZipPacker(Packer):
 					info_msg: str = f"Packing \"{file}\""
 					self.signals.info.emit(info_msg)
 
-					m_zip.write(os.path.join(root, file), os.path.relpath(os.path.join(root, file), os.path.join(path, '..')))
+					m_zip.write(os.path.join(root, file), os.path.relpath(os.path.join(root, file), os.path.join(path, '.')))
 		except OSError as ex:
 			raise ex

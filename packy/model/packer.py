@@ -11,10 +11,6 @@ import os
 import re
 import shutil
 
-# Python debug
-# import debugpy
-# debugpy.debug_this_thread()
-
 # PyQt
 from PyQt6.QtCore import Qt, QRunnable, QStandardPaths
 
@@ -23,6 +19,9 @@ from model.preferences import PreferencesGeneral, PreferencesKeys, PreferencesTa
 from model.task import Task, TaskStatus
 from model.packer_signals import PackerSignals
 from utils.settings_access import packySettings
+
+# Python debug
+# import debugpy
 
 ###############################################################################
 class Packer(QRunnable):
@@ -57,6 +56,7 @@ class Packer(QRunnable):
     # -------------------------------------------------------------------------
 	def run(self):
 		try:
+			# debugpy.debug_this_thread()
 			self.__sendStartLog()
 			tmp_folder_path = self.__tmpFolderPath()
 
@@ -105,7 +105,7 @@ class Packer(QRunnable):
     # -------------------------------------------------------------------------
 	def __filterSelectedFiles(self):
 		checked_items = self.__task.filesSelected().checks()
-		items_to_pack = [k for k, v in checked_items.items() if v != Qt.CheckState.Unchecked.value]
+		items_to_pack = [k for k, v in checked_items.items() if v == Qt.CheckState.Checked.value]
 
 		return items_to_pack
 	
@@ -119,9 +119,12 @@ class Packer(QRunnable):
 				tmp_item_path = item.replace(root_path, tmp_folder_path)
 
 				if os.path.isfile(item):
-					shutil.copy(item, tmp_item_path)
+					parent_folders = os.path.dirname(tmp_item_path)
+					if not os.path.exists(parent_folders):
+						os.makedirs(parent_folders)
+					shutil.copy2(item, tmp_item_path)
 				else:
-					os.mkdir(tmp_item_path)
+					shutil.copytree(item, tmp_item_path, dirs_exist_ok=True)
 				
 				info_msg = f"Copy \"{item}\" to \"{tmp_folder_path}\""
 				self.signals.info.emit(info_msg)
