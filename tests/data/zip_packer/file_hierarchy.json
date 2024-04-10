@@ -1,0 +1,95 @@
+{
+	"root":[
+		{
+			"type": "folder",
+			"path": "tmp_path/results"
+		},
+		{
+			"type": "folder",
+			"path": "tmp_path/tmp_dir_1",
+			"children":[
+				{
+					"type": "file",
+					"path": "tmp_path/tmp_dir_1/file.txt"
+				}
+			]
+		},
+		{
+			"type": "folder",
+			"path": "tmp_path/tmp_dir_2",
+			"children":[
+				{
+					"type": "folder",
+					"path": "tmp_path/tmp_dir_2/dir",
+					"children":[
+						{
+							"type": "file",
+							"path": "tmp_path/tmp_dir_2/dir/file.txt"
+						}
+					]
+				}
+			]
+		},
+		{
+			"type": "folder",
+			"path": "tmp_path/tmp_dir_3",
+			"children":[
+				{
+					"type": "folder",
+					"path": "tmp_path/tmp_dir_3/dir",
+					"children":[]
+				}
+			]
+		},
+		{
+			"type": "folder",
+			"path": "tmp_path/tmp_dir_4",
+			"children":[
+				{
+					"type": "file",
+					"path": "tmp_path/tmp_dir_4/file_1.txt"
+				},
+				{
+					"type": "file",
+					"path": "tmp_path/tmp_dir_4/file_2.txt"
+				},
+				{
+					"type": "folder",
+					"path": "tmp_path/tmp_dir_4/dir_1",
+					"children":[
+						{
+							"type": "file",
+							"path": "tmp_path/tmp_dir_4/dir_1/file_1.txt"
+						},
+						{
+							"type": "folder",
+							"path": "tmp_path/tmp_dir_4/dir_1/dir",
+							"children":[
+								{
+									"type": "file",
+									"path": "tmp_path/tmp_dir_4/dir_1/dir/file.txt"
+								}
+							]
+						}
+					]
+				},
+				{
+					"type": "folder",
+					"path": "tmp_path/tmp_dir_4/dir_2",
+					"children":[
+						{
+							"type": "folder",
+							"path": "tmp_path/tmp_dir_4/dir_2/dir",
+							"children":[]
+						}
+					]
+				},
+				{
+					"type": "folder",
+					"path": "tmp_path/tmp_dir_4/dir_3",
+					"children":[]
+				}
+			]
+		}
+	]
+}

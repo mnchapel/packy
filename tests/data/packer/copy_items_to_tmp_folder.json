@@ -13,9 +13,7 @@
 	},
 	"complete_dir":{
 		"input":[
-			"tmp_path/folder/dir_1",
-			"tmp_path/folder/dir_1/file_2.txt",
-			"tmp_path/folder/dir_1/file_3.txt"
+			"tmp_path/folder/dir_1"
 		],
 		"expected":[
 			"tmp_path/results/complete_dir/dir_1",
@@ -23,12 +21,18 @@
 			"tmp_path/results/complete_dir/dir_1/file_3.txt"
 		]
 	},
+	"empty_dir":{
+		"input":[
+			"tmp_path/folder/dir_2"
+		],
+		"expected":[
+			"tmp_path/results/empty_dir/dir_2"
+		]
+	},
 	"file_and_dir":{
 		"input":[
 			"tmp_path/folder/file_1.txt",
-			"tmp_path/folder/dir_1",
-			"tmp_path/folder/dir_1/file_2.txt",
-			"tmp_path/folder/dir_1/file_3.txt"
+			"tmp_path/folder/dir_1"
 		],
 		"expected":[
 			"tmp_path/results/file_and_dir/file_1.txt",

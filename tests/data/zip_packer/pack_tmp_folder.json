@@ -1,0 +1,47 @@
+{
+	"one_file":{
+		"input":{
+			"tmp_dir_path": "tmp_path/tmp_dir_1",
+			"destination_file": "tmp_path/results/one_file.zip"
+		},
+		"expected":[
+			"file.txt"
+		]
+	},
+	"one_dir":{
+		"input":{
+			"tmp_dir_path": "tmp_path/tmp_dir_2",
+			"destination_file": "tmp_path/results/one_dir.zip"
+		},
+		"expected":[
+			"dir/",
+			"dir/file.txt"
+		]
+	},
+	"empty_dir":{
+		"input":{
+			"tmp_dir_path": "tmp_path/tmp_dir_3",
+			"destination_file": "tmp_path/results/empty_dir.zip"
+		},
+		"expected":[
+			"dir/"
+		]
+	},
+	"complex_dir":{
+		"input":{
+			"tmp_dir_path": "tmp_path/tmp_dir_4",
+			"destination_file": "tmp_path/results/complex_dir.zip"
+		},
+		"expected":[
+			"file_1.txt",
+			"file_2.txt",
+			"dir_1/",
+			"dir_1/file_1.txt",
+			"dir_1/dir/",
+			"dir_1/dir/file.txt",
+			"dir_2/",
+			"dir_2/dir/",
+			"dir_3/"
+		]
+	}
+}

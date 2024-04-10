@@ -82,11 +82,15 @@ class ZipPacker(Packer):
 	# -------------------------------------------------------------------------
 	def __packDir(self, m_zip, path):
 		try:
-			for root, _, files in os.walk(path):
+			for root, dirs, files in os.walk(path):
+				for dir in dirs:
+					info_msg: str = f"Packing \"{dir}\""
+					self.signals.info.emit(info_msg)
+					m_zip.write(os.path.join(root, dir), os.path.relpath(os.path.join(root, dir), os.path.join(path, '.')))
+
 				for file in files:
 					info_msg: str = f"Packing \"{file}\""
 					self.signals.info.emit(info_msg)
-
 					m_zip.write(os.path.join(root, file), os.path.relpath(os.path.join(root, file), os.path.join(path, '.')))
 		except OSError as ex:
 			raise ex

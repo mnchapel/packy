@@ -36,9 +36,10 @@ from utils_func import joinPath
 # tmp_path
 # ├─ folder
 # │  ├─ file1.txt
-# │  └─ dir1
-# │     ├─ file2.txt
-# │     └─ file3.txt
+# │  ├─ dir1
+# │  │  ├─ file2.txt
+# │  │  └─ file3.txt
+# │  └─ dir2
 # ├─ snapshots
 # │  ├─ output_1.zip
 # │  ├─ output_2.zip
@@ -223,6 +224,8 @@ class TestFilterSelectedFiles():
 # - no_items: no items.
 # - one_file: one file.
 # - complete_dir: a folder and its files.
+# - empty_dir: an empty folder.
+# - file_and_dir: .
 #
 ###############################################################################
 class TestCopyItemsToTmpFolder():
@@ -230,7 +233,9 @@ class TestCopyItemsToTmpFolder():
 	test_list = [
 		"no_items",
 		"one_file",
-		"complete_dir"
+		"complete_dir",
+		"empty_dir",
+		"file_and_dir"
 	]
 
 	# -------------------------------------------------------------------------

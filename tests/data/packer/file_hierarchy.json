@@ -25,6 +25,11 @@
 							"path": "tmp_path/folder/dir_1/file_3.txt"
 						}
 					]
+				},
+				{
+					"type": "folder",
+					"path": "tmp_path/folder/dir_2",
+					"children":[]
 				}
 			]
 		},

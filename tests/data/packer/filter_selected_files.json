@@ -5,23 +5,21 @@
 	},
 	"item_checked":{
 		"input":{
-			"file":2
+			"file_1":2
 		},
 		"expected":[
-			"file"
+			"file_1"
 		]
 	},
 	"item_partially_checked":{
 		"input":{
-			"file":1
+			"file_1":1
 		},
-		"expected":[
-			"file"
-		]
+		"expected":[]
 	},
 	"item_unchecked":{
 		"input":{
-			"file":0
+			"file_1":0
 		},
 		"expected":[]
 	},
@@ -33,7 +31,6 @@
 			"dir_1/file_3": 0
 		},
 		"expected":[
-			"dir_1",
 			"dir_1/file_2"
 		]
 	}
