@@ -2,7 +2,7 @@
 
 # PackY
 
-PackY is a simple and intuitive software for creating batch file archives. A common use case is to archive the configuration files of installed software in separate containers but grouped together in a single folder. This projet is currently under development and this page will be updated later with more information.
+PackY is a simple and intuitive software for creating batch file archives. A common use case is to archive the configuration files of installed software in separate containers but grouped together in a single folder. This project is currently under development and this page will be updated later with more information.
 
 ## Installation
 
@@ -14,7 +14,7 @@ PackY is a simple and intuitive software for creating batch file archives. A com
 
 ### Linux
 
-Unfortunately, the software is currently only available for Windows but a Linux installer will soon be avaible, so stay tuned!
+Unfortunately, the software is currently only available for Windows but a Linux installer will soon be available, so stay tuned!
 
 ## Report issue
 
@@ -32,3 +32,42 @@ The following features will soon be available:
 - Internationalization.
 
 This software is intended to remain simple, so there are no plans to add many more features.
+
+## Development
+
+### Pre-requisites
+
+1. Create a virtual environment with conda:
+
+    ```console
+    conda create -n <env_name> python=3.11
+    ```
+
+2. Activate the virtual environment:
+
+    ```console
+    conda activate <env_name>
+    ```
+
+3. Install the dependencies:
+
+    - All in one with the requirements file:
+
+      ```console
+      pip install -r requirements.txt
+      ```
+
+    - Individually:
+
+      ```console
+      pip install PyQt6
+      pip install pyyaml
+      pip install typing_extensions
+      pip install jsonschema
+      ```
+
+4. Run Packy:
+
+    ```console
+    python packy\main.py
+    ```
