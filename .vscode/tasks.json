@@ -1,0 +1,53 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run PackY",
+			"type": "shell",
+			"command": "${command:python.interpreterPath}",
+			"args": [
+				"${workspaceFolder}/packy/main.py"
+			],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "Run pytest",
+			"type": "process",
+			"command": "${command:python.interpreterPath} pytest -v",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "Generate .py from .ui",
+			"type": "process",
+			"command": "${command:python.interpreterPath} pyuic -o packy/view/ui_main_window.py -x resources/ui/main_window.ui",
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": true
+			},
+			"problemMatcher": []
+		}
+	]
+}
