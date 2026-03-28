@@ -339,6 +339,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 	# -------------------------------------------------------------------------
 	def __connectHelpMenuActions(self) -> None:
+		self.action_open_log_folder.triggered.connect(self.__openLogFolder)
 		self.action_github_repo.triggered.connect(self.__openGitHubRepo)
 		self.action_about.triggered.connect(self.__openAbout)
 	
@@ -467,9 +468,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		dlg.exec()
 
 	# -------------------------------------------------------------------------
+	def __openLogFolder(self, s) -> None:
+		log_folder_path = os.path.dirname(MainWindow.log_file_path)
+		QDesktopServices.openUrl(QUrl.fromLocalFile(log_folder_path))
+
+	# -------------------------------------------------------------------------
 	def __openGitHubRepo(self, s) -> None:
 		QDesktopServices.openUrl(QUrl("https://github.com/mnchapel/packy"))
-	
+
 	# -------------------------------------------------------------------------
 	def __openAbout(self, s):
 		dlg = About(self)

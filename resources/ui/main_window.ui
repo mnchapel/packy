@@ -748,6 +748,7 @@
     <property name="title">
      <string>Help</string>
     </property>
+    <addaction name="action_open_log_folder"/>
     <addaction name="action_github_repo"/>
     <addaction name="action_about"/>
    </widget>
@@ -793,6 +794,11 @@
   <action name="action_save_as">
    <property name="text">
     <string>Save As...</string>
+   </property>
+  </action>
+  <action name="action_open_log_folder">
+   <property name="text">
+    <string>Open Log Folder</string>
    </property>
   </action>
  </widget>
