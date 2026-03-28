@@ -32,11 +32,15 @@
 			},
 			"problemMatcher": []
 		},
-		{
-			"label": "Generate .py from .ui",
-			"type": "process",
-			"command": "${command:python.interpreterPath} pyuic -o packy/view/ui_main_window.py -x resources/ui/main_window.ui",
-			"options": {
+    {
+      "label": "Generate .py from .ui",
+      "type": "shell",
+      "command": "${command:python.interpreterPath} packy/compile_ui.py",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "options": {
 				"cwd": "${workspaceFolder}"
 			},
 			"presentation": {
@@ -48,6 +52,6 @@
 				"clear": true
 			},
 			"problemMatcher": []
-		}
+    }
 	]
 }
