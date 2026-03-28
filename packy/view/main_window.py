@@ -10,6 +10,7 @@ COPYING.md file in the root directory of this source tree.
 import json
 import os
 import shutil
+import sys
 import yaml
 
 # PyQt
@@ -92,17 +93,28 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	def __initLog(self) -> None:
 		if not hasattr(MainWindow, "log_panel"):
 			MainWindow.log_panel: QPlainTextEdit = self.log_panel
-		
+
 		if not hasattr(MainWindow, "log_file_path"):
-			app_data_location = QStandardPaths.StandardLocation.AppDataLocation
-			folder_path = QStandardPaths.writableLocation(app_data_location)
-			MainWindow.log_file_path: str = folder_path + "/log.txt"
+			if self.__is_dev():
+				folder_path = "./logs"
+			else:
+				app_data_location = QStandardPaths.StandardLocation.AppDataLocation
+				folder_path = QStandardPaths.writableLocation(app_data_location)
+
+			MainWindow.log_file_path: str = os.path.join(folder_path, "log.txt")
 
 			if not os.path.exists(MainWindow.log_file_path):
 				os.makedirs(os.path.dirname(MainWindow.log_file_path))
-			
+
 			self.__cleanPreviousSessionLog()
-	
+
+	# -------------------------------------------------------------------------
+	def __is_dev(self) -> bool:
+		if getattr(sys, 'frozen', False):
+			return False
+		else:
+			return True
+
 	# -------------------------------------------------------------------------
 	def __cleanPreviousSessionLog(self) -> None:
 			open(MainWindow.log_file_path, "w").close()
