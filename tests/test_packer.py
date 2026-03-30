@@ -45,7 +45,7 @@ from utils_func import joinPath
 # │  ├─ output_2.zip
 # │  ├─ output_3.zip
 # │  └─ output_4.zip
-# └─ results 
+# └─ results
 #
 ###############################################################################
 
@@ -59,85 +59,95 @@ test_data_folder = pathlib.Path("tests", "data", "packer")
 # MODULE FIXTURE SCOPE
 ###############################################################################
 
+
 # -----------------------------------------------------------------------------
 @pytest.fixture
 def loadFileHierarchy(request, tmp_path):
-	file = pathlib.Path(request.config.rootdir, test_data_folder, "file_hierarchy").with_suffix(".json")
-	file_txt = file.read_text()
-	a_tmp_path = str(tmp_path).replace("\\", "/")
-	file_txt = file_txt.replace("tmp_path", a_tmp_path)
-	data = json.loads(file_txt)
+    file = pathlib.Path(request.config.rootdir, test_data_folder, "file_hierarchy").with_suffix(
+        ".json"
+    )
+    file_txt = file.read_text()
+    a_tmp_path = str(tmp_path).replace("\\", "/")
+    file_txt = file_txt.replace("tmp_path", a_tmp_path)
+    data = json.loads(file_txt)
 
-	yield data
+    yield data
+
 
 # -----------------------------------------------------------------------------
 @pytest.fixture
 def loadTestData(request, tmp_path):
-	json_filename = camelCaseToSnakeCase(request.cls.__name__[4:])
-	file = pathlib.Path(request.config.rootdir, test_data_folder, json_filename).with_suffix(".json")
-	file_txt = file.read_text()
-	
-	# Replace tmp_path
-	a_tmp_path = str(tmp_path).replace("\\", "/")
-	file_txt = file_txt.replace("tmp_path", a_tmp_path)
+    json_filename = camelCaseToSnakeCase(request.cls.__name__[4:])
+    file = pathlib.Path(request.config.rootdir, test_data_folder, json_filename).with_suffix(
+        ".json"
+    )
+    file_txt = file.read_text()
 
-	# Replace tmp_os_path
-	tmp_os_location = QStandardPaths.StandardLocation.TempLocation
-	tmp_os_path = QStandardPaths.writableLocation(tmp_os_location)
-	tmp_os_path = tmp_os_path.replace("\\", "/")
-	file_txt = file_txt.replace("tmp_os_path", tmp_os_path)
+    # Replace tmp_path
+    a_tmp_path = str(tmp_path).replace("\\", "/")
+    file_txt = file_txt.replace("tmp_path", a_tmp_path)
 
-	data = json.loads(file_txt)
+    # Replace tmp_os_path
+    tmp_os_location = QStandardPaths.StandardLocation.TempLocation
+    tmp_os_path = QStandardPaths.writableLocation(tmp_os_location)
+    tmp_os_path = tmp_os_path.replace("\\", "/")
+    file_txt = file_txt.replace("tmp_os_path", tmp_os_path)
 
-	yield data
+    data = json.loads(file_txt)
+
+    yield data
+
 
 # -----------------------------------------------------------------------------
 def recursive(fh_dict):
-	for node in fh_dict:
-		type = node["type"]
+    for node in fh_dict:
+        type = node["type"]
 
-		match type:
-			case "file":
-				open(node["path"], "w").close()
-			case "folder":
-				os.makedirs(node["path"])
-			case "zip":
-				with ZipFile(node["path"], mode = "w") as zip:
-					zip.writestr(ZipInfo("empty/"), "")
-			case _:
-				raise Exception("")
+        match type:
+            case "file":
+                open(node["path"], "w").close()
+            case "folder":
+                os.makedirs(node["path"])
+            case "zip":
+                with ZipFile(node["path"], mode="w") as zip:
+                    zip.writestr(ZipInfo("empty/"), "")
+            case _:
+                raise Exception("")
 
-		if "children" in node:
-			recursive(node["children"])
+        if "children" in node:
+            recursive(node["children"])
+
 
 # -----------------------------------------------------------------------------
 @pytest.fixture
 def createFileHierarchy(loadFileHierarchy):
-	fh_dict = loadFileHierarchy
+    fh_dict = loadFileHierarchy
 
-	recursive(fh_dict["root"])
+    recursive(fh_dict["root"])
+
 
 # -----------------------------------------------------------------------------
 @pytest.fixture
 def checkArchiveHierarchy(loadTestData, outputPath, test_name):
-	data = loadTestData[test_name]["expected"]
-	expected_hierarchy = data["archive_hierarchy"]
+    data = loadTestData[test_name]["expected"]
+    expected_hierarchy = data["archive_hierarchy"]
 
-	output_path = outputPath
-	zip = ZipFile(output_path)
+    output_path = outputPath
+    zip = ZipFile(output_path)
 
-	output_name = os.path.basename(output_path)
-	output_name = output_name.rsplit(".", 1)[0]
-	expected_hierarchy = [output_name + "/" + item for item in expected_hierarchy]
+    output_name = os.path.basename(output_path)
+    output_name = output_name.rsplit(".", 1)[0]
+    expected_hierarchy = [output_name + "/" + item for item in expected_hierarchy]
 
-	assert zip.namelist() == expected_hierarchy
-		
+    assert zip.namelist() == expected_hierarchy
+
+
 ###############################################################################
 # TEST TMP FOLDER PATH
 #
 # -----------------------------------------------------------------------------
 # Description:
-#		Produce the temporary folder path according to the output archive name.
+# Produce the temporary folder path according to the output archive name.
 #
 # -----------------------------------------------------------------------------
 # - simple_test: output archive name with one word.
@@ -145,38 +155,34 @@ def checkArchiveHierarchy(loadTestData, outputPath, test_name):
 # - spaces_test: output archive name with several words (separated by " ").
 #
 ###############################################################################
-class TestTmpFolderPath():
+class TestTmpFolderPath:
+    test_list = ["simple_test", "complex_test", "spaces_test"]
 
-	test_list = [
-		"simple_test",
-		"complex_test",
-		"spaces_test"
-	]
+    # -------------------------------------------------------------------------
+    @pytest.mark.parametrize("test_name", test_list)
+    def test(self, loadTestData, test_name):
+        input = loadTestData[test_name]["input"]
+        expected = loadTestData[test_name]["expected"]
 
-	# -------------------------------------------------------------------------
-	@pytest.mark.parametrize("test_name", test_list)
-	def test(self, loadTestData, test_name):
-		input = loadTestData[test_name]["input"]
-		expected = loadTestData[test_name]["expected"]
+        mock_task = Mock(Task)
+        mock_task.destFile = MagicMock(return_value=input)
 
-		mock_task = Mock(Task)
-		mock_task.destFile = MagicMock(return_value = input)
-		
-		zip_packer = ZipPacker(mock_task)
-		tmp_folder_path = zip_packer._Packer__tmpFolderPath()
-		tmp_folder_path = tmp_folder_path.replace("\\", "/")
+        zip_packer = ZipPacker(mock_task)
+        tmp_folder_path = zip_packer._Packer__tmpFolderPath()
+        tmp_folder_path = tmp_folder_path.replace("\\", "/")
 
-		expected = joinPath(os.path.dirname(model.task.__file__), expected)
+        expected = joinPath(os.path.dirname(model.task.__file__), expected)
 
-		assert tmp_folder_path == expected
+        assert tmp_folder_path == expected
+
 
 ###############################################################################
 # TEST FILTER SELECTED FILES
 #
 # -----------------------------------------------------------------------------
 # Description:
-#		The function selects the items (files and directories) that are checked
-#		or partially checked to be packed.
+# The function selects the items (files and directories) that are checked
+# or partially checked to be packed.
 #
 # -----------------------------------------------------------------------------
 # - no_items: no items.
@@ -186,31 +192,30 @@ class TestTmpFolderPath():
 # - item_mixed: items are unchecked, checked and partially checked.
 #
 ###############################################################################
-class TestFilterSelectedFiles():
+class TestFilterSelectedFiles:
+    test_list = [
+        "no_items",
+        "item_checked",
+        "item_partially_checked",
+        "item_unchecked",
+        "item_mixed",
+    ]
 
-	test_list = [
-		"no_items",
-		"item_checked",
-		"item_partially_checked",
-		"item_unchecked",
-		"item_mixed"
-	]
+    # -------------------------------------------------------------------------
+    @pytest.mark.parametrize("test_name", test_list)
+    def test(self, loadTestData, test_name):
+        input = loadTestData[test_name]["input"]
+        expected = loadTestData[test_name]["expected"]
 
-	# -------------------------------------------------------------------------
-	@pytest.mark.parametrize("test_name", test_list)
-	def test(self, loadTestData, test_name):
-		input = loadTestData[test_name]["input"]
-		expected = loadTestData[test_name]["expected"]
+        mock = Mock(Task)
+        mock_files_model = Mock(FilesModel)
+        mock_files_model.checks = MagicMock(return_value=input)
+        mock.filesSelected = MagicMock(return_value=mock_files_model)
 
-		mock = Mock(Task)
-		mock_files_model = Mock(FilesModel)
-		mock_files_model.checks = MagicMock(return_value = input)
-		mock.filesSelected = MagicMock(return_value = mock_files_model)
+        zip_packer = ZipPacker(mock)
+        items_to_pack = zip_packer._Packer__filterSelectedFiles()
 
-		zip_packer = ZipPacker(mock)
-		items_to_pack = zip_packer._Packer__filterSelectedFiles()
-
-		assert items_to_pack == expected
+        assert items_to_pack == expected
 
 
 ###############################################################################
@@ -218,7 +223,7 @@ class TestFilterSelectedFiles():
 #
 # -----------------------------------------------------------------------------
 # Description:
-#		Copy items to pack into a temporary folder.
+# Copy items to pack into a temporary folder.
 #
 # -----------------------------------------------------------------------------
 # - no_items: no items.
@@ -228,162 +233,146 @@ class TestFilterSelectedFiles():
 # - file_and_dir: .
 #
 ###############################################################################
-class TestCopyItemsToTmpFolder():
+class TestCopyItemsToTmpFolder:
+    test_list = ["no_items", "one_file", "complete_dir", "empty_dir", "file_and_dir"]
 
-	test_list = [
-		"no_items",
-		"one_file",
-		"complete_dir",
-		"empty_dir",
-		"file_and_dir"
-	]
+    # -------------------------------------------------------------------------
+    @pytest.mark.parametrize("test_name", test_list)
+    def test(self, createFileHierarchy, loadTestData, test_name, tmp_path):
+        input = loadTestData[test_name]["input"]
+        expected = loadTestData[test_name]["expected"]
 
-	# -------------------------------------------------------------------------
-	@pytest.mark.parametrize("test_name", test_list)
-	def test(self, createFileHierarchy, loadTestData, test_name, tmp_path):
-		input = loadTestData[test_name]["input"]
-		expected = loadTestData[test_name]["expected"]
-		
-		mock_files_model = Mock(FilesModel)
-		mock_files_model.rootPath = MagicMock(return_value = joinPath(tmp_path, "folder"))
+        mock_files_model = Mock(FilesModel)
+        mock_files_model.rootPath = MagicMock(return_value=joinPath(tmp_path, "folder"))
 
-		mock_task = Mock(Task)
-		mock_task.filesSelected = MagicMock(return_value = mock_files_model)
+        mock_task = Mock(Task)
+        mock_task.filesSelected = MagicMock(return_value=mock_files_model)
 
-		zip_packer = ZipPacker(mock_task)
-		tmp_path_task = joinPath(tmp_path, "results", test_name)
-		zip_packer._Packer__copyItemsToTmpFolder(input, tmp_path_task)
+        zip_packer = ZipPacker(mock_task)
+        tmp_path_task = joinPath(tmp_path, "results", test_name)
+        zip_packer._Packer__copyItemsToTmpFolder(input, tmp_path_task)
 
-		for item in expected:
-			assert os.path.exists(item)
+        for item in expected:
+            assert os.path.exists(item)
+
 
 ###############################################################################
 # TEST FIND SNAPSHOTS
 #
 # -----------------------------------------------------------------------------
 # Description
-#		TODO
+# TODO
 #
 # -----------------------------------------------------------------------------
-# - input: 
-# - expected: 
+# - input:
+# - expected:
 #
 # -----------------------------------------------------------------------------
-# - 
+# -
 #
 ###############################################################################
-class TestFindSnapshots():
+class TestFindSnapshots:
+    test_list = ["find_4_snapshots"]
 
-	test_list = [
-		"find_4_snapshots"
-	]
+    # -------------------------------------------------------------------------
+    @pytest.fixture
+    def configureSettings(self, loadTestData, test_name):
+        settings = packySettings()
+        task_suffix = settings.value(PreferencesKeys.TASK_SUFFIX.value, type=int)
 
-	# -------------------------------------------------------------------------
-	@pytest.fixture
-	def configureSettings(self, loadTestData, test_name):
-		settings = packySettings()
-		task_suffix = settings.value(PreferencesKeys.TASK_SUFFIX.value, type = int)
+        test_task_suffix = loadTestData[test_name]["input"]["task_suffix"]
+        settings.setValue(PreferencesKeys.TASK_SUFFIX.value, test_task_suffix)
 
-		test_task_suffix = loadTestData[test_name]["input"]["task_suffix"]
-		settings.setValue(PreferencesKeys.TASK_SUFFIX.value, test_task_suffix)
+        yield
 
-		yield 
+        settings.setValue(PreferencesKeys.TASK_SUFFIX.value, task_suffix)
 
-		settings.setValue(PreferencesKeys.TASK_SUFFIX.value, task_suffix)
+    # -------------------------------------------------------------------------
+    @pytest.mark.parametrize("test_name", test_list)
+    def test(self, createFileHierarchy, loadTestData, configureSettings, test_name):
+        input = loadTestData[test_name]["input"]
+        expected = loadTestData[test_name]["expected"]
 
-	# -------------------------------------------------------------------------
-	@pytest.mark.parametrize("test_name", test_list)
-	def test(self, createFileHierarchy, loadTestData, configureSettings, test_name):
-		input = loadTestData[test_name]["input"]
-		expected = loadTestData[test_name]["expected"]
-		
-		mock_task = Mock(Task)
-		mock_task.rawDestFile = MagicMock(return_value = input["raw_dest_file"])
-		mock_task.destExtension = MagicMock(return_value = input["dest_extension"])
+        mock_task = Mock(Task)
+        mock_task.rawDestFile = MagicMock(return_value=input["raw_dest_file"])
+        mock_task.destExtension = MagicMock(return_value=input["dest_extension"])
 
-		zip_packer = ZipPacker(mock_task)
-		snapshots = zip_packer._Packer__findSnapshots()
+        zip_packer = ZipPacker(mock_task)
+        snapshots = zip_packer._Packer__findSnapshots()
 
-		assert sorted(snapshots) == sorted(expected)
+        assert sorted(snapshots) == sorted(expected)
+
 
 ###############################################################################
 # TEST REMOVE SNAPSHOTS
 #
 # -----------------------------------------------------------------------------
 # Description
-#		Remove snapshots according to the snapshot retention.
+# Remove snapshots according to the snapshot retention.
 #
 # -----------------------------------------------------------------------------
-# - input: 
-# - expected: 
+# - input:
+# - expected:
 #
 ###############################################################################
-class TestRemoveSnapshots():
+class TestRemoveSnapshots:
+    test_list = ["no_snapshot_to_remove", "one_snapshot_to_remove", "several_snapshot_to_remove"]
 
-	test_list = [
-		"no_snapshot_to_remove",
-		"one_snapshot_to_remove",
-		"several_snapshot_to_remove"
-	]
+    # -------------------------------------------------------------------------
+    @pytest.fixture
+    def configureSettings(self, loadTestData, test_name):
+        settings = packySettings()
+        nb_snapshot = settings.value(PreferencesKeys.GENERAL_NB_SNAPSHOT.value, type=int)
 
-	# -------------------------------------------------------------------------
-	@pytest.fixture
-	def configureSettings(self, loadTestData, test_name):
-		settings = packySettings()
-		nb_snapshot = settings.value(PreferencesKeys.GENERAL_NB_SNAPSHOT.value, type = int)
+        test_nb_snapshot = loadTestData[test_name]["input"]["nb_snapshot"]
+        settings.setValue(PreferencesKeys.GENERAL_NB_SNAPSHOT.value, test_nb_snapshot)
 
-		test_nb_snapshot = loadTestData[test_name]["input"]["nb_snapshot"]
-		settings.setValue(PreferencesKeys.GENERAL_NB_SNAPSHOT.value, test_nb_snapshot)
+        yield
 
-		yield 
+        settings.setValue(PreferencesKeys.GENERAL_NB_SNAPSHOT.value, nb_snapshot)
 
-		settings.setValue(PreferencesKeys.GENERAL_NB_SNAPSHOT.value, nb_snapshot)
+    # -------------------------------------------------------------------------
+    @pytest.mark.parametrize("test_name", test_list)
+    def test(self, createFileHierarchy, loadTestData, configureSettings, test_name):
+        input = loadTestData[test_name]["input"]
+        expected = loadTestData[test_name]["expected"]
 
-	# -------------------------------------------------------------------------
-	@pytest.mark.parametrize("test_name", test_list)
-	def test(self, createFileHierarchy, loadTestData, configureSettings, test_name):
-		input = loadTestData[test_name]["input"]
-		expected = loadTestData[test_name]["expected"]
+        mock_task = Mock(Task)
+        raw_dest_file = input["raw_dest_file"]
+        mock_task.rawDestFile = MagicMock(return_value=raw_dest_file)
 
-		mock_task = Mock(Task)
-		raw_dest_file = input["raw_dest_file"]
-		mock_task.rawDestFile = MagicMock(return_value = raw_dest_file)
+        zip_packer = ZipPacker(mock_task)
+        zip_packer._Packer__removeSnapshots(input["snapshots"])
 
-		zip_packer = ZipPacker(mock_task)
-		zip_packer._Packer__removeSnapshots(input["snapshots"])
+        snapshots_dir = os.path.dirname(raw_dest_file)
+        assert len(os.listdir(snapshots_dir)) == len(expected)
 
-		snapshots_dir = os.path.dirname(raw_dest_file)
-		assert len(os.listdir(snapshots_dir)) == len(expected)
+        for item in expected:
+            assert os.path.exists(item)
 
-		for item in expected:
-			assert os.path.exists(item)
 
 ###############################################################################
 # TEST CLEAN TMP FOLDER
 #
 # -----------------------------------------------------------------------------
 # Description
-#		TODO
+# TODO
 #
 # -----------------------------------------------------------------------------
-# - input:  
+# - input:
 #
 ###############################################################################
-class TestCleanTmpFolder():
+class TestCleanTmpFolder:
+    test_list = ["files", "tree_hierarchy"]
 
-	test_list = [
-		"files",
-		"tree_hierarchy"
-	]
+    # -------------------------------------------------------------------------
+    @pytest.mark.parametrize("test_name", test_list)
+    def test(self, createFileHierarchy, loadTestData, test_name):
+        input = loadTestData[test_name]["input"]
 
-	# -------------------------------------------------------------------------
-	@pytest.mark.parametrize("test_name", test_list)
-	def test(self, createFileHierarchy, loadTestData, test_name):
-		input = loadTestData[test_name]["input"]
+        mock_task = Mock(Task)
 
-		mock_task = Mock(Task)
+        zip_packer = ZipPacker(mock_task)
+        zip_packer._Packer__cleanTmpFolder(input)
 
-		zip_packer = ZipPacker(mock_task)
-		zip_packer._Packer__cleanTmpFolder(input)
-
-		assert os.path.exists(input) is False
+        assert os.path.exists(input) is False

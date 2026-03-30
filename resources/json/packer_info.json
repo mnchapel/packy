@@ -1,38 +1,85 @@
 {
-	"zip": {
-		"methods": ["Stored", "Deflated"],
-		"levels": [["None"], ["No compression", "Best compression", "Default", "Best speed"]]
-	},
-	"tar": {
-		"methods": [""],
-		"levels": [""]
-	},
-	"bz2": {
-		"methods": [""],
-		"levels": [""]
-	},
-	"tbz": {
-		"methods": [""],
-		"levels": [""]
-	},
-	"gz": {
-		"methods": [""],
-		"levels": [""]
-	},
-	"tgz": {
-		"methods": [""],
-		"levels": [""]
-	},
-	"lzma": {
-		"methods": ["LZMA"],
-		"levels": [["None"]]
-	},
-	"tlz": {
-		"methods": [""],
-		"levels": [""]
-	},
-	"xz": {
-		"methods": [""],
-		"levels": [""]
-	}
+  "zip": {
+    "methods": [
+      "Stored",
+      "Deflated"
+    ],
+    "levels": [
+      [
+        "None"
+      ],
+      [
+        "No compression",
+        "Best compression",
+        "Default",
+        "Best speed"
+      ]
+    ]
+  },
+  "tar": {
+    "methods": [
+      ""
+    ],
+    "levels": [
+      ""
+    ]
+  },
+  "bz2": {
+    "methods": [
+      ""
+    ],
+    "levels": [
+      ""
+    ]
+  },
+  "tbz": {
+    "methods": [
+      ""
+    ],
+    "levels": [
+      ""
+    ]
+  },
+  "gz": {
+    "methods": [
+      ""
+    ],
+    "levels": [
+      ""
+    ]
+  },
+  "tgz": {
+    "methods": [
+      ""
+    ],
+    "levels": [
+      ""
+    ]
+  },
+  "lzma": {
+    "methods": [
+      "LZMA"
+    ],
+    "levels": [
+      [
+        "None"
+      ]
+    ]
+  },
+  "tlz": {
+    "methods": [
+      ""
+    ],
+    "levels": [
+      ""
+    ]
+  },
+  "xz": {
+    "methods": [
+      ""
+    ],
+    "levels": [
+      ""
+    ]
+  }
 }

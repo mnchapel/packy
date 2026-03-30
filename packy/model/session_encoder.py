@@ -10,17 +10,17 @@ COPYING.md file in the root directory of this source tree.
 import json
 from typing_extensions import override
 
+
 ###############################################################################
 class SessionEncoder(json.JSONEncoder):
-	
-	###########################################################################
-	# PUBLIC MEMBER FUNCTIONS
-	###########################################################################
+    ###########################################################################
+    # PUBLIC MEMBER FUNCTIONS
+    ###########################################################################
 
-	# -------------------------------------------------------------------------
-	@override
-	def default(self, obj):
-		if hasattr(obj, "serialize"):
-			return obj.serialize()
-		else:
-			return super.default(obj)
+    # -------------------------------------------------------------------------
+    @override
+    def default(self, obj):
+        if hasattr(obj, "serialize"):
+            return obj.serialize()
+        else:
+            return super.default(obj)

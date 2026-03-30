@@ -9,6 +9,12 @@ COPYING.md file in the root directory of this source tree.
 # PyQt
 from PyQt6.QtCore import QCoreApplication, QSettings
 
+
 # -----------------------------------------------------------------------------
 def packySettings():
-	return QSettings(QSettings.Format.IniFormat, QSettings.Scope.UserScope, QCoreApplication.organizationName(), QCoreApplication.applicationName())
+    return QSettings(
+        QSettings.Format.IniFormat,
+        QSettings.Scope.UserScope,
+        QCoreApplication.organizationName(),
+        QCoreApplication.applicationName(),
+    )

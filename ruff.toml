@@ -1,0 +1,6 @@
+indent-width = 4
+line-length = 100
+
+[format]
+indent-style = "space"
+docstring-code-format = true

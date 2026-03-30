@@ -11,24 +11,26 @@ import os
 import sys
 from enum import Enum
 
+
 # -----------------------------------------------------------------------------
 class ExternalData(Enum):
-	METADATA = "yaml/metadata.yml"
-	LOGO = "img/logo.ico"
-	PACKER_INFO = "json/packer_info.json"
-	JSON_SCHEMA = "json/session_schema.json"
-	UI_ABOUT = "ui/about.ui"
-	UI_FIX_WARNINGS = "ui/fix_warnings.ui"
-	UI_OPTIONS = "ui/options.ui"
+    METADATA = "yaml/metadata.yml"
+    LOGO = "img/logo.ico"
+    PACKER_INFO = "json/packer_info.json"
+    JSON_SCHEMA = "json/session_save_schema.json"
+    UI_ABOUT = "ui/about.ui"
+    UI_FIX_WARNINGS = "ui/fix_warnings.ui"
+    UI_OPTIONS = "ui/options.ui"
+
 
 # -----------------------------------------------------------------------------
 def external_data_path(ExternalData):
-	resources_path = ""
+    resources_path = ""
 
-	if hasattr(sys, "_MEIPASS"):
-		resources_path = os.path.join(sys._MEIPASS, "resources")
-	else:
-		current_dir = os.path.dirname(__file__)
-		resources_path = os.path.join(current_dir, "../../resources")
-	
-	return os.path.join(resources_path, ExternalData.value)
+    if hasattr(sys, "_MEIPASS"):
+        resources_path = os.path.join(sys._MEIPASS, "resources")
+    else:
+        current_dir = os.path.dirname(__file__)
+        resources_path = os.path.join(current_dir, "../../resources")
+
+    return os.path.join(resources_path, ExternalData.value)

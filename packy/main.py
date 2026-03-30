@@ -18,10 +18,12 @@ from model.log import messageHandler
 from view.main_window import MainWindow
 from utils.external_data_access import ExternalData, external_data_path
 
+
 # -----------------------------------------------------------------------------
 def initLog() -> None:
-	QtCore.qInstallMessageHandler(messageHandler)
-	QtCore.qDebug("Log starts debug")
+    QtCore.qInstallMessageHandler(messageHandler)
+    QtCore.qDebug("Log starts debug")
+
 
 # -----------------------------------------------------------------------------
 app = QtWidgets.QApplication(sys.argv)

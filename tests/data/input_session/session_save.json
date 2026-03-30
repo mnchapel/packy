@@ -1,0 +1,146 @@
+{
+    "version": "0.9.0.0",
+    "session_name": "session_save.json",
+    "dirname": "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_session",
+    "tasks": [
+        {
+            "id": 6,
+            "checked": 2,
+            "files_model": {
+                "root_path": "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_01",
+                "check": {
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_01/folder_30": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_01/folder_10": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_01/folder_10/file_01.txt": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_01/folder_10/file_02.txt": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_01/folder_10/file_03.txt": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_01/folder_10/folder_100": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_01/folder_10/folder_200": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_01/folder_10/folder_300": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_01/folder_20": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_01/folder_20/file_01.txt": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_01/folder_20/file_02.txt": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_01/folder_20/file_03.txt": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_01/file_01.txt": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_01/file_02.txt": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_01/file_03.txt": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_01/file_04.txt": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_01/file_05.txt": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_01/file_07.txt": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_01/file_06.txt": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_01/folder_10/folder_100/file_01.txt": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_01/folder_10/folder_100/file_02.txt": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_01/folder_10/folder_100/file_03.txt": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_01/folder_10/folder_200/file_01.txt": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_01/folder_10/folder_200/file_02.txt": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_01/folder_10/folder_200/file_03.txt": 2
+                }
+            },
+            "packer_data": {
+                "type": 0,
+                "compression_method": 0,
+                "compression_level": 0
+            },
+            "dst_raw_basename": "software_01",
+            "dst_folder": "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/output_archives"
+        },
+        {
+            "id": 7,
+            "checked": 2,
+            "files_model": {
+                "root_path": "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_02",
+                "check": {
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_02/folder_30": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_02/folder_20": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_02/folder_20/file_01.txt": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_02/folder_20/file_02.txt": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_02/folder_20/file_03.txt": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_02/folder_10": 1,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_02/folder_10/file_01.txt": 0,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_02/folder_10/file_02.txt": 0,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_02/folder_10/file_03.txt": 0,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_02/folder_10/folder_100": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_02/folder_10/folder_200": 0,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_02/folder_10/folder_300": 0,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_02/folder_10/folder_100/file_01.txt": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_02/folder_10/folder_100/file_02.txt": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_02/folder_10/folder_100/file_03.txt": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_02/file_01.txt": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_02/file_02.txt": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_02/file_03.txt": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_02/file_04.txt": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_02/file_05.txt": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_02/file_06.txt": 2,
+                    "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_02/file_07.txt": 2
+                }
+            },
+            "packer_data": {
+                "type": 0,
+                "compression_method": 0,
+                "compression_level": 0
+            },
+            "dst_raw_basename": "software_02",
+            "dst_folder": "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/output_archives"
+        },
+        {
+            "id": 8,
+            "checked": 2,
+            "files_model": {
+                "root_path": "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_03",
+                "check": {}
+            },
+            "packer_data": {
+                "type": 0,
+                "compression_method": 0,
+                "compression_level": 0
+            },
+            "dst_raw_basename": "software_03",
+            "dst_folder": "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/output_archives"
+        },
+        {
+            "id": 9,
+            "checked": 2,
+            "files_model": {
+                "root_path": "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_04",
+                "check": {}
+            },
+            "packer_data": {
+                "type": 0,
+                "compression_method": 0,
+                "compression_level": 0
+            },
+            "dst_raw_basename": "software_04",
+            "dst_folder": "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/output_archives"
+        },
+        {
+            "id": 10,
+            "checked": 2,
+            "files_model": {
+                "root_path": "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_05",
+                "check": {}
+            },
+            "packer_data": {
+                "type": 0,
+                "compression_method": 0,
+                "compression_level": 0
+            },
+            "dst_raw_basename": "software_05",
+            "dst_folder": "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/output_archives"
+        },
+        {
+            "id": 11,
+            "checked": 2,
+            "files_model": {
+                "root_path": "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/input_file_system/software_without_files",
+                "check": {}
+            },
+            "packer_data": {
+                "type": 0,
+                "compression_method": 0,
+                "compression_level": 0
+            },
+            "dst_raw_basename": "software_06",
+            "dst_folder": "C:/Users/garnj/2_Projets/2.3.13.600_Packy/P4_Realisation/dev/tests/data/output_archives"
+        }
+    ]
+}

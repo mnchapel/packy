@@ -10,10 +10,12 @@ COPYING.md file in the root directory of this source tree.
 import os
 import re
 
+
 # -----------------------------------------------------------------------------
 def camelCaseToSnakeCase(value: str) -> str:
-	return re.sub(r"(?<!^)(?=[A-Z])", "_", value).lower()
+    return re.sub(r"(?<!^)(?=[A-Z])", "_", value).lower()
+
 
 # -----------------------------------------------------------------------------
 def joinPath(path, *paths):
-	return os.path.join(path, *paths).replace("\\", "/")
+    return os.path.join(path, *paths).replace("\\", "/")

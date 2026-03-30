@@ -10,12 +10,13 @@ COPYING.md file in the root directory of this source tree.
 from model.task import Task
 from model.zip_packer import ZipPacker
 
+
 # -----------------------------------------------------------------------------
 def createPacker(task: Task):
-	extension = task.packerData().extension()
+    extension = task.packerData().extension()
 
-	match extension:
-		case "zip" | "lzma":
-			return ZipPacker(task)
-		case _:
-			raise Exception("[createPacker] extension not recognized.")
+    match extension:
+        case "zip" | "lzma":
+            return ZipPacker(task)
+        case _:
+            raise Exception("[createPacker] extension not recognized.")

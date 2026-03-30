@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/session_save.json",
+  "description": "Schema for defining archive session configurations and file archiving tasks",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "description": "The schema against which to verify this document",
+      "type": "string",
+      "format": "uri-reference"
+    },
+    "$id": {
+      "description": "A unique identifier for the schema resource",
+      "type": "string",
+      "format": "uri-reference"
+    },
+    "version": {
+      "description": "The software version compatible with this data structure",
+      "type": "string",
+      "minLength": 1
+    },
+    "session_name": {
+      "description": "The descriptive name of the session",
+      "type": "string",
+      "minLength": 1
+    },
+    "dirname": {
+      "description": "Absolute path to the directory where archives are generated",
+      "type": "string",
+      "pattern": "^([a-zA-Z]:[\\\\/]|/)[^<>:\"|?*]+$"
+    },
+    "tasks": {
+      "description": "A list of archive batch creation tasks",
+      "type": "array",
+      "items": {
+        "description": "Configuration parameters for a specific task.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "The unique task identifier",
+            "type": "integer",
+            "minimum": 0
+          },
+          "checked": {
+            "description": "Task selection state between Unchecked (value 0), Checked (value 1), or Indeterminate (value 2)",
+            "type": "integer",
+            "enum": [0, 1, 2]
+          },
+          "files_model": {
+            "description": "Definition of files to be included in the archive",
+            "type": "object",
+            "properties": {
+              "root_path": {
+                "description": "Absolute path to the source directory containing files to be archived",
+                "pattern": "^([a-zA-Z]:[\\\\/]|/)[^<>:\"|?*]+$"
+              },
+              "check": {
+                "description": "A map of absolute file paths to their inclusion status",
+                "type": "object",
+                "patternProperties": {
+                  "^([a-zA-Z]:[\\\\/]|/)[^<>:\"|?*]+(?:\\.[a-zA-Z0-9]+)?$": {
+                    "description": "The selection status of the file between Unchecked (value 0), Checked (value 1), or Indeterminate (value 2)",
+                    "type": "integer",
+                    "enum": [0, 1, 2]
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "root_path",
+              "check"
+            ],
+            "additionalProperties": false
+          },
+          "packer_data": {
+            "description": "Configuration settings for the archiving tool",
+            "type": "object",
+            "properties": {
+              "type": {
+                "description": "The numeric ID of the archiving tool to be used",
+                "type": "integer",
+                "minimum": 0
+              },
+              "compression_method": {
+                "description": "The numeric ID of the compression algorithm",
+                "type": "integer",
+                "minimum": 0
+              },
+              "compression_level": {
+                "description": "The compression intensity level (0 for no compression)",
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "type",
+              "compression_method",
+              "compression_level"
+            ],
+            "additionalProperties": false
+          },
+          "dst_raw_basename": {
+            "description": "The base filename of the archive in the destination directory (excluding extension)",
+            "type": "string",
+            "minLength": 1
+          },
+          "dst_folder": {
+            "description": "Absolute path to the destination directory for the archive",
+            "pattern": "^([a-zA-Z]:[\\\\/]|/)[^<>:\"|?*]+$"
+          }
+        },
+        "required": [
+          "id",
+          "checked",
+          "files_model",
+          "packer_data",
+          "dst_raw_basename",
+          "dst_folder"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+    "required": [
+    "version",
+    "session_name",
+    "dirname",
+    "tasks"
+  ],
+  "additionalProperties": false
+}
