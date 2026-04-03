@@ -1,74 +1,128 @@
-"""
+"""Model representing a file system with checkable items.
+
+This model extends ``QFileSystemModel`` to add support for check states
+on files and directories, allowing users to select items within a
+directory tree. It also tracks differences between the current file
+system and the stored selection through a warnings system.
+
 Copyright 2023-present, Marie-Neige Chapel
 All rights reserved.
 
-This source code is licensed under the license found in the
-COPYING.md file in the root directory of this source tree.
+See COPYING.md file for more information.
 """
 
-# Python
+# Standard library
 import os
 from enum import Enum
+from pathlib import Path
+from typing import Any
 
-# PyQt
+# Third-party
 from PyQt6 import QtCore
-from PyQt6.QtCore import Qt, QModelIndex, QDir
+from PyQt6.QtCore import QDir, QModelIndex, QObject, Qt
 from PyQt6.QtGui import QFileSystemModel
+from typing_extensions import override
 
-# PackY
+# Local application
 from model.warnings import Warnings
 
 
 ###############################################################################
 class FilesModelSerialKeys(Enum):
+    """Enumeration of keys used for FilesModel serialization.
+
+    These keys are used when converting a FilesModel instance to and from
+    a dictionary (e.g., for JSON serialization).
+
+    Attributes:
+        ROOT_PATH (str):
+            Key representing the root directory path of the model.
+        CHECK (str):
+            Key representing the mapping of file paths to their check states.
+    """
+
     ROOT_PATH = "root_path"
     CHECK = "check"
 
 
 ###############################################################################
 class FilesModel(QFileSystemModel):
-    ###########################################################################
-    # PRIVATE MEMBER VARIABLES
-    #
-    # __check_state_items: a dict with the check state for files and
-    #                      directories. If an item is not in the dict,
-    #                      its value is Qt.CheckState.Unchecked.value by
-    #                      default.
-    # __warnings: an object which contains the modifications (added/removed
-    #             items) between the model and the current selection.
-    ###########################################################################
+    """File system model with checkable items and integrity tracking.
 
-    ###########################################################################
-    # SPECIAL METHODS
-    ###########################################################################
+    This class extends ``QFileSystemModel`` to add support for check states
+    on files and directories. It allows users to select items in a directory
+    tree and keeps track of changes between the current file system and the
+    stored selection using a warnings mechanism.
+
+    The model maintains an internal mapping of file paths to their check
+    states. Items not explicitly stored in this mapping are considered
+    unchecked by default.
+
+    It also provides utilities to detect added or removed files relative
+    to the stored selection and to update the model accordingly.
+
+    Attributes:
+        __check_state_items (dict[str, int]):
+            a dict with the check state for files and directories. If an item is not in the dict,
+            its value is Qt.CheckState.Unchecked.value by default.
+        __warnings (Warnings):
+            an object which contains the modifications (added/removed items) between the model
+            and the current selection.
+    """
+
+    __check_state_items: dict[str, int]
+    __warnings: Warnings
 
     # -------------------------------------------------------------------------
-    def __init__(self, json_dict: dict = None, parent=None):
-        super(FilesModel, self).__init__()
+    def __init__(
+        self,
+        json_dict: dict[str, Any] | None = None,
+        parent: QObject | None = None,
+    ) -> None:
+        """Initializes the file system model.
 
+        Args:
+                json_dict (dict, optional):
+                    Serialized representation of the model used to restore its state.
+                    Defaults to None.
+                parent (QObject, optional):
+                    Parent object passed to the underlying Qt model.
+        """
+        super().__init__(parent)
         self.__init(json_dict)
 
     # -------------------------------------------------------------------------
     def __repr__(self) -> str:
+        """Returns a string representation of the model."""
         return f"files_model: root_path = {self.rootPath()}, check = {{{self.__checksToStr()}}}"
 
     # -------------------------------------------------------------------------
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
+        """Checks if two FilesModel instances are equal."""
+        if not isinstance(other, FilesModel):
+            return NotImplemented
         return (
             self.rootPath() == other.rootPath()
             and self.__check_state_items == other.__check_state_items
         )
+
+    # -------------------------------------------------------------------------
+    def __hash__(self) -> int:
+        """Returns the hash of the model."""
+        return hash((self.rootPath(), tuple(sorted(self.__check_state_items.items()))))
 
     ###########################################################################
     # GETTERS
     ###########################################################################
 
     # -------------------------------------------------------------------------
-    def checks(self):
+    def checks(self) -> dict[str, int]:
+        """Returns the dictionary of check states."""
         return self.__check_state_items
 
     # -------------------------------------------------------------------------
-    def warnings(self):
+    def warnings(self) -> Warnings:
+        """Returns the warnings object."""
         return self.__warnings
 
     ###########################################################################
@@ -76,18 +130,19 @@ class FilesModel(QFileSystemModel):
     ###########################################################################
 
     # -------------------------------------------------------------------------
-    # @override
-    def data(self, index: QModelIndex, role=Qt.ItemDataRole.DisplayRole):
+    @override
+    def data(self, index: QModelIndex, role: int = Qt.ItemDataRole.DisplayRole) -> Any:
         match role:
             case Qt.ItemDataRole.CheckStateRole:
                 if index.column() == 0:
                     return self.__checkState(index)
+                return None
             case _:
-                return QFileSystemModel.data(self, index, role)
+                return super().data(index, role)
 
     # -------------------------------------------------------------------------
-    # @override
-    def setData(self, index: QModelIndex, value, role: Qt.ItemDataRole):
+    @override
+    def setData(self, index: QModelIndex, value: Any, role: int = Qt.ItemDataRole.EditRole) -> bool:
         match role:
             case Qt.ItemDataRole.CheckStateRole:
                 if index.column() == 0:
@@ -98,59 +153,66 @@ class FilesModel(QFileSystemModel):
                     self.__updateParentFiles(index, value)
 
                     return True
-                else:
-                    QtCore.qDebug(
-                        f"Wrong index.column() = {index.column()}. Index column should be equal to 0."
-                    )
-                    return False
+
+                QtCore.qDebug(
+                    f"Wrong index.column() = {index.column()}. Index column should be equal to 0.",
+                )
+                return False
             case _:
-                return QFileSystemModel.setData(self, index, value, role)
+                return super().setData(index, value, role)
 
     # -------------------------------------------------------------------------
-    # @override
-    def flags(self, index):
-        return QFileSystemModel.flags(self, index) | Qt.ItemFlag.ItemIsUserCheckable
+    @override
+    def flags(self, index: QModelIndex) -> Qt.ItemFlag:
+        return super().flags(index) | Qt.ItemFlag.ItemIsUserCheckable
 
     # -------------------------------------------------------------------------
-    # @override
-    def setRootPath(self, path: str) -> QModelIndex:
+    @override
+    def setRootPath(self, path: str | None) -> QModelIndex:
         self.__check_state_items.clear()
         self.__warnings.clear()
 
-        return QFileSystemModel.setRootPath(self, path)
+        return super().setRootPath(path)
 
     # -------------------------------------------------------------------------
-    def listNewItems(self, dir_path: str):
-        for root, dirs, files in os.walk(dir_path):
+    def listNewItems(self, dir_path: str) -> None:
+        """Scan the root directory to add new files to the model.
+
+        Identify untracked items and add them to warnings.
+        """
+        for root, _, files in os.walk(dir_path):
             for name in files:
-                item = os.path.join(root, name).replace("\\", "/")
-                if item not in self.__check_state_items:
-                    self.__warnings.addAddedItem(item)
+                item = Path(root) / name
+                if str(item) not in self.__check_state_items:
+                    self.__warnings.addAddedItem(str(item))
 
     # -------------------------------------------------------------------------
-    def serialize(self):
-        dict = {}
+    def serialize(self) -> dict[str, Any]:
+        """Serialize the current instance into a JSON-compatible dictionary."""
+        data_dict: dict[str, Any] = {}
 
-        dict[FilesModelSerialKeys.ROOT_PATH.value] = self.rootPath()
-        dict[FilesModelSerialKeys.CHECK.value] = self.__checksToStr()
+        data_dict[FilesModelSerialKeys.ROOT_PATH.value] = self.rootPath()
+        data_dict[FilesModelSerialKeys.CHECK.value] = self.__checksToStr()
 
-        return dict
+        return data_dict
 
     # -------------------------------------------------------------------------
-    def checkIntegrity(self):
+    def checkIntegrity(self) -> None:
+        """Check if checked items still exist and update warnings accordingly."""
         for item in self.__check_state_items:
             if self.__isItemChecked(item):
                 # Removed item?
                 if not self.__doesExists(item):
                     self.__warnings.addRemovedItem(item)
                 # Added item?
-                elif os.path.isdir(item):
+                elif Path(item).is_dir():
                     self.listNewItems(item)
                 elif self.__warnings.isInAddedCandidateItems(item):
                     self.__warnings.addAddedItem(item)
 
     # -------------------------------------------------------------------------
-    def updateModel(self):
+    def updateModel(self) -> None:
+        """Update the internal state based on current warnings."""
         removed_items = self.__warnings.removedItems()
         for item in removed_items:
             del self.__check_state_items[item]
@@ -166,41 +228,40 @@ class FilesModel(QFileSystemModel):
     ###########################################################################
 
     # -------------------------------------------------------------------------
-    def __init(self, json_dict: dict):
-
+    def __init(self, json_dict: dict[str, Any] | None) -> None:
         self.__defaultInit()
 
         if json_dict is not None:
             self.__jsonInit(json_dict)
 
         self.__initFilter()
-        self.rowsInserted.connect(self.__checkIfAddedItems)
+        self.rowsInserted.connect(self.__checkIfAddedItems)  # type: ignore[reportUnknownMemberType]
 
     # -------------------------------------------------------------------------
-    def __defaultInit(self):
+    def __defaultInit(self) -> None:
         self.__check_state_items = {}
         self.__warnings = Warnings()
 
     # -------------------------------------------------------------------------
-    def __jsonInit(self, json_dict: dict):
+    def __jsonInit(self, json_dict: dict[str, Any]) -> None:
         self.setRootPath(json_dict[FilesModelSerialKeys.ROOT_PATH.value])
         self.__check_state_items = json_dict[FilesModelSerialKeys.CHECK.value]
         self.checkIntegrity()
 
     # -------------------------------------------------------------------------
-    def __initFilter(self):
-        filter = self.filter()
-        self.setFilter(filter | QDir.Filter.Hidden)
+    def __initFilter(self) -> None:
+        file_filter = self.filter()
+        self.setFilter(file_filter | QDir.Filter.Hidden)
 
     # -------------------------------------------------------------------------
-    def __updateChildFiles(self, index: QModelIndex, value, role: Qt.ItemDataRole):
+    def __updateChildFiles(self, index: QModelIndex, value: int, role: Qt.ItemDataRole) -> None:
         if value != Qt.CheckState.PartiallyChecked.value:
             for i in range(self.rowCount(index)):
                 child_index = self.index(i, 0, index)
                 self.setData(child_index, value, role)
 
     # -------------------------------------------------------------------------
-    def __updateParentFiles(self, index: QModelIndex, value):
+    def __updateParentFiles(self, index: QModelIndex, value: int) -> None:
         match value:
             case Qt.CheckState.Checked.value:
                 self.__propagateCheckToParents(index)
@@ -208,11 +269,11 @@ class FilesModel(QFileSystemModel):
                 self.__propagateUncheckToParents(index)
             case _:
                 QtCore.qDebug(
-                    f"The Qt.CheckState value {value} should not appear in this function."
+                    f"The Qt.CheckState value {value} should not appear in this function.",
                 )
 
     # -------------------------------------------------------------------------
-    def __propagateCheckToParents(self, index: QModelIndex):
+    def __propagateCheckToParents(self, index: QModelIndex) -> None:
         index_parent = index.parent()
 
         if index_parent == QModelIndex():
@@ -256,32 +317,22 @@ class FilesModel(QFileSystemModel):
         self.__propagateUncheckToParents(index_parent)
 
     # -------------------------------------------------------------------------
-    def __isItemChecked(self, item) -> bool:
-        if self.__checkState(item) == Qt.CheckState.Checked.value:
-            return True
-
-        return False
+    def __isItemChecked(self, item: QModelIndex | str) -> bool:
+        return self.__checkState(item) == Qt.CheckState.Checked.value
 
     # -------------------------------------------------------------------------
-    def __isItemPartiallyChecked(self, item) -> bool:
-        if self.__checkState(item) == Qt.CheckState.PartiallyChecked.value:
-            return True
-
-        return False
+    def __isItemPartiallyChecked(self, item: QModelIndex | str) -> bool:
+        return self.__checkState(item) == Qt.CheckState.PartiallyChecked.value
 
     # -------------------------------------------------------------------------
-    def __isItemUnchecked(self, item) -> bool:
-        if self.__checkState(item) == Qt.CheckState.Unchecked.value:
-            return True
-
-        return False
+    def __isItemUnchecked(self, item: QModelIndex | str) -> bool:
+        return self.__checkState(item) == Qt.CheckState.Unchecked.value
 
     # -------------------------------------------------------------------------
-    def __checkState(self, item) -> int:
+    def __checkState(self, item: QModelIndex | str) -> int:
         if isinstance(item, QModelIndex):
             return self.__checkStateIndex(item)
-        elif isinstance(item, str):
-            return self.__checkStatePath(item)
+        return self.__checkStatePath(item)
 
     # -------------------------------------------------------------------------
     def __checkStateIndex(self, index: QModelIndex) -> int:
@@ -291,8 +342,7 @@ class FilesModel(QFileSystemModel):
     def __checkStatePath(self, item_path: str) -> int:
         if item_path in self.__check_state_items:
             return self.__check_state_items[item_path]
-        else:
-            return Qt.CheckState.Unchecked.value
+        return Qt.CheckState.Unchecked.value
 
     # -------------------------------------------------------------------------
     def __updateCheckState(self, index: QModelIndex, check_state: Qt.CheckState) -> None:
@@ -300,18 +350,15 @@ class FilesModel(QFileSystemModel):
         self.dataChanged.emit(index, index)
 
     # -------------------------------------------------------------------------
-    def __checksToStr(self):
+    def __checksToStr(self) -> dict[str, int]:
         return {str(key): value for key, value in self.__check_state_items.items()}
 
     # -------------------------------------------------------------------------
     def __doesExists(self, item_path: str) -> bool:
-        if os.path.exists(item_path):
-            return True
-
-        return False
+        return Path(item_path).exists()
 
     # -------------------------------------------------------------------------
-    def __checkIfAddedItems(self, parent: QModelIndex, first: int, last: int):
+    def __checkIfAddedItems(self, parent: QModelIndex, first: int, last: int) -> None:
         for i in range(first, last + 1):
             child = self.index(i, 0, parent)
             if self.__isItemUnchecked(child):
