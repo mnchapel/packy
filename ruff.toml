@@ -1,6 +1,21 @@
 indent-width = 4
 line-length = 100
 
+[lint]
+select = ["ALL"]
+ignore = [
+  "N802", # invalid-function-name
+]
+fixable = ["ALL"]
+unfixable = []
+
 [format]
+quote-style = "double"
 indent-style = "space"
 docstring-code-format = true
+
+[lint.pydocstyle]
+convention = "google"
+
+[lint.isort]
+known-first-party = ["packy"]
