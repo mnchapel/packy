@@ -28,6 +28,7 @@ from model.task import TaskProperties
 from model.session import Session
 from model.session_encoder import SessionEncoder
 from model.session_decoder import SessionDecoder
+from view.tree_view_proxy_model import TreeViewProxyModel
 from utils.external_data_access import ExternalData, external_data_path
 from view.about import About
 from view.options import Options
@@ -203,9 +204,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------------------------------------------------
     def __updateFilesSelection(self) -> None:
         files_model = self.__selected_task.filesSelected()
+        root_path = files_model.rootPath()
 
-        self.tree_view_source.setModel(files_model)
-        self.tree_view_source.setRootIndex(files_model.index(files_model.rootPath()))
+        filtering_model = TreeViewProxyModel(root_path)
+        filtering_model.setSourceModel(files_model)
+        self.tree_view_source.setModel(filtering_model)
+
+        parent_index = files_model.index(root_path).parent()
+        proxy_parent_index = filtering_model.mapFromSource(parent_index)
+        self.tree_view_source.setRootIndex(proxy_parent_index)
 
         for col_index in range(1, files_model.columnCount()):
             self.tree_view_source.setColumnHidden(col_index, True)
@@ -499,14 +506,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------------------------------------------------
     def __selectSourceFolder(self):
         files_model = self.__selected_task.filesSelected()
-        folder_selected = QFileDialog.getExistingDirectory(
+        selected_folder = QFileDialog.getExistingDirectory(
             self, "Select folder", self.line_edit_source.text(), QFileDialog.Option.ShowDirsOnly
         )
 
-        if folder_selected:
-            self.line_edit_source.setText(folder_selected)
-            files_model.setRootPath(folder_selected)
-            self.tree_view_source.setRootIndex(files_model.index(folder_selected))
+        if selected_folder:
+            self.line_edit_source.setText(selected_folder)
+            files_model.setRootPath(selected_folder)
+
+            filtering_model = TreeViewProxyModel(selected_folder)
+            filtering_model.setSourceModel(files_model)
+            self.tree_view_source.setModel(filtering_model)
+
+            parent_index = files_model.index(selected_folder).parent()
+            proxy_parent_index = filtering_model.mapFromSource(parent_index)
+            self.tree_view_source.setRootIndex(proxy_parent_index)
 
     # -------------------------------------------------------------------------
     def __selectDestinationFile(self):
