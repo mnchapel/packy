@@ -1,0 +1,93 @@
+// ChatGPT suggestion A (préféré):
+{
+  "version": 1,
+  "roots": [
+    {
+      "id": "root-1",
+      "path": "/home/user/project",
+      "type": "directory",
+      "state": "partial",
+      "children": [
+        {
+          "id": "dir-1",
+          "name": "src",
+          "type": "directory",
+          "state": "checked",
+          "children": [
+            {
+              "id": "file-1",
+              "name": "index.js",
+              "type": "file",
+              "state": "checked"
+            }
+          ]
+        },
+        {
+          "id": "file-2",
+          "name": "README.md",
+          "type": "file",
+          "state": "unchecked"
+        }
+      ]
+    }
+  ]
+}
+
+// ChatGPT suggestion B:
+{
+  "version": 1,
+  "roots": [
+    {
+      "id": "root-1",
+      "path": "/projectA"
+    }
+  ],
+  "nodes": {
+    "uuid-dir-1": {
+      "id": "uuid-dir-1",
+      "name": "src",
+      "type": "directory",
+      "parent": "root-1",
+      "children": ["uuid-file-1"]
+    },
+    "uuid-file-1": {
+      "id": "uuid-file-1",
+      "name": "index.js",
+      "type": "file",
+      "parent": "uuid-dir-1"
+    }
+  },
+  "selection": {
+    "uuid-dir-1": "checked",
+    "uuid-file-1": "checked"
+  }
+}
+
+// Gemini
+{
+  "version": "1.0",
+  "last_updated": "2026-03-29T10:50:00Z",
+  "roots": [
+    {
+      "path": "/home/user/projects",
+      "name": "projects",
+      "type": "directory",
+      "selection_state": "partial",
+      "children": [
+        {
+          "path": "/home/user/projects/src",
+          "name": "src",
+          "type": "directory",
+          "selection_state": "checked",
+          "children": [] 
+        },
+        {
+          "path": "/home/user/projects/README.md",
+          "name": "README.md",
+          "type": "file",
+          "selection_state": "unchecked"
+        }
+      ]
+    }
+  ]
+}
