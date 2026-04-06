@@ -2,12 +2,14 @@
 Copyright 2023-present, Marie-Neige Chapel
 All rights reserved.
 
-This source code is licensed under the license found in the
-COPYING.md file in the root directory of this source tree.
+See LICENCE.md file for more information.
 """
 
 
 ###############################################################################
+from typing import Any
+
+
 class Warnings:
     ###########################################################################
     # PRIVATE MEMBER VARIABLES
@@ -47,11 +49,11 @@ class Warnings:
     ###########################################################################
 
     # -------------------------------------------------------------------------
-    def addedItems(self):
+    def addedItems(self) -> list[Any]:
         return self.__added_items
 
     # -------------------------------------------------------------------------
-    def removedItems(self):
+    def removedItems(self) -> list[Any]:
         return self.__removed_items
 
     ###########################################################################

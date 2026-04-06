@@ -8,7 +8,7 @@ system and the stored selection through a warnings system.
 Copyright 2023-present, Marie-Neige Chapel
 All rights reserved.
 
-See COPYING.md file for more information.
+See LICENCE.md file for more information.
 """
 
 # Standard library
