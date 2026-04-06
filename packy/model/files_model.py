@@ -15,13 +15,12 @@ See COPYING.md file for more information.
 import os
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import Any, override
 
 # Third-party
 from PyQt6 import QtCore
 from PyQt6.QtCore import QDir, QModelIndex, QObject, Qt
 from PyQt6.QtGui import QFileSystemModel
-from typing_extensions import override
 
 # Local application
 from model.warnings import Warnings
