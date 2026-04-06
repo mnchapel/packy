@@ -40,7 +40,7 @@ This software is intended to remain simple, so there are no plans to add many mo
 1. Create a virtual environment with conda:
 
     ```console
-    conda create -n <env_name> python=3.11
+    conda create -n <env_name> python=3.14.3
     ```
 
 2. Activate the virtual environment:
@@ -60,10 +60,11 @@ This software is intended to remain simple, so there are no plans to add many mo
     - Individually:
 
       ```console
-      pip install PyQt6
+      pip install pyside6
       pip install pyyaml
       pip install typing_extensions
       pip install jsonschema
+      pip install pytest
       ```
 
 4. Run Packy:
@@ -71,3 +72,17 @@ This software is intended to remain simple, so there are no plans to add many mo
     ```console
     python packy\main.py
     ```
+
+### Deployment
+
+- Generate the `requirements.txt` file :
+
+    1. Install the dependency pipreqs int he project virtual environment with `pip install pipreqs`.
+
+    2. Check the result preview with the command `pipreqs --print`.
+
+    3. Export a requirements file : `pipreqs --savepath requirements.txt`.
+
+## Ressources
+
+- [PySide6 official documentation](https://doc.qt.io/qtforpython-6/index.html).
