@@ -22,7 +22,7 @@ from models.warnings import Warnings
 
 # Third-party
 from PySide6 import QtCore
-from PySide6.QtCore import QDir, QModelIndex, QObject, QPersistentModelIndex, Qt
+from PySide6.QtCore import QDir, QModelIndex, QObject, QPersistentModelIndex, Qt, Slot
 from PySide6.QtWidgets import QFileSystemModel
 
 
@@ -71,6 +71,10 @@ class FilesModel(QFileSystemModel):
 
     __check_state_items: dict[str, int]
     __warnings: Warnings
+
+    ###########################################################################
+    # SPECIAL METHODS
+    ###########################################################################
 
     # -------------------------------------------------------------------------
     def __init__(
@@ -243,7 +247,7 @@ class FilesModel(QFileSystemModel):
             self.__jsonInit(json_dict)
 
         self.__initFilter()
-        self.rowsInserted.connect(self.__checkIfAddedItems)  # type: ignore[reportUnknownMemberType]
+        self.rowsInserted.connect(self.__checkIfAddedItems)
 
     # -------------------------------------------------------------------------
     def __defaultInit(self) -> None:
@@ -371,6 +375,7 @@ class FilesModel(QFileSystemModel):
         return Path(item_path).exists()
 
     # -------------------------------------------------------------------------
+    @Slot(QModelIndex, int, int, result=None)
     def __checkIfAddedItems(self, parent: QModelIndex, first: int, last: int) -> None:
         for i in range(first, last + 1):
             child = self.index(i, 0, parent)
