@@ -6,8 +6,8 @@ See LICENCE.md file for more information.
 """
 
 # PackY
-from model.task import Task
-from model.zip_packer import ZipPacker
+from models.task import Task
+from models.zip_packer import ZipPacker
 
 
 # -----------------------------------------------------------------------------

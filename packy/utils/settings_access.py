@@ -6,7 +6,7 @@ See LICENCE.md file for more information.
 """
 
 # PyQt
-from PyQt6.QtCore import QCoreApplication, QSettings
+from PySide6.QtCore import QCoreApplication, QSettings
 
 
 # -----------------------------------------------------------------------------

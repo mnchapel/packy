@@ -9,12 +9,12 @@ See LICENCE.md file for more information.
 import sys
 
 # PyQt
-from PyQt6 import QtCore, QtWidgets
-from PyQt6.QtGui import QIcon
+from PySide6 import QtCore, QtWidgets
+from PySide6.QtGui import QIcon
 
 # PackY
-from model.log import messageHandler
-from view.main_window import MainWindow
+from models.log import messageHandler
+from views.main_window import MainWindow
 from utils.external_data_access import ExternalData, external_data_path
 
 

@@ -6,7 +6,7 @@ See LICENCE.md file for more information.
 """
 
 # PyQt
-from PyQt6.QtCore import QObject, pyqtSignal
+from PySide6.QtCore import QObject, Signal
 
 
 ###############################################################################
@@ -14,7 +14,7 @@ class PackerSignals(QObject):
     ###########################################################################
     # SIGNALS
     ###########################################################################
-    info = pyqtSignal(str)
-    error = pyqtSignal(str)
-    progress = pyqtSignal(int)
-    finish = pyqtSignal()
+    info = Signal(str)
+    error = Signal(str)
+    progress = Signal(int)
+    finish = Signal()

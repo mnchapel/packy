@@ -9,7 +9,7 @@ See LICENCE.md file for more information.
 import pytest
 
 # PyQt
-from PyQt6.QtCore import QCoreApplication
+from PySide6.QtCore import QCoreApplication
 
 
 # -----------------------------------------------------------------------------

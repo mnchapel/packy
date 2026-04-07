@@ -15,11 +15,11 @@ from unittest.mock import MagicMock, Mock
 from zipfile import ZipFile, ZipInfo
 
 # PyQt
-from PyQt6.QtCore import QStandardPaths
+from PySide6.QtCore import QStandardPaths
 
 # PackY
-from model.task import Task
-from model.zip_packer import ZipPacker
+from models.task import Task
+from models.zip_packer import ZipPacker
 
 # PackY tests
 from utils_func import camelCaseToSnakeCase

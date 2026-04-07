@@ -13,26 +13,26 @@ import sys
 import yaml
 
 # PyQt
-from PyQt6 import QtCore, QtWidgets
-from PyQt6.QtCore import Qt, QCoreApplication, QItemSelection, QThreadPool, QStandardPaths, QUrl
-from PyQt6.QtGui import QDesktopServices
-from PyQt6.QtWidgets import QFileDialog, QPlainTextEdit, QMessageBox
+from PySide6 import QtCore, QtWidgets
+from PySide6.QtCore import Qt, QCoreApplication, QItemSelection, QThreadPool, QStandardPaths, QUrl
+from PySide6.QtGui import QDesktopServices
+from PySide6.QtWidgets import QFileDialog, QPlainTextEdit, QMessageBox
 
 # PackY
-from model.packer_data import DataName, PackerData
-from model.packer_factory import createPacker
-from model.progression import Progression
-from model.task import Task
-from model.task import TaskProperties
-from model.session import Session
-from model.session_encoder import SessionEncoder
-from model.session_decoder import SessionDecoder
-from view.tree_view_proxy_model import TreeViewProxyModel
+from models.packer_data import DataName, PackerData
+from models.packer_factory import createPacker
+from models.progression import Progression
+from models.task import Task
+from models.task import TaskProperties
+from models.session import Session
+from models.session_encoder import SessionEncoder
+from models.session_decoder import SessionDecoder
+from views.tree_view_proxy_model import TreeViewProxyModel
 from utils.external_data_access import ExternalData, external_data_path
-from view.about import About
-from view.options import Options
-from view.fix_warnings import FixWarnings
-from view.ui_main_window import Ui_MainWindow
+from views.about import About
+from views.options import Options
+from views.fix_warnings import FixWarnings
+from ui.generated.ui_main_window import Ui_MainWindow
 
 
 ###############################################################################

@@ -6,12 +6,14 @@ See LICENCE.md file for more information.
 """
 
 # PyQt
-from PyQt6.QtWidgets import QDialog, QAbstractButton
-from PyQt6.uic import loadUi
+from json import load
+
+from PySide6.QtWidgets import QDialog, QAbstractButton
+from PySide6.QtUiTools import QUiLoader
 
 # PackY
-from model.files_model import FilesModel
-from model.warnings import Warnings
+from models.files_model import FilesModel
+from models.warnings import Warnings
 from utils.external_data_access import ExternalData, external_data_path
 
 
@@ -33,7 +35,8 @@ class FixWarnings(QDialog):
         super(FixWarnings, self).__init__()
 
         ui_path = external_data_path(ExternalData.UI_FIX_WARNINGS)
-        self.__ui = loadUi(ui_path, self)
+        loader = QUiLoader()
+        self.__ui = loader.load(ui_path, self)
         self.__model = files_model
         self.__init()
 

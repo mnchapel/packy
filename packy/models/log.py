@@ -10,10 +10,10 @@ import os
 from time import localtime, strftime
 
 # PyQt
-from PyQt6.QtCore import QMessageLogContext, QtMsgType
+from PySide6.QtCore import QMessageLogContext, QtMsgType
 
 # PackY
-from view.main_window import MainWindow
+from views.main_window import MainWindow
 
 
 # -----------------------------------------------------------------------------

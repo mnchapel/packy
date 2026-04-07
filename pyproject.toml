@@ -9,6 +9,6 @@ license = "GPL-3.0"
 requires-python = ">= 3.12.13"
 
 [tool.distutils.build_exe]
-includes = ["model", "view", "utils"]
+includes = ["models", "views", "ui/generated", "utils"]
 excludes = ["tkinter", "unittest"]
 include_files = ["resources"]

@@ -11,12 +11,12 @@ import re
 import shutil
 
 # PyQt
-from PyQt6.QtCore import Qt, QRunnable, QStandardPaths
+from PySide6.QtCore import Qt, QRunnable, QStandardPaths
 
 # PackY
-from model.preferences import PreferencesGeneral, PreferencesKeys, PreferencesTask
-from model.task import Task, TaskStatus
-from model.packer_signals import PackerSignals
+from models.preferences import PreferencesGeneral, PreferencesKeys, PreferencesTask
+from models.task import Task, TaskStatus
+from models.packer_signals import PackerSignals
 from utils.settings_access import packySettings
 
 # Python debug

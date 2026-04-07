@@ -2,8 +2,8 @@
 
 from typing import override
 
-from PyQt6 import QtCore
-from PyQt6.QtGui import QFileSystemModel
+from PySide6 import QtCore
+from PySide6.QtWidgets import QFileSystemModel
 
 
 ###############################################################################

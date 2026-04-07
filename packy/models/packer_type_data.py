@@ -9,7 +9,7 @@ See LICENCE.md file for more information.
 from enum import Enum
 
 # PyQt
-from PyQt6 import QtCore
+from PySide6 import QtCore
 
 
 ###############################################################################

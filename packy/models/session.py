@@ -11,11 +11,11 @@ from enum import Enum
 from typing_extensions import override
 
 # PyQt
-from PyQt6 import QtCore
-from PyQt6.QtCore import Qt, QAbstractTableModel, QModelIndex, QCoreApplication
+from PySide6 import QtCore
+from PySide6.QtCore import Qt, QAbstractTableModel, QModelIndex, QCoreApplication
 
 # PackY
-from model.task import Task
+from models.task import Task
 
 
 ###############################################################################

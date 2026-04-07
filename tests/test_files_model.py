@@ -12,8 +12,8 @@ import pathlib
 import pytest
 
 # PackY
-from model.files_model import FilesModel
-from model.warnings import Warnings
+from models.files_model import FilesModel
+from models.warnings import Warnings
 
 # PackY tests
 from utils_func import camelCaseToSnakeCase

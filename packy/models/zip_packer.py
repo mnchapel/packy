@@ -11,9 +11,9 @@ import zipfile
 from zipfile import ZipFile
 
 # PackY
-from model.packer import Packer
-from model.packer_data import PackerData
-from model.task import Task
+from models.packer import Packer
+from models.packer_data import PackerData
+from models.task import Task
 
 
 ###############################################################################

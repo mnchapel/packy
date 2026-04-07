@@ -12,13 +12,13 @@ from datetime import date
 from enum import Enum, auto
 
 # PyQt
-from PyQt6 import QtCore
-from PyQt6.QtCore import Qt, QStandardPaths, QAbstractListModel, pyqtSignal
+from PySide6 import QtCore
+from PySide6.QtCore import Qt, QStandardPaths, QAbstractListModel, Signal
 
 # PackY
-from model.files_model import FilesModel
-from model.packer_data import PackerData
-from model.preferences import PreferencesTask, PreferencesKeys
+from models.files_model import FilesModel
+from models.packer_data import PackerData
+from models.preferences import PreferencesTask, PreferencesKeys
 from utils.settings_access import packySettings
 
 
@@ -70,7 +70,7 @@ class Task(QAbstractListModel):
     # SIGNALS
     ###########################################################################
 
-    statusChanged = pyqtSignal(int)
+    statusChanged = Signal(int)
 
     ###########################################################################
     # SPECIAL METHODS

@@ -5,7 +5,7 @@ on files and directories, allowing users to select items within a
 directory tree. It also tracks differences between the current file
 system and the stored selection through a warnings system.
 
-Copyright 2023-present, Marie-Neige Chapel
+Copyright 2023-present, Marie-Neige Chapel and Joseph Garnier
 All rights reserved.
 
 See LICENCE.md file for more information.
@@ -17,13 +17,13 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, override
 
-# Third-party
-from PyQt6 import QtCore
-from PyQt6.QtCore import QDir, QModelIndex, QObject, Qt
-from PyQt6.QtGui import QFileSystemModel
-
 # Local application
-from model.warnings import Warnings
+from models.warnings import Warnings
+
+# Third-party
+from PySide6 import QtCore
+from PySide6.QtCore import QDir, QModelIndex, QObject, QPersistentModelIndex, Qt
+from PySide6.QtWidgets import QFileSystemModel
 
 
 ###############################################################################
@@ -130,7 +130,11 @@ class FilesModel(QFileSystemModel):
 
     # -------------------------------------------------------------------------
     @override
-    def data(self, index: QModelIndex, role: int = Qt.ItemDataRole.DisplayRole) -> Any:
+    def data(
+        self,
+        index: QModelIndex | QPersistentModelIndex,
+        role: int = Qt.ItemDataRole.DisplayRole,
+    ) -> Any:
         match role:
             case Qt.ItemDataRole.CheckStateRole:
                 if index.column() == 0:
@@ -141,7 +145,12 @@ class FilesModel(QFileSystemModel):
 
     # -------------------------------------------------------------------------
     @override
-    def setData(self, index: QModelIndex, value: Any, role: int = Qt.ItemDataRole.EditRole) -> bool:
+    def setData(
+        self,
+        index: QModelIndex | QPersistentModelIndex,
+        value: Any,
+        role: int = Qt.ItemDataRole.EditRole,
+    ) -> bool:
         match role:
             case Qt.ItemDataRole.CheckStateRole:
                 if index.column() == 0:
@@ -162,12 +171,12 @@ class FilesModel(QFileSystemModel):
 
     # -------------------------------------------------------------------------
     @override
-    def flags(self, index: QModelIndex) -> Qt.ItemFlag:
+    def flags(self, index: QModelIndex | QPersistentModelIndex) -> Qt.ItemFlag:
         return super().flags(index) | Qt.ItemFlag.ItemIsUserCheckable
 
     # -------------------------------------------------------------------------
     @override
-    def setRootPath(self, path: str | None) -> QModelIndex:
+    def setRootPath(self, path: str) -> QModelIndex:
         self.__check_state_items.clear()
         self.__warnings.clear()
 
@@ -253,14 +262,19 @@ class FilesModel(QFileSystemModel):
         self.setFilter(file_filter | QDir.Filter.Hidden)
 
     # -------------------------------------------------------------------------
-    def __updateChildFiles(self, index: QModelIndex, value: int, role: Qt.ItemDataRole) -> None:
+    def __updateChildFiles(
+        self,
+        index: QModelIndex | QPersistentModelIndex,
+        value: int,
+        role: Qt.ItemDataRole,
+    ) -> None:
         if value != Qt.CheckState.PartiallyChecked.value:
             for i in range(self.rowCount(index)):
                 child_index = self.index(i, 0, index)
                 self.setData(child_index, value, role)
 
     # -------------------------------------------------------------------------
-    def __updateParentFiles(self, index: QModelIndex, value: int) -> None:
+    def __updateParentFiles(self, index: QModelIndex | QPersistentModelIndex, value: int) -> None:
         match value:
             case Qt.CheckState.Checked.value:
                 self.__propagateCheckToParents(index)
@@ -272,7 +286,7 @@ class FilesModel(QFileSystemModel):
                 )
 
     # -------------------------------------------------------------------------
-    def __propagateCheckToParents(self, index: QModelIndex) -> None:
+    def __propagateCheckToParents(self, index: QModelIndex | QPersistentModelIndex) -> None:
         index_parent = index.parent()
 
         if index_parent == QModelIndex():
@@ -294,7 +308,7 @@ class FilesModel(QFileSystemModel):
             self.__propagateCheckToParents(index_parent)
 
     # -------------------------------------------------------------------------
-    def __propagateUncheckToParents(self, index: QModelIndex) -> None:
+    def __propagateUncheckToParents(self, index: QModelIndex | QPersistentModelIndex) -> None:
         index_parent = index.parent()
 
         if self.__checkState(index_parent) == Qt.CheckState.Unchecked.value:
@@ -328,13 +342,13 @@ class FilesModel(QFileSystemModel):
         return self.__checkState(item) == Qt.CheckState.Unchecked.value
 
     # -------------------------------------------------------------------------
-    def __checkState(self, item: QModelIndex | str) -> int:
-        if isinstance(item, QModelIndex):
+    def __checkState(self, item: QModelIndex | QPersistentModelIndex | str) -> int:
+        if isinstance(item, QModelIndex | QPersistentModelIndex):
             return self.__checkStateIndex(item)
         return self.__checkStatePath(item)
 
     # -------------------------------------------------------------------------
-    def __checkStateIndex(self, index: QModelIndex) -> int:
+    def __checkStateIndex(self, index: QModelIndex | QPersistentModelIndex) -> int:
         return self.__checkStatePath(self.filePath(index))
 
     # -------------------------------------------------------------------------

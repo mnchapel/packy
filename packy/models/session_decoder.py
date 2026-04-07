@@ -10,11 +10,11 @@ import json
 from jsonschema import SchemaError, ValidationError, validate
 
 # PyQt
-from PyQt6 import QtCore
+from PySide6 import QtCore
 
 # PackY
-from model.session import Session
-from model.task import Task
+from models.session import Session
+from models.task import Task
 from utils.external_data_access import ExternalData, external_data_path
 
 

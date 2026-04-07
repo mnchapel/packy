@@ -6,8 +6,8 @@ See LICENCE.md file for more information.
 """
 
 # PyQt
-from PyQt6.QtWidgets import QDialog
-from PyQt6.uic import loadUi
+from PySide6.QtWidgets import QDialog
+from PySide6.QtUiTools import QUiLoader
 
 # PackY
 from utils.external_data_access import ExternalData, external_data_path
@@ -23,4 +23,5 @@ class About(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         ui_path = external_data_path(ExternalData.UI_ABOUT)
-        loadUi(ui_path, self)
+        loader = QUiLoader()
+        loader.load(ui_path, self)

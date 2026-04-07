@@ -14,14 +14,14 @@ from unittest.mock import MagicMock, Mock
 from zipfile import ZipFile, ZipInfo
 
 # PyQt
-from PyQt6.QtCore import QStandardPaths
+from PySide6.QtCore import QStandardPaths
 
 # PackY
 import model.task
-from model.preferences import PreferencesKeys
-from model.task import Task
-from model.files_model import FilesModel
-from model.zip_packer import ZipPacker
+from models.preferences import PreferencesKeys
+from models.task import Task
+from models.files_model import FilesModel
+from models.zip_packer import ZipPacker
 from utils.settings_access import packySettings
 
 # PackY tests

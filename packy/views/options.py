@@ -7,13 +7,13 @@ See LICENCE.md file for more information.
 
 # PyQt
 from asyncio import Task
-from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtWidgets import QDialog, QAbstractButton
-from PyQt6.uic import loadUi
+from PySide6.QtCore import Signal
+from PySide6.QtWidgets import QDialog, QAbstractButton
+from PySide6.QtUiTools import QUiLoader
 
 # PackY
-from model.preferences import PreferencesKeys, PreferencesTask
-from model.task import Task
+from models.preferences import PreferencesKeys, PreferencesTask
+from models.task import Task
 from utils.external_data_access import ExternalData, external_data_path
 from utils.settings_access import packySettings
 
@@ -24,7 +24,7 @@ class Options(QDialog):
     # SIGNALS
     ###########################################################################
 
-    taskSuffixChanged = pyqtSignal()
+    taskSuffixChanged = Signal()
 
     ###########################################################################
     # SPECIAL METHODS
@@ -35,7 +35,8 @@ class Options(QDialog):
         super(Options, self).__init__()
 
         ui_path = external_data_path(ExternalData.UI_OPTIONS)
-        self.__ui = loadUi(ui_path, self)
+        loader = QUiLoader()
+        self.__ui = loader.load(ui_path, self)
         self.__settings = packySettings()
 
         self.__initGeneralSection()

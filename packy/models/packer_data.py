@@ -10,10 +10,10 @@ import json
 from enum import Enum
 
 # PyQt
-from PyQt6.QtCore import QAbstractListModel
+from PySide6.QtCore import QAbstractListModel
 
 # PackY
-from model.packer_type_data import PackerTypeData
+from models.packer_type_data import PackerTypeData
 from utils.external_data_access import ExternalData, external_data_path
 
 
