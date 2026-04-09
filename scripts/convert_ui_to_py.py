@@ -23,13 +23,12 @@ def main() -> None:
     if not pyside_script_path.exists():
         raise FileNotFoundError(pyside_script_path)
 
-    src_dir = Path(__file__).parent.resolve()
-    ui_dir = (src_dir / "ui").resolve()
-    py_dir = (src_dir / "ui" / "generated").resolve()
+    project_dir = Path(__file__).parent.parent.resolve()
+    ui_dir = (project_dir / "packy" / "ui").resolve()
 
     for ui_path in ui_dir.iterdir():
         if ui_path.suffix == ".ui":
-            py_path = py_dir / f"ui_{ui_path.stem}.py"
+            py_path = ui_dir / f"ui_{ui_path.stem}.py"
 
             subprocess.run(  # noqa: S603
                 [str(pyside_script_path), str(ui_path), "-o", str(py_path)],

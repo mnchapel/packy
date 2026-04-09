@@ -2,56 +2,161 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Run PackY",
+      "label": "PackY: Clean",
+      "detail": "Cleans the build artifacts",
       "type": "shell",
-      "command": "${command:python.interpreterPath}",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "linux": {
+        "command": "${command:python.interpreterPath}/../Scripts/pyside6-project clean"
+      },
+      "windows": {
+        "command": "${command:python.interpreterPath}/../Scripts/pyside6-project.exe clean"
+      },
       "args": [
-        "${workspaceFolder}/packy/main.py"
+        "pyproject.toml"
       ],
       "presentation": {
         "echo": true,
         "reveal": "always",
-        "focus": false,
-        "panel": "shared",
-        "showReuseMessage": true,
+        "focus": true,
+        "panel": "dedicated",
+        "showReuseMessage": false,
         "clear": true
       },
       "problemMatcher": []
     },
     {
-      "label": "Run pytest",
-      "type": "process",
-      "command": "${command:python.interpreterPath} pytest -v",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared",
-        "showReuseMessage": true,
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "Generate .py from .ui",
+      "label": "PackY: Build",
+      "detail": "Compiles resources, UI files, and QML files if existing and necessary",
       "type": "shell",
-      "command": "${command:python.interpreterPath} packy/convert_ui_to_py.py",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "linux": {
+        "command": "${command:python.interpreterPath}/../Scripts/pyside6-project build"
+      },
+      "windows": {
+        "command": "${command:python.interpreterPath}/../Scripts/pyside6-project.exe build"
+      },
+      "args": [
+        "pyproject.toml"
+      ],
       "group": {
         "kind": "build",
         "isDefault": true
       },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "PackY: Compile .ui",
+      "detail": "Generate .py files from .ui files",
+      "type": "shell",
       "options": {
         "cwd": "${workspaceFolder}"
+      },
+      "command": "${command:python.interpreterPath}",
+      "args": [
+        "scripts/convert_ui_to_py.py"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "PackY: Run",
+      "detail": "Run the PackY app",
+      "type": "shell",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "command": "${command:python.interpreterPath}",
+      "args": [
+        "packy/main.py"
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "PackY: Test",
+      "detail": "Run the unit tests",
+      "type": "process",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "command": "${command:python.interpreterPath} pytest -v",
+      "group": {
+        "kind": "test",
+        "isDefault": true
       },
       "presentation": {
         "echo": true,
         "reveal": "always",
-        "focus": false,
-        "panel": "shared",
-        "showReuseMessage": true,
+        "focus": true,
+        "panel": "dedicated",
+        "showReuseMessage": false,
         "clear": true
       },
       "problemMatcher": []
-    }
+    },
+    {
+      "label": "PackY: Deploy",
+      "detail": "Deploys the app",
+      "type": "shell",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "linux": {
+        "command": "${command:python.interpreterPath}/../Scripts/pyside6-deploy"
+      },
+      "windows": {
+        "command": "${command:python.interpreterPath}/../Scripts/pyside6-deploy.exe"
+      },
+      "args": [
+        "packy/main.py",
+        "--config-file",
+        "build/pysidedeploy.spec",
+        "--verbose",
+        "--dry-run",
+        "--keep-deployment-files",
+        "--name",
+        "PackY",
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": [],
+      "dependsOn": [
+        "PackY: Build"
+      ]
+    },
   ]
 }

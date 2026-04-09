@@ -5,10 +5,18 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Python Debugger: Qt App",
+      "name": "Python Debugger: Current File",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Python Debugger: PackY",
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/packy/main.py",
+      "preLaunchTask": "PackY: Build",
       "console": "integratedTerminal",
     }
   ]
