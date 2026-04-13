@@ -32,7 +32,7 @@ from utils.external_data_access import ExternalData, external_data_path
 from views.about import About
 from views.options import Options
 from views.fix_warnings import FixWarnings
-from ui.generated.ui_main_window import Ui_MainWindow
+from ui.ui_main_window import Ui_MainWindow
 
 
 ###############################################################################
@@ -102,10 +102,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 folder_path = QStandardPaths.writableLocation(app_data_location)
 
             MainWindow.log_file_path: str = os.path.join(folder_path, "log.txt")
-
-            if not os.path.exists(MainWindow.log_file_path):
-                os.makedirs(os.path.dirname(MainWindow.log_file_path))
-
             self.__cleanPreviousSessionLog()
 
     # -------------------------------------------------------------------------
