@@ -107,7 +107,7 @@
       "options": {
         "cwd": "${workspaceFolder}"
       },
-      "command": "${command:python.interpreterPath} pytest -v",
+      "command": "pytest -v",
       "group": {
         "kind": "test",
         "isDefault": true
