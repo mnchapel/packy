@@ -7,7 +7,7 @@ See LICENCE.md file for more information.
 
 # Python
 import json
-from typing_extensions import override
+from typing import override
 
 
 ###############################################################################

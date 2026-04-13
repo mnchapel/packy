@@ -8,7 +8,7 @@ See LICENCE.md file for more information.
 # Python
 import os
 from enum import Enum
-from typing_extensions import override
+from typing import override
 
 # PyQt
 from PySide6 import QtCore
