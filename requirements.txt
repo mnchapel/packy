@@ -1,10 +1,4 @@
-attrs==25.3.0
-jsonschema==4.23.0
-jsonschema-specifications==2024.10.1
-PyQt6==6.8.1
-PyQt6-Qt6==6.8.2
-PyQt6_sip==13.10.0
-PyYAML==6.0.2
-referencing==0.36.2
-rpds-py==0.23.1
-typing_extensions==4.12.2
+pyside6==6.11.0
+pyyaml==6.0.3
+jsonschema==4.26.0
+pytest==9.0.3
