@@ -476,7 +476,7 @@ PackY is built with PySide6, JSON Schema and Ruff. We thank the contributors of 
 
 ### Contributors
 
-This project is maintained and developed by [Joseph Garnier](https://www.joseph-garnier.fr/).
+This project is maintained and developed by [Marie-Neige Chapel](https://github.com/mnchapel) and [Joseph Garnier](https://www.joseph-garnier.fr/).
 
 ## ©️ License
 
