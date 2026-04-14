@@ -42,7 +42,7 @@ PackY is a simple and intuitive application designed to create batch file archiv
 
 - **Designed for backups** - PackY was originally created as a tool to archive application data prior to backup operations.
 - **A simple and practical tool** - PackY intentionally offers a limited set of features to remain accessible to everyone and easy to use.
-- **High-quality code** - Thanks to strict linting rules and rigorous testing, the software is built on a reliable and robust codebase.
+- **High-quality code** - Thanks to strict linting rules and rigorous testing, the software is built on a reliable and robust codebase. The code aims to be as Pythonic as possible.
 
 ## 💠 Overview
 
@@ -54,7 +54,7 @@ PackY is a simple and intuitive application designed to create batch file archiv
 
 - [Miniconda](https://www.anaconda.com/docs/getting-started/miniconda/main) - The package and environment manager
 - [Python3](https://www.python.org/) - The programming language
-- [PySide6](https://doc.qt.io/qtforpython-6/index.html) and [its tools](https://doc.qt.io/qtforpython-6/tools/index.html) - UI Qt framework for Python.
+- [PySide6](https://doc.qt.io/qtforpython-6/index.html) and [its tools](https://doc.qt.io/qtforpython-6/tools/index.html) - UI Qt framework for Python (in [pythonic version](https://doc.qt.io/qtforpython-6/considerations.html#features)).
 - [JSON Schema in Python](https://pypi.org/project/jsonschema/) - An implementation of JSON Schema validation for Python
 - [PyYAML](https://pypi.org/project/PyYAML/) - YAML parser
 - [pytest](https://docs.pytest.org/en/stable/index.html) - A framework for unit tests
@@ -158,7 +158,18 @@ Therefore, [Visual Studio Code](https://code.visualstudio.com/) is recommended, 
       pip install pytest
       ```
 
-4. Verify that the installation was successful by running PackY:
+4. Regenerate the Qt Python stub files using the `pyside6-genpyi` tool to enable the `snake_case` features and properties in the Qt API:
+
+    ```bash
+    pyside6-genpyi all --feature snake_case true_property
+    ```
+
+    For more information about the feature, see:
+
+    - [Motivation behind the feature](https://doc.qt.io/qtforpython-6/developer/feature-motivation.html).
+    - [pyside6-genpyi command documentation](https://doc.qt.io/qtforpython-6/tools/pyside-genpyi.html).
+
+5. Verify that the installation was successful by running PackY:
 
     ```bash
     python "packy/main.py"
@@ -307,6 +318,9 @@ The usage of commands and scripts is described below in the order of a typical d
 - Some additional useful commands for development:
 
   ```bash
+  # Generate Qt Python stub files for pythonic UI. More options on <https://doc.qt.io/qtforpython-6/tools/pyside-genpyi.html>
+  pyside6-genpyi all --feature snake_case true_property
+
   # Generate the requirements file
   pipreqs --savepath requirements.txt
   ```
