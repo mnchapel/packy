@@ -507,7 +507,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         if selected_folder:
             self.line_edit_source.setText(selected_folder)
-            files_model.setRootPath(selected_folder)
+            files_model.set_root_path(selected_folder)
 
             filtering_model = TreeViewProxyModel(selected_folder)
             filtering_model.setSourceModel(files_model)
