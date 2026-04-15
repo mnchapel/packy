@@ -179,17 +179,18 @@ Therefore, [Visual Studio Code](https://code.visualstudio.com/) is recommended, 
 
 ### Building
 
-Building the application involves compiling resources, UI files, and QML files into a format that PySide can interpret, using the `build` subcommand of the [`pyside6-project` tool](https://doc.qt.io/qtforpython-6/tools/pyside-project.html). This Qt subcommand implicitly calls the [pyside6-uic](https://doc.qt.io/qtforpython-6/tools/pyside-uic.html) and [pyside6-rcc](https://doc.qt.io/qtforpython-6/tools/pyside-rcc.html) commands.
+Building the application involves compiling resources, UI files, and QML files into a format that PySide can interpret, using the `build` subcommand of the [`pyside6-project` tool](https://doc.qt.io/qtforpython-6/tools/pyside-project.html). This Qt subcommand implicitly calls the [pyside6-uic](https://doc.qt.io/qtforpython-6/tools/pyside-uic.html) and [pyside6-rcc](https://doc.qt.io/qtforpython-6/tools/pyside-rcc.html) commands. To determine which files to compile, the `build` subcommand scans the list of files defined in the `tool.pyside6-project.files` table of the `pyproject.toml` file. This list must therefore always be kept up to date, but by default this process is manual. For this reason, the project provides the `update_pyproject_file.py` script, which scans the source files and updates the table accordingly. This script must be executed before running the `build` subcommand.
 
-To **build PackY**, open a terminal in the project's Conda virtual environment, then run the following command:
+Thus, to **build PackY**, open a terminal in the project's Conda virtual environment, then run the following commands:
 
 ```bash
+python "scripts/update_pyproject_file.py" --relative-to "." --include-directory "packy"
 pyside6-project build "pyproject.toml"
 ```
 
-In VS Code, the `PackY: Build` task can also be used to run this command.
+In VS Code, the `PackY: Build` task can also be used to run these commands. The update script can also be executed independently using the `PackY: Update PyProject file` task.
 
-To compile only the UI files, run the command `python "scripts/convert_ui_to_py.py"`, or, from VS Code, run the `PackY: Compile .ui` task. More information about these commands can be found in the [Useful commands](#useful-commands) section.
+To compile only the UI files, run the command `python "scripts/convert_ui_to_py.py"`, or, from VS Code, use the `PackY: Compile .ui` task. More information about these commands can be found in the [Useful commands](#useful-commands) section.
 
 ### Testing
 
@@ -273,7 +274,15 @@ The usage of commands and scripts is described below in the order of a typical d
   - [pyside6-uic command documentation](https://doc.qt.io/qtforpython-6/tools/pyside-uic.html) and [its options](https://doc.qt.io/qt-6/uic.html).
   - [pyside6-rcc command documentation](https://doc.qt.io/qtforpython-6/tools/pyside-rcc.html) and [its options](https://doc.qt.io/qt-6/rcc.html).
 
-- To manually **compile .ui** files (automatically called by the build command):
+- To **update PyProject file** (automatically called by the build command):
+
+  ```bash
+  python "scripts/update_pyproject_file.py" --relative-to "." --include-directory "packy"
+  ```
+
+  - VS Code task: `PackY: Update PyProject file`.
+
+- To manually **compile .ui** files:
 
   ```bash
   python "scripts/convert_ui_to_py.py"

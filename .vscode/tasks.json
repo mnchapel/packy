@@ -55,6 +55,35 @@
         "showReuseMessage": false,
         "clear": true
       },
+      "problemMatcher": [],
+      "dependsOn": [
+        "PackY: Update PyProject file"
+      ]
+    },
+    {
+      "label": "PackY: Update PyProject file",
+      "detail": "Update the ``tool.pyside6-project.files`` section in a pyproject.toml file",
+      "type": "shell",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "command": "${command:python.interpreterPath}",
+      "args": [
+        "scripts/update_pyproject_file.py",
+        "--relative-to",
+        ".",
+        "--include-directory",
+        "packy",
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": true
+      },
       "problemMatcher": []
     },
     {
