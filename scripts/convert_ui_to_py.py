@@ -30,12 +30,12 @@ def main() -> None:
         if ui_path.suffix == ".ui":
             py_path = ui_dir / f"ui_{ui_path.stem}.py"
 
-            subprocess.run(  # noqa: S603
+            subprocess.run(# noqa: S603
                 [str(pyside_script_path), str(ui_path), "-o", str(py_path)],
                 check=True,
-                shell=False,  # Explicitly disabled for security
+                shell=False, # Explicitly disabled for security
             )
-            print(f"Generated: {py_path}")  # noqa: T201
+            print(f"Generated: {py_path}") # noqa: T201
 
 
 if __name__ == "__main__":

@@ -4,7 +4,7 @@ line-length = 100
 [lint]
 select = ["ALL"]
 ignore = [
-  "N802", # invalid-function-name
+  "EM101", # raw-string-in-exception
 ]
 fixable = ["ALL"]
 unfixable = []
