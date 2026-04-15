@@ -6,6 +6,7 @@ All rights reserved.
 See LICENCE.md file for more information.
 """
 
+# Standard library
 import subprocess
 import sys
 from pathlib import Path

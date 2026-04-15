@@ -18,4 +18,13 @@ docstring-code-format = true
 convention = "google"
 
 [lint.isort]
-known-first-party = ["packy"]
+section-order = ["third-party", "local-folder", "first-party", "standard-library", "future"]
+known-local-folder = ["packy", "models", "ui", "utils", "views"]
+known-first-party = ["packy", "models", "ui", "utils", "views"]
+
+[lint.isort.import-heading]
+third-party = "Third-party"
+first-party = "Local application"
+local-folder = "Local application"
+standard-library = "Standard library"
+future = "Future library"

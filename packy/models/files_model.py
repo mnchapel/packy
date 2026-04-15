@@ -11,21 +11,21 @@ All rights reserved.
 See LICENCE.md file for more information.
 """
 
-# Standard library
-import os
-from enum import Enum
-from pathlib import Path
-from typing import Any, override
-
-# Local application
-from models.warnings import Warnings
-
 # Third-party
 from PySide6 import QtCore
 from PySide6.QtCore import QDir, QModelIndex, QObject, QPersistentModelIndex, Qt, Slot
 from PySide6.QtWidgets import QFileSystemModel
 
 from __feature__ import snake_case, true_property
+
+# Local application
+from models.warnings import Warnings
+
+# Standard library
+import os
+from enum import Enum
+from pathlib import Path
+from typing import Any, override
 
 
 ###############################################################################
@@ -80,11 +80,11 @@ class FilesModel(QFileSystemModel):
         """Initializes the file system model.
 
         Args:
-                json_dict (dict, optional):
-                    Serialized representation of the model used to restore its state.
-                    Defaults to None.
-                parent (QObject, optional):
-                    Parent object passed to the underlying Qt model.
+            json_dict (dict, optional):
+                Serialized representation of the model used to restore its state.
+                Defaults to None.
+            parent (QObject, optional):
+                Parent object passed to the underlying Qt model.
         """
         super().__init__(parent)
         self.__check_state_items: dict[str, int] = {}
