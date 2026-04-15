@@ -11,15 +11,14 @@ All rights reserved.
 See LICENCE.md file for more information.
 """
 
+# Local application
+from models.warnings import Warnings
+
 # Third-party
 from PySide6 import QtCore
 from PySide6.QtCore import QDir, QModelIndex, QObject, QPersistentModelIndex, Qt, Slot
 from PySide6.QtWidgets import QFileSystemModel
-
 from __feature__ import snake_case, true_property
-
-# Local application
-from models.warnings import Warnings
 
 # Standard library
 import os
