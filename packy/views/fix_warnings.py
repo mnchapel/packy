@@ -12,9 +12,9 @@ from PySide6.QtWidgets import QDialog, QAbstractButton
 from PySide6.QtUiTools import QUiLoader
 
 # PackY
-from models.files_model import FilesModel
-from models.warnings import Warnings
-from utils.external_data_access import ExternalData, external_data_path
+from packy.models.files_model import FilesModel
+from packy.models.warnings import Warnings
+from packy.utils.external_data_access import ExternalData, external_data_path
 
 
 ###############################################################################

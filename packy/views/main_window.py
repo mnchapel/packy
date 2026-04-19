@@ -19,20 +19,20 @@ from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import QFileDialog, QPlainTextEdit, QMessageBox
 
 # PackY
-from models.packer_data import DataName, PackerData
-from models.packer_factory import createPacker
-from models.progression import Progression
-from models.task import Task
-from models.task import TaskProperties
-from models.session import Session
-from models.session_encoder import SessionEncoder
-from models.session_decoder import SessionDecoder
-from views.tree_view_proxy_model import TreeViewProxyModel
-from utils.external_data_access import ExternalData, external_data_path
-from views.about import About
-from views.options import Options
-from views.fix_warnings import FixWarnings
-from ui.ui_main_window import Ui_MainWindow
+from packy.models.packer_data import DataName, PackerData
+from packy.models.packer_factory import createPacker
+from packy.models.progression import Progression
+from packy.models.task import Task
+from packy.models.task import TaskProperties
+from packy.models.session import Session
+from packy.models.session_encoder import SessionEncoder
+from packy.models.session_decoder import SessionDecoder
+from packy.views.tree_view_proxy_model import TreeViewProxyModel
+from packy.utils.external_data_access import ExternalData, external_data_path
+from packy.views.about import AboutDialog
+from packy.views.options import OptionsDialog
+from packy.views.fix_warnings import FixWarnings
+from packy.ui.ui_main_window import Ui_MainWindow
 
 
 ###############################################################################

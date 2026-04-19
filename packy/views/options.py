@@ -12,10 +12,11 @@ from PySide6.QtWidgets import QDialog, QAbstractButton
 from PySide6.QtUiTools import QUiLoader
 
 # PackY
-from models.preferences import PreferencesKeys, PreferencesTask
-from models.task import Task
+from packy.models.preferences import PreferencesKeys, PreferencesTask
+from packy.models.task import Task
 from utils.external_data_access import ExternalData, external_data_path
-from utils.settings_access import packySettings
+from packy.utils.external_data_access import ExternalData, external_data_path
+from packy.utils.settings_access import packySettings
 
 
 ###############################################################################

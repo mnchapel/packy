@@ -74,6 +74,8 @@
         ".",
         "--include-directory",
         "packy",
+        "--include-file",
+        "main.py"
       ],
       "group": "build",
       "presentation": {
@@ -117,7 +119,7 @@
       },
       "command": "${command:python.interpreterPath}",
       "args": [
-        "packy/main.py"
+        "main.py"
       ],
       "presentation": {
         "echo": true,
@@ -165,7 +167,7 @@
         "command": "${command:python.interpreterPath}/../Scripts/pyside6-deploy.exe"
       },
       "args": [
-        "packy/main.py",
+        "main.py",
         "--config-file",
         "build/pysidedeploy.spec",
         "--verbose",

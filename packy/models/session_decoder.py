@@ -13,9 +13,9 @@ from jsonschema import SchemaError, ValidationError, validate
 from PySide6 import QtCore
 
 # PackY
-from models.session import Session
-from models.task import Task
-from utils.external_data_access import ExternalData, external_data_path
+from packy.models.session import Session
+from packy.models.task import Task
+from packy.utils.external_data_access import ExternalData, external_data_path
 
 
 ###############################################################################

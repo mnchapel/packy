@@ -13,8 +13,8 @@ from enum import Enum
 from PySide6.QtCore import QAbstractListModel
 
 # PackY
-from models.packer_type_data import PackerTypeData
-from utils.external_data_access import ExternalData, external_data_path
+from packy.models.packer_type_data import PackerTypeData
+from packy.utils.external_data_access import ExternalData, external_data_path
 
 
 ###############################################################################

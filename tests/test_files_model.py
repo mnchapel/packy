@@ -12,11 +12,11 @@ import pathlib
 import pytest
 
 # PackY
-from models.files_model import FilesModel
-from models.warnings import Warnings
+from packy.models.files_model import FilesModel
+from packy.models.warnings import Warnings
 
 # PackY tests
-from utils_func import camelCaseToSnakeCase
+from packy.utils_func import camelCaseToSnakeCase
 
 ###############################################################################
 # FILE HIERARCHY

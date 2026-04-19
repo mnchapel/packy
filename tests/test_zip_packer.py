@@ -18,11 +18,11 @@ from zipfile import ZipFile, ZipInfo
 from PySide6.QtCore import QStandardPaths
 
 # PackY
-from models.task import Task
-from models.zip_packer import ZipPacker
+from packy.models.task import Task
+from packy.models.zip_packer import ZipPacker
 
 # PackY tests
-from utils_func import camelCaseToSnakeCase
+from packy.utils_func import camelCaseToSnakeCase
 
 ###############################################################################
 # FILE HIERARCHY

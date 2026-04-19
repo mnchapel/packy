@@ -13,7 +13,7 @@ from time import localtime, strftime
 from PySide6.QtCore import QMessageLogContext, QtMsgType
 
 # PackY
-from views.main_window import MainWindow
+from packy.views.main_window import MainWindow
 
 
 # -----------------------------------------------------------------------------

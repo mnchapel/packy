@@ -15,7 +15,7 @@ from PySide6 import QtCore
 from PySide6.QtCore import Qt, QAbstractTableModel, QModelIndex, QCoreApplication
 
 # PackY
-from models.task import Task
+from packy.models.task import Task
 
 
 ###############################################################################

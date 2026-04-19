@@ -293,7 +293,7 @@ The usage of commands and scripts is described below in the order of a typical d
 - To **run** the PackY application (execute the main file):
 
   ```bash
-  python "packy/main.py"
+  python "main.py"
   ```
 
   - VS Code task: `PackY: Run`.

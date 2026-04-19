@@ -16,10 +16,10 @@ from PySide6 import QtCore
 from PySide6.QtCore import Qt, QStandardPaths, QAbstractListModel, Signal
 
 # PackY
-from models.files_model import FilesModel
-from models.packer_data import PackerData
-from models.preferences import PreferencesTask, PreferencesKeys
-from utils.settings_access import packySettings
+from packy.models.files_model import FilesModel
+from packy.models.packer_data import PackerData
+from packy.models.preferences import PreferencesTask, PreferencesKeys
+from packy.utils.settings_access import packySettings
 
 
 ###############################################################################

@@ -18,15 +18,15 @@ from PySide6.QtCore import QStandardPaths
 
 # PackY
 import model.task
-from models.preferences import PreferencesKeys
-from models.task import Task
-from models.files_model import FilesModel
-from models.zip_packer import ZipPacker
-from utils.settings_access import packySettings
+from packy.models.preferences import PreferencesKeys
+from packy.models.task import Task
+from packy.models.files_model import FilesModel
+from packy.models.zip_packer import ZipPacker
+from packy.utils.settings_access import packySettings
 
 # PackY tests
-from utils_func import camelCaseToSnakeCase
-from utils_func import joinPath
+from packy.utils_func import camelCaseToSnakeCase
+from packy.utils_func import joinPath
 
 ###############################################################################
 # FILE HIERARCHY
