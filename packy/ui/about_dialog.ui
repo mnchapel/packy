@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>AboutDialog</class>
+ <widget class="QDialog" name="AboutDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>355</width>
+    <height>244</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>About PackY</string>
+  </property>
+  <layout class="QVBoxLayout" name="dialog_layout">
+   <property name="sizeConstraint">
+    <enum>QLayout::SizeConstraint::SetFixedSize</enum>
+   </property>
+   <item>
+    <layout class="QHBoxLayout" name="information_layout">
+     <item>
+      <widget class="QLabel" name="logo_label">
+       <property name="maximumSize">
+        <size>
+         <width>90</width>
+         <height>90</height>
+        </size>
+       </property>
+       <property name="pixmap">
+        <pixmap resource="../../resources/packy.qrc">:/img/logo.ico</pixmap>
+       </property>
+       <property name="scaledContents">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="text_label">
+       <property name="text">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;h3 align=&quot;justify&quot; style=&quot; margin-top:14px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:large; font-weight:700;&quot;&gt;PackY&lt;/span&gt;&lt;/h3&gt;&lt;p align=&quot;justify&quot;&gt;&lt;br/&gt;&lt;br/&gt;Version 0.9a0&lt;br/&gt;PackY is a simple and intuitive software for creating batch file archives.&lt;br/&gt;&lt;br/&gt;PackY is under GNU General Public License v3.0. Please see &lt;a href=&quot;https://github.com/mnchapel/packy/blob/main/LICENSE.md&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#1c5a8e;&quot;&gt;Packy/LICENSE.md&lt;/span&gt;&lt;/a&gt; for an overview of PackY licensing.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+       <property name="openExternalLinks">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="close_button_box">
+     <property name="standardButtons">
+      <set>QDialogButtonBox::StandardButton::Close</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../../resources/packy.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>close_button_box</sender>
+   <signal>rejected()</signal>
+   <receiver>AboutDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>325</x>
+     <y>199</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>177</x>
+     <y>104</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

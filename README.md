@@ -172,7 +172,7 @@ Therefore, [Visual Studio Code](https://code.visualstudio.com/) is recommended, 
 5. Verify that the installation was successful by running PackY:
 
     ```bash
-    python "packy/main.py"
+    python "main.py"
     ```
 
     The PackY development environment is now ready.
@@ -184,7 +184,7 @@ Building the application involves compiling resources, UI files, and QML files i
 Thus, to **build PackY**, open a terminal in the project's Conda virtual environment, then run the following commands:
 
 ```bash
-python "scripts/update_pyproject_file.py" --relative-to "." --include-directory "packy"
+python "scripts/update_pyproject_file.py" --relative-to "." --include-directory "packy" --include-file "resources/packy.qrc" --include-file "main.py"
 pyside6-project build "pyproject.toml"
 ```
 
@@ -277,7 +277,7 @@ The usage of commands and scripts is described below in the order of a typical d
 - To **update PyProject file** (automatically called by the build command):
 
   ```bash
-  python "scripts/update_pyproject_file.py" --relative-to "." --include-directory "packy"
+  python "scripts/update_pyproject_file.py" --relative-to "." --include-directory "packy" --include-file "resources/packy.qrc" --include-file "main.py"
   ```
 
   - VS Code task: `PackY: Update PyProject file`.
@@ -318,7 +318,7 @@ The usage of commands and scripts is described below in the order of a typical d
   ```bash
   # The application must be rebuilt before deployment
   pyside6-project build "pyproject.toml"
-  pyside6-deploy "packy/main.py" --config-file "build/pysidedeploy.spec" --verbose --dry-run --keep-deployment-files --name "PackY"
+  pyside6-deploy "main.py" --config-file "build/pysidedeploy.spec" --verbose --dry-run --keep-deployment-files --name "PackY"
   ```
 
   - VS Code task: `PackY: Deploy`.
