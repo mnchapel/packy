@@ -76,10 +76,14 @@ def printLogInGUI(type: QtMsgType, ctx: QMessageLogContext, msg: str) -> None:
         html: str = html_font_color + guiLogFormat(type, ctx, msg) + "</font>"
         MainWindow.log_panel.appendHtml(html)
 
+def printLogInConsole(type: QtMsgType, ctx: QMessageLogContext, msg: str) -> None:
+    print(guiLogFormat(type, ctx, msg))  # noqa: T201
+
 
 # -----------------------------------------------------------------------------
 def messageHandler(type: QtMsgType, ctx: QMessageLogContext, msg: str) -> None:
     writeLogInFile(type, ctx, msg)
+    printLogInConsole(type, ctx, msg)
 
     if type in {QtMsgType.QtInfoMsg, QtMsgType.QtWarningMsg, QtMsgType.QtCriticalMsg}:
         printLogInGUI(type, ctx, msg)
