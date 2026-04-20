@@ -18,8 +18,7 @@ from PySide6.QtCore import Qt, QStandardPaths, QAbstractListModel, Signal
 # PackY
 from packy.models.files_model import FilesModel
 from packy.models.packer_data import PackerData
-from packy.models.preferences import PreferencesTask, PreferencesKeys
-from packy.utils.settings_access import packySettings
+from packy.models.packy_settings import PreferencesTask, PreferencesKeys
 
 
 ###############################################################################

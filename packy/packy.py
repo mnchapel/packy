@@ -12,12 +12,11 @@ See LICENCE.md file for more information.
 
 # Local application
 from packy.models.log import messageHandler
-from packy.utils.external_data_access import ExternalData, external_data_path
 from packy.views.main_window import MainWindow
 
 # Third-party
 from PySide6 import QtCore, QtWidgets
-from PySide6.QtGui import QIcon
+from PySide6.QtCore import QCoreApplication
 
 # Standard library
 import sys
@@ -39,29 +38,25 @@ class Packy:
         Args:
             app (Packy): The application instance to launch.
         """
-        QtCore.qDebug("Starting PackY...")
         app.configure()
         app.init()
-        QtCore.qDebug("PackY started successfully!")
         app.run()
-        QtCore.qDebug("Stopping PackY...")
         app.dispose()
-        QtCore.qDebug("PackY stopped successfully!")
 
     # -------------------------------------------------------------------------
     def __init__(self) -> None:
         """Initialize the Packy application instance."""
+        QCoreApplication.setOrganizationName("PackY")
+        QCoreApplication.setOrganizationDomain("packy.com")
+        QCoreApplication.setApplicationName("PackY")
 
     # -------------------------------------------------------------------------
     def configure(self) -> None:
         """Configure the application environment and settings."""
-        QtCore.qDebug("*** (1/2) Configurating app ***")
-        QtCore.qDebug("App configurated")
 
     # -------------------------------------------------------------------------
     def init(self) -> None:
         """Initialize application components and logging system."""
-        QtCore.qDebug("*** (2/2) Initializing app ***")
         QtCore.qInstallMessageHandler(messageHandler)
         QtCore.qDebug("App initialized.")
 
@@ -73,16 +68,12 @@ class Packy:
         application icon, initializes the main window, and starts
         the event loop.
         """
-        QtCore.qDebug("*** Run app ***")
         app = QtWidgets.QApplication(sys.argv)
-        icon_path = external_data_path(ExternalData.LOGO)
-        app.setWindowIcon(QIcon(icon_path))
         main_window = MainWindow()
-
+        main_window.show()
         sys.exit(app.exec())
 
     # -------------------------------------------------------------------------
     def dispose(self) -> None:
         """Release application resources before shutdown."""
-        QtCore.qDebug("*** Dispose app ***")
-        QtCore.qDebug("*** App disposed. ***")
+        QtCore.qDebug("App disposed.")

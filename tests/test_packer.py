@@ -18,7 +18,7 @@ from PySide6.QtCore import QStandardPaths
 
 # PackY
 import model.task
-from packy.models.preferences import PreferencesKeys
+from packy.models.packy_settings import PreferencesKeys
 from packy.models.task import Task
 from packy.models.files_model import FilesModel
 from packy.models.zip_packer import ZipPacker

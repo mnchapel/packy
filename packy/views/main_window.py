@@ -15,12 +15,13 @@ import yaml
 # PyQt
 from PySide6 import QtCore, QtWidgets
 from PySide6.QtCore import Qt, QCoreApplication, QItemSelection, QThreadPool, QStandardPaths, QUrl
-from PySide6.QtGui import QDesktopServices
+from PySide6.QtGui import QCloseEvent, QDesktopServices, QIcon
 from PySide6.QtWidgets import QFileDialog, QPlainTextEdit, QMessageBox
 
 # PackY
 from packy.models.packer_data import DataName, PackerData
 from packy.models.packer_factory import createPacker
+from packy.models.packy_settings import PackySettings
 from packy.models.progression import Progression
 from packy.models.task import Task
 from packy.models.task import TaskProperties
@@ -29,11 +30,11 @@ from packy.models.session_encoder import SessionEncoder
 from packy.models.session_decoder import SessionDecoder
 from packy.views.tree_view_proxy_model import TreeViewProxyModel
 from packy.utils.external_data_access import ExternalData, external_data_path
-from packy.views.about import AboutDialog
-from packy.views.options import OptionsDialog
+from packy.views.about_dialog import AboutDialog
+from packy.views.options_dialog import OptionsDialog
 from packy.views.fix_warnings import FixWarnings
 from packy.ui.ui_main_window import Ui_MainWindow
-
+from typing import override
 
 ###############################################################################
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -58,7 +59,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # -------------------------------------------------------------------------
     def __init__(self, *args, obj=None, **kwargs) -> None:
         super(MainWindow, self).__init__(*args, **kwargs)
-        self.setupUi(self)
+
+        self.__settings: PackySettings = PackySettings(self)
+        self.__setup_ui()
+        self.__setup_toolbar()
+        self.__setup_menu_bar()
+        self.__read_settings()
+        self.__setup_connections()
 
         self.__initApplication()
         self.__initLog()
@@ -74,6 +81,47 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.__setTitle()
 
         self.show()
+
+    @property
+    def settings(self) -> PackySettings:
+        return self.__settings
+
+    def __setup_ui(self) -> None:
+        self.setupUi(self)
+        icon = QIcon(":/img/logo.ico")
+        self.setWindowIcon(icon)
+
+    def __setup_toolbar(self) -> None:
+        pass
+
+    def __setup_menu_bar(self) -> None:
+        pass
+
+    def __read_settings(self) -> None:
+        self.__settings.restore_layout_geometry(self)
+        self.__settings.restore_main_window_state(self)
+
+    def __setup_connections(self) -> None:
+        pass
+
+    @override
+    def closeEvent(self, event: QCloseEvent) -> None:
+        close_button = QMessageBox.question(
+            self, self.windowTitle(), "Are you sure?\n",
+            QMessageBox.StandardButton.Cancel | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Yes,
+            QMessageBox.StandardButton.Yes,
+        )
+        if close_button == QMessageBox.StandardButton.Yes:
+            super().closeEvent(event)
+            self.__write_settings()
+            event.accept()
+        else:
+            event.ignore()
+
+    def __write_settings(self) -> None:
+        self.__settings.save_layout_geometry_for(self)
+        self.__settings.save_main_window_state(self)
+
 
     ###########################################################################
     # PRIVATE MEMBER METHODS
@@ -473,8 +521,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # -------------------------------------------------------------------------
     def __openOptions(self, s):
-        dlg = Options(self)
-        dlg.taskSuffixChanged.connect(self.__session.emitSuffixChanged)
+        dlg = OptionsDialog(self.__settings, self)
+        # dlg.changed.connect(self.__session.emitSuffixChanged)
         dlg.exec()
 
     # -------------------------------------------------------------------------
@@ -488,7 +536,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # -------------------------------------------------------------------------
     def __openAbout(self, s):
-        dlg = About(self)
+        dlg = AboutDialog(self)
         dlg.exec()
 
     # -------------------------------------------------------------------------
