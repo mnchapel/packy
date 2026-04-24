@@ -14,8 +14,12 @@ from PySide6.QtCore import QByteArray, QCoreApplication, QObject, QRect, QSettin
 from PySide6.QtWidgets import QMainWindow, QWidget
 
 # Standard library
-from enum import Enum, StrEnum, auto
-from typing import cast
+from enum import Enum, auto
+from typing import TYPE_CHECKING, cast, final
+
+if TYPE_CHECKING:
+    # Standard library
+    from collections.abc import Callable
 
 
 # ###############################################################################
@@ -54,23 +58,7 @@ class SettingNotFoundError(Exception):
 
 
 ###############################################################################
-class SnapshotRetentionPolicy(StrEnum):
-    """Define available snapshot retention strategies."""
-
-    KEEP_ALL = "KeepAll"
-    KEEP_LAST_N = "KeepLastN"
-
-
-###############################################################################
-class FilenameSuffix(StrEnum):
-    """Define available filename suffix strategies for archives."""
-
-    CURRENT_DATE = "CurrentDate"
-    VERSION_NUMBER = "VersionNumber"
-    NONE = "None"
-
-
-###############################################################################
+@final
 class PackySettings(QObject):
     """Manage persistent application settings using QSettings.
 
@@ -82,23 +70,12 @@ class PackySettings(QObject):
             is saved. Arguments: (QWidget, QRect).
         main_window_state_changed (Signal): Emitted when the main window
             state is saved. Arguments: (QByteArray).
-        snapshot_retention_policy_changed (Signal): Emitted when the
-            snapshot retention policy changes. Arguments:
-            (SnapshotRetentionPolicy).
-        snapshot_retention_count_changed (Signal): Emitted when the
-            snapshot retention count changes. Arguments: (int).
-        archive_filename_suffix_changed (Signal): Emitted when the
-            archive filename suffix changes. Arguments:
-            (FilenameSuffix).
     """
 
     layout_geometry_changed = Signal(QWidget, QRect)
     main_window_state_changed = Signal(QByteArray)
-    snapshot_retention_policy_changed = Signal(SnapshotRetentionPolicy)
-    snapshot_retention_count_changed = Signal(int)
-    archive_filename_suffix_changed = Signal(FilenameSuffix)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def __init__(self, parent: QObject | None = None) -> None:
         """Initialize the settings manager.
 
@@ -113,7 +90,56 @@ class PackySettings(QObject):
             QCoreApplication.applicationName(),
         )
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    def begin_group(self, prefix: str) -> None:
+        """Redirection to :func:`PySide6.QtCore.QSettings.beginGroup`."""
+        self.__settings.beginGroup(prefix)
+
+    # -------------------------------------------------------------------------
+    def end_group(self) -> None:
+        """Redirection to func:`PySide6.QtCore.QSettings.endGroup`."""
+        self.__settings.endGroup()
+
+    # -------------------------------------------------------------------------
+    def set_value[T](
+        self,
+        key: str,
+        value: T,
+        on_changed: Callable[[T], None] | None = None,
+    ) -> bool:
+        """Sets the value of setting key to value.
+
+        If the key already exists, the previous value is overwritten.
+
+        Args:
+            key (str): The name of the setting key.
+            value (Any): The value of the setting key.
+            on_changed (Callable[[Any], None] | None): A callback function
+                to be called when the value is changed.
+
+        Returns:
+            bool: true if the value has changed; false otherwise
+        """
+        old_value = self.__settings.value(key)
+        if old_value == value:
+            return False
+        self.__settings.setValue(key, value)
+        if on_changed is not None:
+            on_changed(value)
+        return True
+
+    # -------------------------------------------------------------------------
+    def value[T](self, key: str, default: T) -> T:
+        """See :func:`PySide6.QtCore.QSettings.value`."""
+        val = self.__settings.value(key, default, type(default))
+        if isinstance(default, Enum) and not isinstance(val, Enum):
+            try:
+                return type(default)(val)
+            except ValueError:
+                return default
+        return cast("T", val)
+
+    # -------------------------------------------------------------------------
     def save_layout_geometry_for(self, widget: QWidget) -> None:
         """Save visibility and geometry state for a widget.
 
@@ -127,7 +153,7 @@ class PackySettings(QObject):
         self.__settings.endGroup()
         self.layout_geometry_changed.emit(widget, widget.geometry())
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def restore_layout_geometry(self, widget: QWidget) -> None:
         """Restore visibility and geometry state for a widget.
 
@@ -144,95 +170,26 @@ class PackySettings(QObject):
         widget.restoreGeometry(geometry)
         self.__settings.endGroup()
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def save_main_window_state(self, main_window: QMainWindow) -> None:
         """Save the state of the main window.
 
         Args:
             main_window (QMainWindow): The main window instance.
         """
-        self.__settings.beginGroup("MainWindow")
+        self.__settings.beginGroup(main_window.objectName())
         self.__settings.setValue("State", main_window.saveState())
         self.__settings.endGroup()
         self.main_window_state_changed.emit(main_window.saveState())
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def restore_main_window_state(self, main_window: QMainWindow) -> None:
         """Restore the state of the main window.
 
         Args:
             main_window (QMainWindow): The main window instance.
         """
-        self.__settings.beginGroup("MainWindow")
+        self.__settings.beginGroup(main_window.objectName())
         state = cast("QByteArray", self.__settings.value("State", QByteArray(), type=QByteArray))
         main_window.restoreState(state)
         self.__settings.endGroup()
-
-    # --------------------------------------------------------------------------
-    def snapshot_retention_policy(self) -> SnapshotRetentionPolicy:
-        """Return the current snapshot retention policy.
-
-        Returns:
-            SnapshotRetentionPolicy: The configured retention policy.
-        """
-        raw = self.__settings.value(
-            "Snapshot/Retention/Policy",
-            SnapshotRetentionPolicy.KEEP_ALL,
-            type=str,
-        )
-        try:
-            return SnapshotRetentionPolicy(str(raw))
-        except ValueError:
-            return SnapshotRetentionPolicy.KEEP_ALL
-
-    # --------------------------------------------------------------------------
-    def set_snapshot_retention_policy(self, policy: SnapshotRetentionPolicy) -> None:
-        """Set the snapshot retention policy.
-
-        Args:
-            policy (SnapshotRetentionPolicy): The retention policy to set.
-        """
-        self.__settings.setValue("Snapshot/Retention/Policy", policy.value)
-        self.snapshot_retention_policy_changed.emit(policy)
-
-    # --------------------------------------------------------------------------
-    def snapshots_retention_count(self) -> int:
-        """Return the number of snapshots to retain.
-
-        Returns:
-            int: The configured retention count.
-        """
-        return cast("int", self.__settings.value("Snapshot/Retention/Count", 1, type=int))
-
-    # --------------------------------------------------------------------------
-    def set_snapshots_retention_count(self, count: int) -> None:
-        """Set the number of snapshots to retain.
-
-        Args:
-            count (int): The number of snapshots to keep.
-        """
-        self.__settings.setValue("Snapshot/Retention/Count", count)
-        self.snapshot_retention_count_changed.emit(count)
-
-    # --------------------------------------------------------------------------
-    def archive_filename_suffix(self) -> FilenameSuffix:
-        """Return the current archive filename suffix strategy.
-
-        Returns:
-            FilenameSuffix: The configured filename suffix strategy.
-        """
-        raw = self.__settings.value("Task/Archive/FilenameSuffix", FilenameSuffix.NONE, type=str)
-        try:
-            return FilenameSuffix(str(raw))
-        except ValueError:
-            return FilenameSuffix.NONE
-
-    # --------------------------------------------------------------------------
-    def set_archive_filename_suffix(self, suffix: FilenameSuffix) -> None:
-        """Set the archive filename suffix strategy.
-
-        Args:
-            suffix (FilenameSuffix): The suffix strategy to apply.
-        """
-        self.__settings.setValue("Task/Archive/FilenameSuffix", suffix.value)
-        self.archive_filename_suffix_changed.emit(suffix)

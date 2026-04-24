@@ -523,6 +523,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __openOptions(self, s):
         dlg = OptionsDialog(self.__settings, self)
         # dlg.changed.connect(self.__session.emitSuffixChanged)
+        # dlg.snapshot_retention_count_changed.connect(
+        #     lambda x: print(f"value:= {x}")
+        # )
         dlg.exec()
 
     # -------------------------------------------------------------------------

@@ -45,7 +45,7 @@ Repository = "https://github.com/mnchapel/packy"
 Changelog = "https://github.com/mnchapel/packy/CHANGELOG.md"
 
 [tool.distutils.build_exe]
-includes = ["models", "views", "ui/generated", "utils"]
+includes = ["core", "models", "views", "ui/generated", "utils"]
 excludes = ["tkinter", "unittest"]
 include_files = ["resources"]
 
