@@ -59,7 +59,7 @@ class SettingNotFoundError(Exception):
 
 ###############################################################################
 @final
-class PackySettings(QObject):
+class Settings(QObject):
     """Manage persistent application settings using QSettings.
 
     This class provides methods to save and restore UI state and user

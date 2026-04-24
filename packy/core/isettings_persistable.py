@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
     # Local application
-    from packy.models.packy_settings import PackySettings
+    from packy.core.settings import Settings
 
 
 ###############################################################################
@@ -24,7 +24,7 @@ class ISettingsPersistable(Protocol):
     """
 
     @abstractmethod
-    def read_settings(self, settings: PackySettings) -> None:
+    def read_settings(self, settings: Settings) -> None:
         """_summary_
 
         Args:
@@ -33,7 +33,7 @@ class ISettingsPersistable(Protocol):
         raise NotImplementedError
 
     @abstractmethod
-    def write_settings(self, settings: PackySettings) -> None:
+    def write_settings(self, settings: Settings) -> None:
         """_summary_
 
         Args:

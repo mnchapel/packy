@@ -21,7 +21,7 @@ from PySide6.QtWidgets import QFileDialog, QPlainTextEdit, QMessageBox
 # PackY
 from packy.models.packer_data import DataName, PackerData
 from packy.models.packer_factory import createPacker
-from packy.models.packy_settings import PackySettings
+from packy.core.settings import Settings
 from packy.models.progression import Progression
 from packy.models.task import Task
 from packy.models.task import TaskProperties
@@ -60,7 +60,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, *args, obj=None, **kwargs) -> None:
         super(MainWindow, self).__init__(*args, **kwargs)
 
-        self.__settings: PackySettings = PackySettings(self)
+        self.__settings: Settings = Settings(self)
         self.__setup_ui()
         self.__setup_toolbar()
         self.__setup_menu_bar()
@@ -83,7 +83,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.show()
 
     @property
-    def settings(self) -> PackySettings:
+    def settings(self) -> Settings:
         return self.__settings
 
     def __setup_ui(self) -> None:

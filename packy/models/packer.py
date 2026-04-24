@@ -14,7 +14,7 @@ import shutil
 from PySide6.QtCore import Qt, QRunnable, QStandardPaths
 
 # PackY
-from packy.models.packy_settings import PreferencesGeneral, PreferencesKeys, PreferencesTask
+from packy.core.settings import PreferencesGeneral, PreferencesKeys, PreferencesTask
 from packy.models.task import Task, TaskStatus
 from packy.models.packer_signals import PackerSignals
 

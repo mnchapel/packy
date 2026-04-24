@@ -23,7 +23,7 @@ from typing import TYPE_CHECKING, final, override
 
 if TYPE_CHECKING:
     # Local application
-    from packy.models.packy_settings import PackySettings
+    from packy.core.settings import Settings
 
 
 ###############################################################################
@@ -91,7 +91,7 @@ class OptionsDialog(QDialog, ISettingsPersistable, metaclass=FinalMeta):
     archive_filename_suffix_changed = Signal(FilenameSuffix)
 
     # -------------------------------------------------------------------------
-    def __init__(self, app_settings: PackySettings, parent: QDialog | None = None) -> None:
+    def __init__(self, app_settings: Settings, parent: QDialog | None = None) -> None:
         """Initialize the dialog and bind it to application settings.
 
         Args:
@@ -103,7 +103,7 @@ class OptionsDialog(QDialog, ISettingsPersistable, metaclass=FinalMeta):
 
         self.__ui: Ui_OptionsDialog = Ui_OptionsDialog()
         self.__ui.setupUi(self)
-        self.__settings: PackySettings = app_settings
+        self.__settings: Settings = app_settings
 
         # Widgets mapping
         self.__retention_policy_by_button: dict[QAbstractButton, SnapshotRetentionPolicy] = {
@@ -122,7 +122,7 @@ class OptionsDialog(QDialog, ISettingsPersistable, metaclass=FinalMeta):
 
     # -------------------------------------------------------------------------
     @override
-    def read_settings(self, settings: PackySettings) -> None:
+    def read_settings(self, settings: Settings) -> None:
         if settings != self.__settings:
             raise ValueError(  # noqa: TRY003
                 "The parameter settings must be the same instance as the dialog's"
@@ -203,7 +203,7 @@ class OptionsDialog(QDialog, ISettingsPersistable, metaclass=FinalMeta):
 
     # -------------------------------------------------------------------------
     @override
-    def write_settings(self, settings: PackySettings) -> None:
+    def write_settings(self, settings: Settings) -> None:
         if settings != self.__settings:
             raise ValueError(  # noqa: TRY003
                 "The parameter settings must be the same instance as the dialog's"
