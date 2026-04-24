@@ -12,6 +12,9 @@ See LICENCE.md file for more information.
 # Local application
 from packy.packy import Packy
 
+# Standard library
+import sys
+
 
 # -----------------------------------------------------------------------------
 def main() -> None:
@@ -25,10 +28,12 @@ def main() -> None:
         Exception: Propagates any exception raised during application
             execution after being caught and logged.
     """
+    exit_code = 0
     try:
-        Packy.launch(Packy())
+        exit_code = Packy.launch(Packy())
     except Exception as e:  # noqa: BLE001
         print(f"Exception: {e}")  # noqa: T201
+    sys.exit(exit_code)
 
 
 if __name__ == "__main__":

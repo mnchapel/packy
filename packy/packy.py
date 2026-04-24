@@ -20,9 +20,11 @@ from PySide6.QtCore import QCoreApplication
 
 # Standard library
 import sys
+from typing import final
 
 
 ###############################################################################
+@final
 class Packy:
     """Encapsulate the lifecycle of the Packy application.
 
@@ -32,16 +34,24 @@ class Packy:
 
     # -------------------------------------------------------------------------
     @staticmethod
-    def launch(app: Packy) -> None:
+    def launch(app: Packy) -> int:
         """Execute the full lifecycle of the application.
 
         Args:
             app (Packy): The application instance to launch.
+
+        Returns:
+            int: The exit code of the application.
         """
-        app.configure()
-        app.init()
-        app.run()
-        app.dispose()
+        exit_code = 1
+        try:
+            app.configure()
+            app.init()
+            exit_code = app.run()
+        finally:
+            app.dispose()
+
+        return exit_code
 
     # -------------------------------------------------------------------------
     def __init__(self) -> None:
@@ -61,17 +71,20 @@ class Packy:
         QtCore.qDebug("App initialized.")
 
     # -------------------------------------------------------------------------
-    def run(self) -> None:
+    def run(self) -> int:
         """Start the Qt application event loop and main window.
 
         This method creates the QApplication instance, sets the
         application icon, initializes the main window, and starts
         the event loop.
+
+        Returns:
+            int: The exit code of the application.
         """
         app = QtWidgets.QApplication(sys.argv)
         main_window = MainWindow()
         main_window.show()
-        sys.exit(app.exec())
+        return app.exec()
 
     # -------------------------------------------------------------------------
     def dispose(self) -> None:
