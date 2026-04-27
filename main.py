@@ -10,7 +10,7 @@ See LICENCE.md file for more information.
 """
 
 # Local application
-from packy.packy import Packy
+from packy.packy_app import PackyApp
 
 # Standard library
 import sys
@@ -30,7 +30,7 @@ def main() -> None:
     """
     exit_code = 0
     try:
-        exit_code = Packy.launch(Packy())
+        exit_code = PackyApp.launch(PackyApp())
     except Exception as e:  # noqa: BLE001
         print(f"Exception: {e}")  # noqa: T201
     sys.exit(exit_code)

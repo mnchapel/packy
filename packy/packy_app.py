@@ -44,7 +44,7 @@ class PackyLifeCycleError(Exception):
 
 ###############################################################################
 @final
-class Packy:
+class PackyApp:
     """Encapsulate the lifecycle of the Packy application.
 
     This class orchestrates the different stages of the application
@@ -53,7 +53,7 @@ class Packy:
 
     # -------------------------------------------------------------------------
     @staticmethod
-    def launch(app: Packy) -> int:
+    def launch(app: PackyApp) -> int:
         """Execute the full lifecycle of the application.
 
         Args:
