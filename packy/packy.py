@@ -11,16 +11,35 @@ See LICENCE.md file for more information.
 """
 
 # Local application
-from packy.models.log import messageHandler
+from packy.core.debug_logger import DebugLogger
 from packy.views.main_window import MainWindow
 
 # Third-party
 from PySide6 import QtCore, QtWidgets
-from PySide6.QtCore import QCoreApplication
+from PySide6.QtCore import QCoreApplication, QStandardPaths
 
 # Standard library
 import sys
+from pathlib import Path
 from typing import final
+
+
+###############################################################################
+class PackyLifeCycleError(Exception):
+    """An error occurring during the Packy application lifecycle.
+
+    This exception represents failures encountered during one of the
+    lifecycle phases such as configuration, initialization, execution,
+    or disposal.
+    """
+
+    def __init__(self, message: str) -> None:
+        """Initialize the exception with an error message.
+
+        Args:
+            message (str): A descriptive message explaining the failure.
+        """
+        super().__init__(message)
 
 
 ###############################################################################
@@ -67,7 +86,16 @@ class Packy:
     # -------------------------------------------------------------------------
     def init(self) -> None:
         """Initialize application components and logging system."""
-        QtCore.qInstallMessageHandler(messageHandler)
+        in_dev_mode = not getattr(sys, "frozen", False)
+        if in_dev_mode:
+            folder_path = Path("./logs")
+        else:
+            app_data_location = QStandardPaths.StandardLocation.AppDataLocation
+            folder_path = Path(QStandardPaths.writableLocation(app_data_location))
+        log_file_path = folder_path / "log.txt"
+        has_started = DebugLogger.start(log_file_path)
+        if not has_started:
+            raise PackyLifeCycleError("Debug logger has already been started.")  # noqa: TRY003
         QtCore.qDebug("App initialized.")
 
     # -------------------------------------------------------------------------
@@ -90,3 +118,6 @@ class Packy:
     def dispose(self) -> None:
         """Release application resources before shutdown."""
         QtCore.qDebug("App disposed.")
+        has_stopped = DebugLogger.stop()
+        if not has_stopped:
+            raise PackyLifeCycleError("Debug logger is not started.")  # noqa: TRY003

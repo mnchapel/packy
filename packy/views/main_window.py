@@ -68,7 +68,6 @@ class MainWindow(QMainWindow):
         self.__setup_connections()
 
         self.__initApplication()
-        self.__initLog()
 
         self.__thread_pool = QThreadPool()
         self.__thread_pool.setMaxThreadCount(1)
@@ -137,32 +136,6 @@ class MainWindow(QMainWindow):
             QCoreApplication.setApplicationName(metadata["ProductName"])
             QCoreApplication.setOrganizationDomain("packy.fr")
             QCoreApplication.setApplicationVersion(metadata["Version"])
-
-    # -------------------------------------------------------------------------
-    def __initLog(self) -> None:
-        if not hasattr(MainWindow, "log_panel"):
-            MainWindow.log_panel: QPlainTextEdit = self.log_panel
-
-        if not hasattr(MainWindow, "log_file_path"):
-            if self.__is_dev():
-                folder_path = "./logs"
-            else:
-                app_data_location = QStandardPaths.StandardLocation.AppDataLocation
-                folder_path = QStandardPaths.writableLocation(app_data_location)
-
-            MainWindow.log_file_path: str = os.path.join(folder_path, "log.txt")
-            self.__cleanPreviousSessionLog()
-
-    # -------------------------------------------------------------------------
-    def __is_dev(self) -> bool:
-        if getattr(sys, "frozen", False):
-            return False
-        else:
-            return True
-
-    # -------------------------------------------------------------------------
-    def __cleanPreviousSessionLog(self) -> None:
-        open(MainWindow.log_file_path, "w").close()
 
     # -------------------------------------------------------------------------
     def __initConnects(self) -> None:
