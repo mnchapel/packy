@@ -190,7 +190,7 @@ pyside6-project build "pyproject.toml"
 
 In VS Code, the `PackY: Build` task can also be used to run these commands. The update script can also be executed independently using the `PackY: Update PyProject file` task.
 
-To compile only the UI files, run the command `python "scripts/convert_ui_to_py.py"`, or, from VS Code, use the `PackY: Compile .ui` task. More information about these commands can be found in the [Useful commands](#useful-commands) section.
+To compile only the UI files, run the command `python "scripts/convert_ui_to_py.py"`, or, from VS Code, use the `PackY: Compile .ui` task. This method is, however, deprecated in favor of `PackY: Build`. More information about these commands can be found in the [Useful commands](#useful-commands) section.
 
 ### Testing
 
@@ -262,7 +262,7 @@ The usage of commands and scripts is described below in the order of a typical d
   - VS Code task: `PackY: Clean`.
   - [pyside6-project command documentation](https://doc.qt.io/qtforpython-6/tools/pyside-project.html).
 
-- To **build** the project (compile resources, UI files, and QML files if existing and necessary):
+- To **build** the project (compile resources, UI files, and QML files if existing and necessary, after having automatically updated the PyProject file and the translation files):
 
   ```bash
   pyside6-project build "pyproject.toml"
@@ -274,7 +274,7 @@ The usage of commands and scripts is described below in the order of a typical d
   - [pyside6-uic command documentation](https://doc.qt.io/qtforpython-6/tools/pyside-uic.html) and [its options](https://doc.qt.io/qt-6/uic.html).
   - [pyside6-rcc command documentation](https://doc.qt.io/qtforpython-6/tools/pyside-rcc.html) and [its options](https://doc.qt.io/qt-6/rcc.html).
 
-- To **update PyProject file** (automatically called by the build command):
+- To **update PyProject file**, and more specifically the 'tool.pyside6-project.files' section in a `pyproject.toml` file (automatically called by the build command):
 
   ```bash
   python "scripts/update_pyproject_file.py" --relative-to "." --include-directory "packy" --include-file "resources/packy.qrc" --include-file "main.py"
@@ -283,6 +283,7 @@ The usage of commands and scripts is described below in the order of a typical d
   - VS Code task: `PackY: Update PyProject file`.
 
 - To manually **compile .ui** files:
+- To manually **compile .ui** files (*deprecated* in favor of `PackY: Build`):
 
   ```bash
   python "scripts/convert_ui_to_py.py"

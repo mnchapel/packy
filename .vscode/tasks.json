@@ -29,7 +29,7 @@
     },
     {
       "label": "PackY: Build",
-      "detail": "Compiles resources, UI files, and QML files if existing and necessary",
+      "detail": "Compiles resources, UI files, and QML files if existing and necessary, after having automatically updated the PyProject file",
       "type": "shell",
       "options": {
         "cwd": "${workspaceFolder}"
@@ -62,7 +62,7 @@
     },
     {
       "label": "PackY: Update PyProject file",
-      "detail": "Update the ``tool.pyside6-project.files`` section in a pyproject.toml file",
+      "detail": "Update the 'tool.pyside6-project.files' section in a pyproject.toml file",
       "type": "shell",
       "options": {
         "cwd": "${workspaceFolder}"
@@ -92,7 +92,7 @@
     },
     {
       "label": "PackY: Compile .ui",
-      "detail": "Generate .py files from .ui files",
+      "detail": "[Deprecated: use 'PackY: Build'] Generate .py files from .ui files",
       "type": "shell",
       "options": {
         "cwd": "${workspaceFolder}"
