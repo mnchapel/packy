@@ -282,7 +282,29 @@ The usage of commands and scripts is described below in the order of a typical d
 
   - VS Code task: `PackY: Update PyProject file`.
 
-- To manually **compile .ui** files:
+- To **update translation files** (update all TS files in the `i18n/` directory by scanning the source code; automatically called by the build command):
+
+  ```bash
+  pyside6-lupdate -extensions "ui,py,qs,qml,qrc" -sort-messages -recursive -locations relative -tr-function-alias "QT_TR_NOOP+=PACKY_TR_NOOP" . -ts "@i18n/translations.txt"
+  ```
+
+  - VS Code task: `PackY: Update translation files`.
+  - [pyside6-lupdate command documentation](https://doc.qt.io/qtforpython-6/tools/pyside-lupdate.html) and [its options](https://doc.qt.io/qt-6/linguist-lupdate.html).
+
+- To **add a new translation file** (create a TS file for a specific language in the `i18n/` directory, and reference it in `i18n/translations.txt`):
+
+  ```bash
+  pyside6-lupdate -source-language "en-US" -target-language "<ISO_LOCAL_CODE>" -ts "i18n/<ISO_LOCAL_CODE>.ts"
+  echo i18n/<ISO_LOCAL_CODE>.ts>>"i18n/translations.txt"
+  ```
+
+  Where:
+
+  - `<ISO_LOCAL_CODE>` : An ISO locale code following the format `<LANG_CODE>-<COUNTRY_CODE>`. A full list can be found [here](https://simplelocalize.io/data/locales/).
+
+  - VS Code task: `PackY: Add new translation file`.
+  - [pyside6-lupdate command documentation](https://doc.qt.io/qtforpython-6/tools/pyside-lupdate.html) and [its options](https://doc.qt.io/qt-6/linguist-lupdate.html).
+
 - To manually **compile .ui** files (*deprecated* in favor of `PackY: Build`):
 
   ```bash
@@ -419,6 +441,7 @@ Qt documentation:
 - [Qt for Python](https://doc.qt.io/qtforpython-6/index.html)
 - [Qt Extension for VS Code](https://doc-snapshots.qt.io/vscodeext-dev/index.html)
 - [Qt Python VSCode Extension](https://doc.qt.io/qtforpython-6/tools/vscode-ext.html)
+- [Qt Linguist for translation](https://doc.qt.io/qt-6/qtlinguist-index.html).
 - [PySide6 Tools](https://doc.qt.io/qtforpython-6/tools/index.html)
 - [PySide Tutorials](https://doc.qt.io/qtforpython-6/tutorials/index.html)
 - [Inno Setup](https://jrsoftware.org/ishelp.php)

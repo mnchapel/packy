@@ -91,6 +91,66 @@
       "problemMatcher": []
     },
     {
+      "label": "PackY: Update translation files",
+      "detail": "Updates all translation (.ts) files",
+      "type": "shell",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "linux": {
+        "command": "${command:python.interpreterPath}/../Scripts/pyside6-lupdate"
+      },
+      "windows": {
+        "command": "${command:python.interpreterPath}/../Scripts/pyside6-lupdate.exe"
+      },
+      "args": [
+        "-extensions",
+        "ui,py,qs,qml,qrc",
+        "-sort-messages",
+        "-recursive",
+        "-locations",
+        "relative",
+        "-tr-function-alias",
+        "QT_TR_NOOP+=PACKY_TR_NOOP",
+        ".",
+        "-ts",
+        "@i18n/translations.txt",
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "PackY: Add new translation file",
+      "detail": "Create and reference a new translation (.ts) file",
+      "type": "shell",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "linux": {
+        "command": "${command:python.interpreterPath}/../Scripts/pyside6-lupdate -source-language \"en-US\" -target-language \"${input:isoLocaleCode}\" -ts \"i18n/${input:isoLocaleCode}.ts\" && echo i18n/${input:isoLocaleCode}.ts>>\"i18n/translations.txt\""
+      },
+      "windows": {
+        "command": "${command:python.interpreterPath}/../Scripts/pyside6-lupdate -source-language \"en-US\" -target-language \"${input:isoLocaleCode}\" -ts \"i18n/${input:isoLocaleCode}.ts\" && echo i18n/${input:isoLocaleCode}.ts>>\"i18n/translations.txt\""
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "PackY: Compile .ui",
       "detail": "[Deprecated: use 'PackY: Build'] Generate .py files from .ui files",
       "type": "shell",
@@ -191,5 +251,12 @@
         "PackY: Build"
       ]
     },
+  ],
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "isoLocaleCode",
+      "description": "IOS 639 and 3166 local code, e.g., 'fr-FR', 'en-GB', 'de-DE'.",
+    }
   ]
 }

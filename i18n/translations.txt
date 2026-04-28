@@ -1,0 +1,2 @@
+i18n/en-US.ts
+i18n/fr-FR.ts
