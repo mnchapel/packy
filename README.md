@@ -519,7 +519,7 @@ This application is intended to remain simple, so there are no plans to add many
 
 ### Stack
 
-PackY is built with PySide6, JSON Schema and Ruff. We thank the contributors of all these projects for their awesome work!
+PackY is built with PySide6, JSON Schema and Ruff. We thank the contributors of all these projects for their awesome work! We also thank Elias Mueller for the build scripts from his project [PySide6-project-template](https://github.com/trin94/PySide6-project-template), which we have partially reused.
 
 ### Contributors
 
