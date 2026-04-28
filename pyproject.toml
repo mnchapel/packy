@@ -104,6 +104,6 @@ options = [
 [tool.pyside6-rcc]
 # The list of options can be seen with the command `pyside6-rcc --help-all` and on the page <https://doc.qt.io/qt-6/rcc.html>
 options = [
-  "--compress-algo",
+  "-compress-algo",
   "zlib",
 ]
