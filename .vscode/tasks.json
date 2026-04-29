@@ -29,7 +29,7 @@
     },
     {
       "label": "PackY: Build",
-      "detail": "Compiles resources, UI files, and QML files if existing and necessary, after having automatically updated the PyProject file",
+      "detail": "Compiles resources (QRC files), UI files, and QML files into Python files, and TS files into a binary form (QM files), after having automatically updated the PyProject file and the translation files",
       "type": "shell",
       "options": {
         "cwd": "${workspaceFolder}"
@@ -57,12 +57,13 @@
       },
       "problemMatcher": [],
       "dependsOn": [
-        "PackY: Update PyProject file"
+        "PackY: Update PyProject file",
+        "PackY: Update translation files"
       ]
     },
     {
       "label": "PackY: Update PyProject file",
-      "detail": "Update the 'tool.pyside6-project.files' section in a pyproject.toml file",
+      "detail": "Update the 'tool.pyside6-project.files' section in the pyproject.toml file",
       "type": "shell",
       "options": {
         "cwd": "${workspaceFolder}"
@@ -72,6 +73,8 @@
         "scripts/update_pyproject_file.py",
         "--relative-to",
         ".",
+        "--include-directory",
+        "i18n",
         "--include-directory",
         "packy",
         "--include-file",
@@ -92,7 +95,7 @@
     },
     {
       "label": "PackY: Update translation files",
-      "detail": "Updates all translation (.ts) files",
+      "detail": "Scan the source code to extract strings and populate the translation (.ts) files in the 'i18n/' directory",
       "type": "shell",
       "options": {
         "cwd": "${workspaceFolder}"
@@ -129,7 +132,7 @@
     },
     {
       "label": "PackY: Add new translation file",
-      "detail": "Create and reference a new translation (.ts) file",
+      "detail": "Create and reference a new translation (.ts) file in 'i18n/' folder",
       "type": "shell",
       "options": {
         "cwd": "${workspaceFolder}"
