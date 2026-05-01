@@ -11,6 +11,7 @@ See LICENCE.md file for more information.
 """
 
 # Local application
+import resources.rc_packy  # pyright: ignore[reportUnusedImport] # noqa: F401
 from packy.core.debug_logger import DebugLogger
 from packy.views.main_window import MainWindow
 
@@ -86,6 +87,7 @@ class PackyApp:
     # -------------------------------------------------------------------------
     def init(self) -> None:
         """Initialize application components and logging system."""
+        # Set up logging
         in_dev_mode = not getattr(sys, "frozen", False)
         if in_dev_mode:
             folder_path = Path("./logs")
