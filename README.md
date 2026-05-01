@@ -118,6 +118,8 @@ Therefore, [Visual Studio Code](https://code.visualstudio.com/) is recommended, 
 - [Qt Python Extension Pack](https://marketplace.visualstudio.com/items?itemName=TheQtCompany.qt-python-pack) (see [the doc](https://doc.qt.io/qtforpython-6/tools/vscode-ext.html)).
 - [Ruff extension](https://marketplace.visualstudio.com/items?itemName=charliermarsh.ruff) (see [the doc](https://docs.astral.sh/ruff/)).
 
+For UI design, [Qt Designer](https://doc.qt.io/qt-6/qtdesigner-manual.html) is recommanded, as well as [Qt Linguist](https://doc.qt.io/qt-6/qtlinguist-index.html) for editing translation files.
+
 ### Setup the environment
 
 1. Get the project using one of these methods:
@@ -195,7 +197,7 @@ Then, to **build PackY**, run the following commands:
 # Update the PyProject file (pyproject.toml)
 python "scripts/update_pyproject_file.py" --relative-to "." --include-directory "i18n" --include-directory "packy" --include-file "resources/packy.qrc" --include-file "main.py"
 # Update translation files (TS files in `i18n/`)
-pyside6-lupdate -extensions "ui,py,qs,qml,qrc" -sort-messages -recursive -locations relative -tr-function-alias "QT_TR_NOOP+=PACKY_TR_NOOP" . -ts "@i18n/translations.txt"
+pyside6-lupdate -extensions "ui,py,qs,qml,qrc" -sort-messages -recursive -locations relative -tr-function-alias "QT_TR_NOOP+=PACKY_TR_NOOP,QT_TRANSLATE_NOOP+=PACKY_TRANSLATE_NOOP" . -ts "@i18n/translations.txt"
 # Build the project
 pyside6-project build "pyproject.toml"
 ```
@@ -282,7 +284,7 @@ The usage of commands and scripts is described below in the order of a typical d
   # Update the PyProject file (pyproject.toml)
   python "scripts/update_pyproject_file.py" --relative-to "." --include-directory "i18n" --include-directory "packy" --include-file "resources/packy.qrc" --include-file "main.py"
   # Update translation files (TS files in `i18n/`)
-  pyside6-lupdate -extensions "ui,py,qs,qml,qrc" -sort-messages -recursive -locations relative -tr-function-alias "QT_TR_NOOP+=PACKY_TR_NOOP" . -ts "@i18n/translations.txt"
+  pyside6-lupdate -extensions "ui,py,qs,qml,qrc" -sort-messages -recursive -locations relative -tr-function-alias "QT_TR_NOOP+=PACKY_TR_NOOP,QT_TRANSLATE_NOOP+=PACKY_TRANSLATE_NOOP" . -ts "@i18n/translations.txt"
   # Build the project
   pyside6-project build "pyproject.toml"
   ```
@@ -305,7 +307,7 @@ The usage of commands and scripts is described below in the order of a typical d
 - To **update translation files** (scan the source code to extract strings and populate the translation (.ts) files in the `i18n/` directory; automatically called by the build command):
 
   ```bash
-  pyside6-lupdate -extensions "ui,py,qs,qml,qrc" -sort-messages -recursive -locations relative -tr-function-alias "QT_TR_NOOP+=PACKY_TR_NOOP" . -ts "@i18n/translations.txt"
+  pyside6-lupdate -extensions "ui,py,qs,qml,qrc" -sort-messages -recursive -locations relative -tr-function-alias "QT_TR_NOOP+=PACKY_TR_NOOP,QT_TRANSLATE_NOOP+=PACKY_TRANSLATE_NOOP" . -ts "@i18n/translations.txt"
   ```
 
   - VS Code task: `PackY: Update translation files`.
@@ -463,6 +465,7 @@ Qt documentation:
 - [Qt for Python](https://doc.qt.io/qtforpython-6/index.html)
 - [Qt Extension for VS Code](https://doc-snapshots.qt.io/vscodeext-dev/index.html)
 - [Qt Python VSCode Extension](https://doc.qt.io/qtforpython-6/tools/vscode-ext.html)
+- [Qt Designer for UI design](https://doc.qt.io/qt-6/qtdesigner-manual.html)
 - [Qt Linguist for translation](https://doc.qt.io/qt-6/qtlinguist-index.html).
 - [PySide6 Tools](https://doc.qt.io/qtforpython-6/tools/index.html)
 - [PySide Tutorials](https://doc.qt.io/qtforpython-6/tutorials/index.html)
@@ -492,7 +495,77 @@ Help us keep PackY open and inclusive. Please read and follow our [Code of Condu
 
 ### Add translations
 
-Not available yet.
+If you speak another language, then adding translations will help make PackY available to non-native English speakers. This is a very quick and easy task, as all application text is located in `i18n/en-US.ts`; simply follow the preparation steps below and use the [Qt Linguist](https://doc.qt.io/qt-6/qtlinguist-index.html) software to translate the various entries. You don't have to translate it all, as any missing attributes will just fallback to English.
+
+**Prerequisites**:
+
+- [Qt Linguist](https://doc.qt.io/qt-6/qtlinguist-index.html) (usually installed along with Qt)
+
+Before starting the translation process, it is necessary to ensure that the translation file for the target language (a file in [TS format](https://doc.qt.io/qt-6/linguist-ts-file-format.html)) exists in the `i18n/` folder. Such a file is named using the ISO locale code following the format `<LANG_CODE>-<COUNTRY_CODE>.ts`. The `<LANG_CODE>` part is a two-letter language code from the [ISO 639](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes) standard, and the `<COUNTRY_CODE>` part is a two-letter country code from the [ISO 3166-1](https://en.wikipedia.org/wiki/ISO_3166-1) standard. For example: 'fr_FR', 'en-US', 'de-DE', etc.
+
+In addition, each translation file is referenced in the *lst-file* `i18n/translations.txt` so that it is included in the string update process for the [build process](#building) (the [`lupdate` command](https://doc.qt.io/qt-6/linguist-lupdate.html) uses it as an output argument). The build process will, among other things, rescan the code to extract strings and update the translation files (i.e., the TS files), then compile them into a compact binary format and store them as QM files (in the `i18n/` directory using the [`pyside6-lrelease` command](https://doc.qt.io/qtforpython-6/tools/pyside-lrelease.html)), which PackY will use directly. This format provides extremely fast lookup for translations compared to TS files. QM files are treated as resources (QRC files) and are therefore referenced in `resources/packy.qrc`.
+
+If the target language file does not have an associated file, it must be created from the reference translation file `i18n/en-US.ts`, which serves as the source text for all translations. It contains the original text of PackY.
+
+Follow these steps (from the [official procedure](https://doc.qt.io/qt-6/linguist-creating-ts-files.html)) to **add a new translation file** to PackY :
+
+1. Create the TS file for the target language in the `i18n/` folder and reference it in `i18n/translations.txt` by running the `PackY: Add new translation file` task or by executing the following commands in a terminal:
+
+    ```bash
+    pyside6-lupdate -source-language "en-US" -target-language "<ISO_LOCAL_CODE>" -ts "i18n/<ISO_LOCAL_CODE>.ts"
+    echo i18n/<ISO_LOCAL_CODE>.ts>>"i18n/translations.txt"
+    ```
+
+    Replace the following:
+
+    - `<ISO_LOCAL_CODE>` : An ISO locale code following the format `<LANG_CODE>-<COUNTRY_CODE>`. A full list can be found [here](https://simplelocalize.io/data/locales/).
+
+2. Run a scan of the source code to extract strings and populate the new translation file:
+
+  ```bash
+  pyside6-lupdate -extensions "ui,py,qs,qml,qrc" -sort-messages -recursive -locations relative -tr-function-alias "QT_TR_NOOP+=PACKY_TR_NOOP,QT_TRANSLATE_NOOP+=PACKY_TRANSLATE_NOOP" . -ts "i18n/<ISO_LOCAL_CODE>.ts"
+  ```
+
+  Replace the following:
+
+  - `<ISO_LOCAL_CODE>` : The same ISO locale code used in step 1.
+
+3. Générer le QM file (a compact binary format that the localized application uses pour extremely fast lookup for translations) out of TS file:
+
+  ```bash
+  pyside6-lrelease "i18n/<ISO_LOCAL_CODE>.ts" -qm "i18n/<ISO_LOCAL_CODE>.qm"
+  ```
+
+  Replace the following:
+
+  - `<ISO_LOCAL_CODE>` : The same ISO locale code used in step 1.
+
+4. Using a text editor or [Qt Designer](https://doc.qt.io/qt-6/qtdesigner-manual.html), open the resource file `resources/packy.qrc` and add the path to the generated QM file inside the `/i18n` prefix, using the locale as the alias:
+
+  ```xml
+  <qresource prefix="/i18n">
+    ...
+    <file alias="<ISO_LOCAL_CODE>">../i18n/<ISO_LOCAL_CODE>.qm</file>
+  </qresource>
+  ```
+
+5. Save the changes. The new translation file is now integrated into PackY.
+
+Translation of PackY text is done using [Qt Linguist](https://doc.qt.io/qt-6/qtlinguist-index.html), provided with Qt. But before starting, it is necessary to make sure that the translation files are up to date by running the dedicated command.
+
+Follow these steps to **translate PackY text**:
+
+1. Update the translation files (TS files) by running the `PackY: Update translation files` task or by executing the following command in a terminal:
+
+  ```bash
+  pyside6-lupdate -extensions "ui,py,qs,qml,qrc" -sort-messages -recursive -locations relative -tr-function-alias "QT_TR_NOOP+=PACKY_TR_NOOP,QT_TRANSLATE_NOOP+=PACKY_TRANSLATE_NOOP" . -ts "@i18n/translations.txt"
+  ```
+
+2. Launch Qt Linguist, then open the TS file for the desired language located in the `i18n/` directory.
+
+3. For each text entry, fill in the **Translation to...** field with the translation of the **Source text**, then validate it by pressing **Ctrl+Enter** or by clicking the corresponding button. Help on using the software can be found in the [official documentation](https://doc.qt.io/qt-6/linguist-translators.html).
+
+4. Save the changes and close the software. The updates will appear in PackY the next time it is restarted.
 
 ### Submit a PR
 
