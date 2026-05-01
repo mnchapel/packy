@@ -15,7 +15,7 @@ from packy.ui.ui_options_dialog import Ui_OptionsDialog
 
 # Third-party
 from PySide6.QtCore import Signal, Slot
-from PySide6.QtWidgets import QAbstractButton, QDialog, QDialogButtonBox
+from PySide6.QtWidgets import QAbstractButton, QDialog, QDialogButtonBox, QWidget
 
 # Standard library
 from enum import StrEnum
@@ -91,13 +91,13 @@ class OptionsDialog(QDialog, ISettingsPersistable, metaclass=FinalMeta):
     archive_filename_suffix_changed = Signal(FilenameSuffix)
 
     # -------------------------------------------------------------------------
-    def __init__(self, app_settings: Settings, parent: QDialog | None = None) -> None:
+    def __init__(self, app_settings: Settings, parent: QWidget | None = None) -> None:
         """Initialize the dialog and bind it to application settings.
 
         Args:
             app_settings (PackySettings): The settings instance to read from
                 and write to.
-            parent (QDialog | None): The parent dialog. Defaults to None.
+            parent (QWidget | None): The parent widget. Defaults to None.
         """
         super().__init__(parent)
 
