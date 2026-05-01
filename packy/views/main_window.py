@@ -88,7 +88,7 @@ class MainWindow(QMainWindow):
     def __setup_ui(self) -> None:
         self.__ui: Ui_MainWindow = Ui_MainWindow()
         self.__ui.setupUi(self)
-        icon = QIcon(":/img/logo.ico")
+        icon = QIcon(":/img/logo")
         self.setWindowIcon(icon)
 
     def __setup_toolbar(self) -> None:

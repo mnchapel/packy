@@ -1,5 +1,9 @@
 <RCC>
-  <qresource>
-    <file>img/logo.ico</file>
+  <qresource prefix="/img">
+    <file alias="logo">img/logo.ico</file>
+  </qresource>
+  <qresource prefix="/i18n">
+    <file alias="fr-FR">../i18n/fr-FR.qm</file>
+    <file alias="en-US">../i18n/en-US.qm</file>
   </qresource>
 </RCC>
