@@ -24,16 +24,19 @@
     <item row="1" column="1" colspan="2">
      <layout class="QVBoxLayout" name="vlayout_bottom">
       <item>
-       <widget class="QLabel" name="label_log_panel">
+       <widget class="QLabel" name="messages_label">
         <property name="text">
-         <string>Log panel:</string>
+         <string>Messages:</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPlainTextEdit" name="log_panel">
+       <widget class="MessagesWidget" name="messages_view">
         <property name="focusPolicy">
          <enum>Qt::FocusPolicy::NoFocus</enum>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -802,6 +805,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MessagesWidget</class>
+   <extends>QTextEdit</extends>
+   <header>packy.views.messages_widget</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
  <buttongroups>
