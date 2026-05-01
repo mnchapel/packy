@@ -14,7 +14,7 @@ import yaml
 
 # PyQt
 from PySide6 import QtCore, QtWidgets
-from PySide6.QtCore import Qt, QCoreApplication, QItemSelection, QThreadPool, QStandardPaths, QUrl
+from PySide6.QtCore import QLibraryInfo, QLocale, QTranslator, Qt, QCoreApplication, QItemSelection, QThreadPool, QStandardPaths, QUrl, Slot, qDebug
 from PySide6.QtGui import QCloseEvent, QDesktopServices, QIcon
 from PySide6.QtWidgets import QFileDialog, QMainWindow, QPlainTextEdit, QMessageBox
 
@@ -63,12 +63,15 @@ class MainWindow(QMainWindow):
         super().__init__(parent)
 
         self.__settings: Settings = Settings(self)
+        self.__current_lang: str = "en-US"
+        self.__translator: QTranslator = QTranslator()
+        self.__qt_translator: QTranslator = QTranslator()
         self.__setup_ui()
         self.__setup_toolbar()
         self.__setup_menu_bar()
+        self.__setup_widets()
         self.__read_settings()
         self.__setup_connections()
-
         self.__initApplication()
 
         self.__thread_pool = QThreadPool()
@@ -122,6 +125,24 @@ class MainWindow(QMainWindow):
             event.accept()
         else:
             event.ignore()
+
+    @Slot(str, result=None)
+    def __load_language(self, language_code: str) -> None:
+         if(self.__current_lang != language_code):
+            locale = QLocale(language_code)
+            QLocale.setDefault(locale)
+            QCoreApplication.removeTranslator(self.__qt_translator)
+            QCoreApplication.removeTranslator(self.__translator)
+            path = QLibraryInfo.location(QLibraryInfo.LibraryPath.TranslationsPath)
+            if self.__qt_translator.load(locale, "qtbase", "_", path):
+                QCoreApplication.installTranslator(self.__qt_translator)
+            else:
+                QtCore.qDebug(f"Translations for qtbase not loaded: {path} not found")
+            path = f":/i18n/{language_code}"
+            if self.__qt_translator.load(locale, path):
+                QCoreApplication.installTranslator(self.__translator)
+            else:
+                QtCore.qDebug(f"Translations for {language_code} not loaded: {path} not found")
 
     def __write_settings(self) -> None:
         self.__settings.save_layout_geometry_for(self)
