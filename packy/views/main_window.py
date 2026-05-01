@@ -19,6 +19,7 @@ from PySide6.QtGui import QCloseEvent, QDesktopServices, QIcon
 from PySide6.QtWidgets import QFileDialog, QMainWindow, QPlainTextEdit, QMessageBox
 
 # PackY
+from packy.core.ui_strings import UIStrings
 from packy.models.packer_data import DataName, PackerData
 from packy.models.packer_factory import createPacker
 from packy.core.settings import Settings
@@ -28,6 +29,7 @@ from packy.models.task import TaskProperties
 from packy.models.session import Session
 from packy.models.session_encoder import SessionEncoder
 from packy.models.session_decoder import SessionDecoder
+from packy.views.messages_widget import MessagesWidget, MsgType
 from packy.views.tree_view_proxy_model import TreeViewProxyModel
 from packy.utils.external_data_access import ExternalData, external_data_path
 from packy.views.about_dialog import AboutDialog
@@ -96,6 +98,9 @@ class MainWindow(QMainWindow):
 
     def __setup_menu_bar(self) -> None:
         pass
+
+    def __setup_widets(self) -> None:
+        self.messages_view = MessagesWidget()
 
     def __read_settings(self) -> None:
         self.__settings.restore_layout_geometry(self)

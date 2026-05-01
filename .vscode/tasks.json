@@ -114,7 +114,7 @@
         "-locations",
         "relative",
         "-tr-function-alias",
-        "QT_TR_NOOP+=PACKY_TR_NOOP",
+        "QT_TR_NOOP+=PACKY_TR_NOOP,QT_TRANSLATE_NOOP+=PACKY_TRANSLATE_NOOP",
         ".",
         "-ts",
         "@i18n/translations.txt",
