@@ -15,7 +15,7 @@
       "name": "Python Debugger: PackY",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/packy/main.py",
+      "program": "${workspaceFolder}/main.py",
       "preLaunchTask": "PackY: Build",
       "console": "integratedTerminal",
     }
