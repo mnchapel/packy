@@ -13,7 +13,7 @@ See LICENCE.md file for more information.
 from packy.ui.ui_about_dialog import Ui_AboutDialog
 
 # Third-party
-from PySide6.QtWidgets import QDialog
+from PySide6.QtWidgets import QDialog, QWidget
 
 
 ###############################################################################
@@ -24,11 +24,11 @@ class AboutDialog(QDialog):
     """
 
     # -------------------------------------------------------------------------
-    def __init__(self, parent: QDialog | None = None) -> None:
+    def __init__(self, parent: QWidget | None = None) -> None:
         """Initialize the About dialog and load its UI definition.
 
         Args:
-            parent (QDialog | None, optional):
+            parent (QWidget | None, optional):
                 The parent widget of the dialog. Defaults to None.
         """
         super().__init__(parent)
