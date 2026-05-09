@@ -14,6 +14,7 @@ from packy.packy_app import PackyApp
 
 # Standard library
 import sys
+import traceback
 
 
 # -----------------------------------------------------------------------------
@@ -31,8 +32,8 @@ def main() -> None:
     exit_code = 0
     try:
         exit_code = PackyApp.launch(PackyApp())
-    except Exception as e:  # noqa: BLE001
-        print(f"Exception: {e}")  # noqa: T201
+    except Exception:  # noqa: BLE001
+        traceback.print_exc()
     sys.exit(exit_code)
 
 
