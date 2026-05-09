@@ -8,8 +8,8 @@ See LICENCE.md file for more information.
 # Python
 import json
 import os
+from pathlib import Path
 import shutil
-import sys
 import yaml
 
 # PyQt
@@ -19,6 +19,7 @@ from PySide6.QtGui import QCloseEvent, QDesktopServices, QIcon
 from PySide6.QtWidgets import QAbstractItemDelegate, QButtonGroup, QDataWidgetMapper, QFileDialog, QMainWindow, QPlainTextEdit, QMessageBox, QRadioButton, QWidget
 
 # PackY
+from packy.core.app_config import AppConfig
 from packy.core.ui_strings import UIStrings
 # from packy.models.archiver_config_model import ArchiveFormat, CompressionLevel, CompressionMethod, DataName, ArchiverConfigModel
 from packy.models.archiver_config_model import ArchiveFormat, ArchiverConfigModel, CompressionLevel, CompressionMethod
@@ -61,9 +62,10 @@ class MainWindow(QMainWindow):
     ###########################################################################
 
     # -------------------------------------------------------------------------
-    def __init__(self, parent: QMainWindow | None = None) -> None:
+    def __init__(self, config: AppConfig, parent: QWidget | None = None) -> None:
         super().__init__(parent)
 
+        self.__log_folder_path = Path(config.log_file_path).parent
         self.__settings: Settings = Settings(self)
         self.__settings.setObjectName("settings")
         self.__archiver_model = ArchiverConfigModel(self)
@@ -134,8 +136,18 @@ class MainWindow(QMainWindow):
         self.__settings.restore_main_window_state(self)
 
     # -------------------------------------------------------------------------
+    def __write_settings(self) -> None:
+        self.__settings.save_layout_geometry_for(self)
+        self.__settings.save_main_window_state(self)
+
+    # -------------------------------------------------------------------------
     def __setup_connections(self) -> None:
-        # Archiver configuration widgets
+        self.__connect_file_menu_actions()
+        self.__connect_help_menu_actions()
+        self.__connect_archiver_config_widgets()
+
+    # -------------------------------------------------------------------------
+    def __connect_archiver_config_widgets(self) -> None:
         self.__archiver_widget_mapper = QDataWidgetMapper(self)
         self.__archiver_widget_mapper.setSubmitPolicy(QDataWidgetMapper.SubmitPolicy.AutoSubmit)
         self.__archiver_widget_mapper.setObjectName("archiver_widget_mapper")
@@ -159,6 +171,43 @@ class MainWindow(QMainWindow):
             b"currentIndex",
         )
         self.__archiver_widget_mapper.toFirst()
+
+    # -------------------------------------------------------------------------
+    def __connect_file_menu_actions(self) -> None:
+        # self.__ui.action_new_session.triggered.connect(self.__createNewSession)
+        # self.__ui.action_save.triggered.connect(self.__saveSession)
+        # self.__ui.action_save_as.triggered.connect(self.__saveSessionAs)
+        # self.__ui.action_open.triggered.connect(self.__openSession)
+        self.__ui.action_options.triggered.connect(self.__open_options_dialog)
+        self.__ui.action_exit.triggered.connect(self.close)
+
+    # -------------------------------------------------------------------------
+    def __connect_help_menu_actions(self) -> None:
+        self.__ui.action_open_log_folder.triggered.connect(self.__open_log_folder)
+        self.__ui.action_github_repo.triggered.connect(self.__open_github_repo)
+        self.__ui.action_about.triggered.connect(self.__open_about_dialog)
+
+    # -------------------------------------------------------------------------
+    @Slot(result=None)
+    def __open_options_dialog(self) -> None:
+        dialog = OptionsDialog(self.__settings, self)
+        dialog.exec()
+
+    # -------------------------------------------------------------------------
+    @Slot(result=None)
+    def __open_log_folder(self) -> None:
+        QDesktopServices.openUrl(QUrl.fromLocalFile(self.__log_folder_path))
+
+    # -------------------------------------------------------------------------
+    @Slot(result=None)
+    def __open_github_repo(self) -> None:
+        QDesktopServices.openUrl(QUrl("https://github.com/mnchapel/packy"))
+
+    # -------------------------------------------------------------------------
+    @Slot(result=None)
+    def __open_about_dialog(self) -> None:
+        dialog = AboutDialog(self)
+        dialog.exec()
 
     # -------------------------------------------------------------------------
     @override
@@ -194,10 +243,6 @@ class MainWindow(QMainWindow):
             else:
                 QtCore.qDebug(f"Translations for {language_code} not loaded: {path} not found")
 
-    # -------------------------------------------------------------------------
-    def __write_settings(self) -> None:
-        self.__settings.save_layout_geometry_for(self)
-        self.__settings.save_main_window_state(self)
 
 
     ###########################################################################
@@ -217,10 +262,11 @@ class MainWindow(QMainWindow):
     # -------------------------------------------------------------------------
     def __initConnects(self) -> None:
         # self.__connectFileMenuActions()
-        self.__connectHelpMenuActions()
+        # self.__connectHelpMenuActions()
         # self.__connectTaskManagement()
         # self.__connectTaskRunning()
         # self.__connectTaskProperties()
+        pass
 
     # -------------------------------------------------------------------------
     def __initSessionView(self) -> None:
@@ -438,21 +484,6 @@ class MainWindow(QMainWindow):
     # -------------------------------------------------------------------------
 
     # -------------------------------------------------------------------------
-    def __connectFileMenuActions(self) -> None:
-        self.__ui.action_new_session.triggered.connect(self.__createNewSession)
-        self.__ui.action_save.triggered.connect(self.__saveSession)
-        self.__ui.action_save_as.triggered.connect(self.__saveSessionAs)
-        self.__ui.action_open.triggered.connect(self.__openSession)
-        self.__ui.action_options.triggered.connect(self.__openOptions)
-        self.__ui.action_exit.triggered.connect(self.close)
-
-    # -------------------------------------------------------------------------
-    def __connectHelpMenuActions(self) -> None:
-        self.__ui.action_open_log_folder.triggered.connect(self.__openLogFolder)
-        self.__ui.action_github_repo.triggered.connect(self.__openGitHubRepo)
-        self.__ui.action_about.triggered.connect(self.__openAbout)
-
-    # -------------------------------------------------------------------------
     def __connectTaskManagement(self) -> None:
         self.__ui.push_button_create.clicked.connect(self.__createNewTask)
         self.__ui.push_button_remove.clicked.connect(self.__removeTask)
@@ -570,28 +601,6 @@ class MainWindow(QMainWindow):
             else:
                 self.__disableTaskProperties()
 
-    # -------------------------------------------------------------------------
-    def __openOptions(self, s):
-        dlg = OptionsDialog(self.__settings, self)
-        # dlg.changed.connect(self.__session.emitSuffixChanged)
-        # dlg.snapshot_retention_count_changed.connect(
-        #     lambda x: print(f"value:= {x}")
-        # )
-        dlg.exec()
-
-    # -------------------------------------------------------------------------
-    def __openLogFolder(self, s) -> None:
-        log_folder_path = os.path.dirname(MainWindow.log_file_path)
-        QDesktopServices.openUrl(QUrl.fromLocalFile(log_folder_path))
-
-    # -------------------------------------------------------------------------
-    def __openGitHubRepo(self, s) -> None:
-        QDesktopServices.openUrl(QUrl("https://github.com/mnchapel/packy"))
-
-    # -------------------------------------------------------------------------
-    def __openAbout(self, s):
-        dlg = AboutDialog(self)
-        dlg.exec()
 
     # -------------------------------------------------------------------------
     def __checkIntegrity(self):
