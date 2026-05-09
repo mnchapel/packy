@@ -14,7 +14,7 @@ from PySide6 import QtCore
 
 # PackY
 from packy.models.session import Session
-from packy.models.task import Task
+from packy.models.tasks_model import TasksModel
 from packy.utils.external_data_access import ExternalData, external_data_path
 
 
@@ -68,5 +68,5 @@ class SessionDecoder(json.JSONDecoder):
 
     # -------------------------------------------------------------------------
     def __deserializeTask(self, dict):
-        task = Task(0, dict)
+        task = TasksModel(0, dict)
         return task

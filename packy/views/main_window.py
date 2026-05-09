@@ -14,21 +14,23 @@ import yaml
 
 # PyQt
 from PySide6 import QtCore, QtWidgets
-from PySide6.QtCore import QLibraryInfo, QLocale, QTranslator, Qt, QCoreApplication, QItemSelection, QThreadPool, QStandardPaths, QUrl, Slot, qDebug
+from PySide6.QtCore import QLibraryInfo, QLocale, QModelIndex, QTranslator, Qt, QCoreApplication, QItemSelection, QThreadPool, QStandardPaths, QUrl, Slot, qDebug
 from PySide6.QtGui import QCloseEvent, QDesktopServices, QIcon
-from PySide6.QtWidgets import QFileDialog, QMainWindow, QPlainTextEdit, QMessageBox
+from PySide6.QtWidgets import QAbstractItemDelegate, QButtonGroup, QDataWidgetMapper, QFileDialog, QMainWindow, QPlainTextEdit, QMessageBox, QRadioButton, QWidget
 
 # PackY
 from packy.core.ui_strings import UIStrings
-from packy.models.packer_data import DataName, PackerData
+# from packy.models.archiver_config_model import ArchiveFormat, CompressionLevel, CompressionMethod, DataName, ArchiverConfigModel
+from packy.models.archiver_config_model import ArchiveFormat, ArchiverConfigModel, CompressionLevel, CompressionMethod
 from packy.models.packer_factory import createPacker
 from packy.core.settings import Settings
 from packy.models.progression import Progression
-from packy.models.task import Task
-from packy.models.task import TaskProperties
+from packy.models.tasks_model import TasksModel
+from packy.models.tasks_model import TaskProperties
 from packy.models.session import Session
 from packy.models.session_encoder import SessionEncoder
 from packy.models.session_decoder import SessionDecoder
+from packy.ui.radio_group_binder import RadioGroupBinder
 from packy.views.messages_widget import MessagesWidget, MsgType
 from packy.views.tree_view_proxy_model import TreeViewProxyModel
 from packy.utils.external_data_access import ExternalData, external_data_path
@@ -36,7 +38,7 @@ from packy.views.about_dialog import AboutDialog
 from packy.views.options_dialog import OptionsDialog
 from packy.views.fix_warnings import FixWarnings
 from packy.ui.ui_main_window import Ui_MainWindow
-from typing import override
+from typing import Any, override
 
 ###############################################################################
 class MainWindow(QMainWindow):
@@ -63,13 +65,16 @@ class MainWindow(QMainWindow):
         super().__init__(parent)
 
         self.__settings: Settings = Settings(self)
+        self.__settings.setObjectName("settings")
+        self.__archiver_model = ArchiverConfigModel(self)
+        self.__archiver_model.setObjectName("archiver_model")
         self.__current_lang: str = "en-US"
         self.__translator: QTranslator = QTranslator()
         self.__qt_translator: QTranslator = QTranslator()
         self.__setup_ui()
         self.__setup_toolbar()
         self.__setup_menu_bar()
-        self.__setup_widets()
+        self.__setup_widgets()
         self.__read_settings()
         self.__setup_connections()
         self.__initApplication()
@@ -79,39 +84,83 @@ class MainWindow(QMainWindow):
         self.__is_canceled = False
 
         self.__initConnects()
-        self.__initSessionView()
-        self.__initTaskView()
-        self.__initProgressionView()
+        # self.__initSessionView()
+        # self.__initTaskView()
+        # self.__initProgressionView()
         self.__setTitle()
 
         self.show()
 
-    @property
-    def settings(self) -> Settings:
-        return self.__settings
-
+    # -------------------------------------------------------------------------
     def __setup_ui(self) -> None:
         self.__ui: Ui_MainWindow = Ui_MainWindow()
         self.__ui.setupUi(self)
         icon = QIcon(":/img/logo")
         self.setWindowIcon(icon)
 
+    # -------------------------------------------------------------------------
     def __setup_toolbar(self) -> None:
         pass
 
+    # -------------------------------------------------------------------------
     def __setup_menu_bar(self) -> None:
         pass
 
-    def __setup_widets(self) -> None:
+    # -------------------------------------------------------------------------
+    def __setup_widgets(self) -> None:
+        # Messages widgets
         self.messages_view = MessagesWidget()
 
+        # Archiver configuration widgets
+        self.__formats_button_group = QButtonGroup(self)
+        self.__formats_button_group.setObjectName("formats_button_group")
+        for i, (archiver_format) in enumerate(ArchiveFormat.__members__.values()):
+            format_radio = QRadioButton(self.__ui.output_group)
+            format_radio.setText(self.tr(archiver_format.label))
+            format_radio.setObjectName(f"{archiver_format.id}_format_radio")
+            self.__formats_button_group.addButton(format_radio, archiver_format.id)
+            column, row = divmod(i, 3)
+            self.__ui.formats_grid_layout.addWidget(format_radio, row, column, 1, 1)
+
+        for method in CompressionMethod.__members__.values():
+            self.__ui.compression_method_combo.addItem(method.label, method)
+
+        for level in CompressionLevel.__members__.values():
+            self.__ui.compression_level_combo.addItem(level.label, level)
+
+    # -------------------------------------------------------------------------
     def __read_settings(self) -> None:
         self.__settings.restore_layout_geometry(self)
         self.__settings.restore_main_window_state(self)
 
+    # -------------------------------------------------------------------------
     def __setup_connections(self) -> None:
-        pass
+        # Archiver configuration widgets
+        self.__archiver_widget_mapper = QDataWidgetMapper(self)
+        self.__archiver_widget_mapper.setSubmitPolicy(QDataWidgetMapper.SubmitPolicy.AutoSubmit)
+        self.__archiver_widget_mapper.setObjectName("archiver_widget_mapper")
+        self.__archiver_widget_mapper.setOrientation(Qt.Orientation.Vertical)
+        self.__archiver_widget_mapper.setModel(self.__archiver_model)
+        self.__formats_button_binder = RadioGroupBinder(self.__formats_button_group, self)
+        self.__formats_button_binder.setObjectName("formats_button_binder")
+        self.__archiver_widget_mapper.addMapping(
+            self.__formats_button_binder,
+            ArchiverConfigModel.Column.FORMAT,
+            b"selected_button",
+        )
+        self.__archiver_widget_mapper.addMapping(
+            self.__ui.compression_method_combo,
+            ArchiverConfigModel.Column.COMPRESSION,
+            b"currentIndex",
+        )
+        self.__archiver_widget_mapper.addMapping(
+            self.__ui.compression_level_combo,
+            ArchiverConfigModel.Column.COMPRESSION_LEVEL,
+            b"currentIndex",
+        )
+        self.__archiver_widget_mapper.toFirst()
 
+    # -------------------------------------------------------------------------
     @override
     def closeEvent(self, event: QCloseEvent) -> None:
         close_button = QMessageBox.question(
@@ -126,6 +175,7 @@ class MainWindow(QMainWindow):
         else:
             event.ignore()
 
+    # -------------------------------------------------------------------------
     @Slot(str, result=None)
     def __load_language(self, language_code: str) -> None:
          if(self.__current_lang != language_code):
@@ -144,6 +194,7 @@ class MainWindow(QMainWindow):
             else:
                 QtCore.qDebug(f"Translations for {language_code} not loaded: {path} not found")
 
+    # -------------------------------------------------------------------------
     def __write_settings(self) -> None:
         self.__settings.save_layout_geometry_for(self)
         self.__settings.save_main_window_state(self)
@@ -165,11 +216,11 @@ class MainWindow(QMainWindow):
 
     # -------------------------------------------------------------------------
     def __initConnects(self) -> None:
-        self.__connectFileMenuActions()
+        # self.__connectFileMenuActions()
         self.__connectHelpMenuActions()
-        self.__connectTaskManagement()
-        self.__connectTaskRunning()
-        self.__connectTaskProperties()
+        # self.__connectTaskManagement()
+        # self.__connectTaskRunning()
+        # self.__connectTaskProperties()
 
     # -------------------------------------------------------------------------
     def __initSessionView(self) -> None:
@@ -234,7 +285,7 @@ class MainWindow(QMainWindow):
 
     # -------------------------------------------------------------------------
     def __updateTaskViewMapper(self) -> None:
-        task: Task = self.__selected_task
+        task: TasksModel = self.__selected_task
         self.__task_view_mapper.setModel(task)
         self.__task_view_mapper.addMapping(
             self.__ui.line_edit_source, TaskProperties.SRC_FOLDER.value, b"text"
@@ -279,35 +330,35 @@ class MainWindow(QMainWindow):
 
         self.__packer_mapper.setModel(packer_data)
         self.__packer_mapper.addMapping(
-            self.__ui.cbox_compression_method, DataName.COMPRESSION_METHOD.value, b"currentIndex"
+            self.__ui.compression_method_combo, DataName.COMPRESSION_METHOD.value, b"currentIndex"
         )
         self.__packer_mapper.toFirst()
 
         self.__updateCompressionLevel()
 
         self.__packer_mapper.addMapping(
-            self.__ui.cbox_compression_level, DataName.COMPRESSION_LEVEL.value, b"currentIndex"
+            self.__ui.compression_level_combo, DataName.COMPRESSION_LEVEL.value, b"currentIndex"
         )
         self.__packer_mapper.toFirst()
 
         self.__updatePackerTypeViewMapper(packer_data)
 
     # -------------------------------------------------------------------------
-    def __updatePackerTypeViewMapper(self, packer_data: PackerData) -> None:
+    def __updatePackerTypeViewMapper(self, packer_data: ArchiverConfigModel) -> None:
+        pass
+        # packer_type_data = packer_data.packerTypeData()
 
-        packer_type_data = packer_data.packerTypeData()
-
-        self.__packer_type_mapper.setModel(packer_type_data)
-        self.__packer_type_mapper.addMapping(self.__ui.rbutton_zip, 0)
-        self.__packer_type_mapper.addMapping(self.__ui.rbutton_tar, 1)
-        self.__packer_type_mapper.addMapping(self.__ui.rbutton_bz2, 2)
-        self.__packer_type_mapper.addMapping(self.__ui.rbutton_tbz, 3)
-        self.__packer_type_mapper.addMapping(self.__ui.rbutton_gz, 4)
-        self.__packer_type_mapper.addMapping(self.__ui.rbutton_tgz, 5)
-        self.__packer_type_mapper.addMapping(self.__ui.rbutton_lzma, 6)
-        self.__packer_type_mapper.addMapping(self.__ui.rbutton_tlz, 7)
-        self.__packer_type_mapper.addMapping(self.__ui.rbutton_xz, 8)
-        self.__packer_type_mapper.toFirst()
+        # self.__packer_type_mapper.setModel(packer_type_data)
+        # self.__packer_type_mapper.addMapping(self.__ui.rbutton_zip, 0)
+        # self.__packer_type_mapper.addMapping(self.__ui.rbutton_tar, 1)
+        # self.__packer_type_mapper.addMapping(self.__ui.rbutton_bz2, 2)
+        # self.__packer_type_mapper.addMapping(self.__ui.rbutton_tbz, 3)
+        # self.__packer_type_mapper.addMapping(self.__ui.rbutton_gz, 4)
+        # self.__packer_type_mapper.addMapping(self.__ui.rbutton_tgz, 5)
+        # self.__packer_type_mapper.addMapping(self.__ui.rbutton_lzma, 6)
+        # self.__packer_type_mapper.addMapping(self.__ui.rbutton_tlz, 7)
+        # self.__packer_type_mapper.addMapping(self.__ui.rbutton_xz, 8)
+        # self.__packer_type_mapper.toFirst()
 
     # -------------------------------------------------------------------------
     # ENABLE / DISABLE GUI
@@ -316,7 +367,7 @@ class MainWindow(QMainWindow):
     # -------------------------------------------------------------------------
     def __enableTaskProperties(self) -> None:
         self.__ui.group_box_file_selection.setEnabled(True)
-        self.__ui.group_box_output_properties.setEnabled(True)
+        self.__ui.output_group.setEnabled(True)
         self.__ui.group_box_statistics.setEnabled(False)
         self.__disableUnavailablePackerType()
 
@@ -341,7 +392,7 @@ class MainWindow(QMainWindow):
     # -------------------------------------------------------------------------
     def __disableTaskProperties(self) -> None:
         self.__ui.group_box_file_selection.setEnabled(False)
-        self.__ui.group_box_output_properties.setEnabled(False)
+        self.__ui.output_group.setEnabled(False)
         self.__ui.group_box_statistics.setEnabled(True)
 
         self.__ui.push_button_create.setEnabled(True)
@@ -372,15 +423,15 @@ class MainWindow(QMainWindow):
     def __clearTaskProperties(self) -> None:
         self.__ui.line_edit_source.setText("")
         self.__ui.line_edit_destination.setText("")
-        self.__ui.cbox_compression_method.clear()
-        self.__ui.cbox_compression_level.clear()
+        self.__ui.compression_method_combo.clear()
+        self.__ui.compression_level_combo.clear()
         self.__ui.tree_view_source.setModel(None)
 
-        checked_button = self.__ui.button_group_packer_type.checkedButton()
+        checked_button = self.__formats_button_group.checkedButton()
         if checked_button:
-            self.__ui.button_group_packer_type.setExclusive(False)
-            checked_button.setChecked(False)
-            self.__ui.button_group_packer_type.setExclusive(True)
+            self.__formats_button_group.setExclusive(False)
+            checked_button.setChecked(Fal__se)
+            self.__formats_button_group.setExclusive(True)
 
     # -------------------------------------------------------------------------
     # CONNECT SIGNALS TO SLOTS
@@ -417,8 +468,8 @@ class MainWindow(QMainWindow):
         self.__ui.push_button_check_integrity.clicked.connect(self.__checkIntegrity)
         self.__ui.push_button_source.clicked.connect(self.__selectSourceFolder)
         self.__ui.push_button_destination.clicked.connect(self.__selectDestinationFile)
-        self.__ui.button_group_packer_type.buttonClicked.connect(self.__updatePackerType)
-        self.__ui.cbox_compression_method.activated.connect(self.__updateCompressionLevel)
+        self.__formats_button_group.buttonClicked.connect(self.__updatePackerType)
+        self.__ui.compression_method_combo.activated.connect(self.__updateCompressionLevel)
 
     ###########################################################################
     # PRIVATE SLOTS
@@ -581,41 +632,41 @@ class MainWindow(QMainWindow):
         self.__packer_type_mapper.submit()
         self.__task_view_mapper.submit()
 
-        self.__ui.cbox_compression_method.setCurrentIndex(0)
-        self.__ui.cbox_compression_level.setCurrentIndex(0)
+        self.__ui.compression_method_combo.setCurrentIndex(0)
+        self.__ui.compression_level_combo.setCurrentIndex(0)
         self.__updateCompressionMethod()
 
     # -------------------------------------------------------------------------
     def __updateCompressionMethod(self):
-        curr_index = self.__ui.cbox_compression_method.currentIndex()
+        curr_index = self.__ui.compression_method_combo.currentIndex()
 
         packer_data = self.__selected_task.packerData()
         info = packer_data.methodsInfo()
-        self.__ui.cbox_compression_method.clear()
+        self.__ui.compression_method_combo.clear()
         for method in info:
-            self.__ui.cbox_compression_method.addItem(method)
+            self.__ui.compression_method_combo.addItem(method)
 
-        self.__ui.cbox_compression_method.setCurrentIndex(curr_index)
+        self.__ui.compression_method_combo.setCurrentIndex(curr_index)
 
-        curr_index = self.__ui.cbox_compression_method.currentIndex()
+        curr_index = self.__ui.compression_method_combo.currentIndex()
 
         self.__updateCompressionLevel()
 
     # -------------------------------------------------------------------------
     def __updateCompressionLevel(self):
-        curr_index = self.__ui.cbox_compression_level.currentIndex()
-        c_method_curr_index = self.__ui.cbox_compression_method.currentIndex()
+        curr_index = self.__ui.compression_level_combo.currentIndex()
+        c_method_curr_index = self.__ui.compression_method_combo.currentIndex()
 
         packer_data = self.__selected_task.packerData()
         info = packer_data.levelsInfo()
-        self.__ui.cbox_compression_level.clear()
+        self.__ui.compression_level_combo.clear()
         for level in info[c_method_curr_index]:
-            self.__ui.cbox_compression_level.addItem(level)
+            self.__ui.compression_level_combo.addItem(level)
 
-        if self.__ui.cbox_compression_level.count() > curr_index:
-            self.__ui.cbox_compression_level.setCurrentIndex(curr_index)
+        if self.__ui.compression_level_combo.count() > curr_index:
+            self.__ui.compression_level_combo.setCurrentIndex(curr_index)
         else:
-            self.__ui.cbox_compression_level.setCurrentIndex(0)
+            self.__ui.compression_level_combo.setCurrentIndex(0)
 
     # -------------------------------------------------------------------------
     def __mapViewWithTask(self, selected: QItemSelection, deselected: QItemSelection) -> None:

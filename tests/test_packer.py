@@ -19,7 +19,7 @@ from PySide6.QtCore import QStandardPaths
 # PackY
 import model.task
 from packy.core.settings import PreferencesKeys
-from packy.models.task import Task
+from packy.models.tasks_model import TasksModel
 from packy.models.files_model import FilesModel
 from packy.models.zip_packer import ZipPacker
 from packy.utils.settings_access import packySettings
@@ -163,7 +163,7 @@ class TestTmpFolderPath:
         input = loadTestData[test_name]["input"]
         expected = loadTestData[test_name]["expected"]
 
-        mock_task = Mock(Task)
+        mock_task = Mock(TasksModel)
         mock_task.destFile = MagicMock(return_value=input)
 
         zip_packer = ZipPacker(mock_task)
@@ -206,7 +206,7 @@ class TestFilterSelectedFiles:
         input = loadTestData[test_name]["input"]
         expected = loadTestData[test_name]["expected"]
 
-        mock = Mock(Task)
+        mock = Mock(TasksModel)
         mock_files_model = Mock(FilesModel)
         mock_files_model.checks = MagicMock(return_value=input)
         mock.filesSelected = MagicMock(return_value=mock_files_model)
@@ -244,7 +244,7 @@ class TestCopyItemsToTmpFolder:
         mock_files_model = Mock(FilesModel)
         mock_files_model.rootPath = MagicMock(return_value=joinPath(tmp_path, "folder"))
 
-        mock_task = Mock(Task)
+        mock_task = Mock(TasksModel)
         mock_task.filesSelected = MagicMock(return_value=mock_files_model)
 
         zip_packer = ZipPacker(mock_task)
@@ -292,7 +292,7 @@ class TestFindSnapshots:
         input = loadTestData[test_name]["input"]
         expected = loadTestData[test_name]["expected"]
 
-        mock_task = Mock(Task)
+        mock_task = Mock(TasksModel)
         mock_task.rawDestFile = MagicMock(return_value=input["raw_dest_file"])
         mock_task.destExtension = MagicMock(return_value=input["dest_extension"])
 
@@ -336,7 +336,7 @@ class TestRemoveSnapshots:
         input = loadTestData[test_name]["input"]
         expected = loadTestData[test_name]["expected"]
 
-        mock_task = Mock(Task)
+        mock_task = Mock(TasksModel)
         raw_dest_file = input["raw_dest_file"]
         mock_task.rawDestFile = MagicMock(return_value=raw_dest_file)
 
@@ -369,7 +369,7 @@ class TestCleanTmpFolder:
     def test(self, createFileHierarchy, loadTestData, test_name):
         input = loadTestData[test_name]["input"]
 
-        mock_task = Mock(Task)
+        mock_task = Mock(TasksModel)
 
         zip_packer = ZipPacker(mock_task)
         zip_packer._Packer__cleanTmpFolder(input)

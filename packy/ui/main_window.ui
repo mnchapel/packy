@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1098</width>
+    <width>857</width>
     <height>763</height>
    </rect>
   </property>
@@ -21,7 +21,7 @@
     <bool>false</bool>
    </property>
    <layout class="QGridLayout" name="gridLayout_4">
-    <item row="1" column="1" colspan="2">
+    <item row="2" column="1" colspan="2">
      <layout class="QVBoxLayout" name="vlayout_bottom">
       <item>
        <widget class="QLabel" name="messages_label">
@@ -94,7 +94,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Source</string>
+            <string>Source:</string>
            </property>
           </widget>
          </item>
@@ -131,37 +131,37 @@
        </widget>
       </item>
       <item>
-       <widget class="QGroupBox" name="group_box_output_properties">
+       <widget class="QGroupBox" name="output_group">
         <property name="enabled">
          <bool>false</bool>
         </property>
         <property name="title">
-         <string>Output properties</string>
+         <string>Output</string>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout">
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1,0,0">
+        <layout class="QFormLayout" name="output_layout">
+         <item row="1" column="0">
+          <widget class="QLabel" name="destination_folder_label">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>120</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Destination folder:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <layout class="QHBoxLayout" name="destination_folder_layout" stretch="1,0">
            <item>
-            <widget class="QLabel" name="label_destination">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>115</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Destination folder</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="line_edit_destination">
+            <widget class="QLineEdit" name="destination_folder_input">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -180,7 +180,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="push_button_destination">
+            <widget class="QPushButton" name="destination_folder_browser">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
                <horstretch>0</horstretch>
@@ -192,266 +192,145 @@
              </property>
             </widget>
            </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="archiver_config_group">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="title">
+         <string>Archiver Configuration</string>
+        </property>
+        <layout class="QFormLayout" name="archiver_config_layout">
+         <item row="0" column="0">
+          <widget class="QLabel" name="format_label">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>120</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Format:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <layout class="QHBoxLayout" name="format_layout" stretch="0,1">
            <item>
-            <spacer name="horizontalSpacer_5">
+            <layout class="QGridLayout" name="formats_grid_layout"/>
+           </item>
+           <item>
+            <spacer name="format_spacer">
              <property name="orientation">
               <enum>Qt::Orientation::Horizontal</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
-               <width>40</width>
-               <height>20</height>
+               <width>0</width>
+               <height>0</height>
               </size>
              </property>
             </spacer>
            </item>
           </layout>
          </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0,1">
-           <item>
-            <widget class="QLabel" name="label_packer">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>115</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Packer</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <layout class="QGridLayout" name="glayout_packer">
-             <item row="0" column="1">
-              <widget class="QRadioButton" name="rbutton_tar">
-               <property name="text">
-                <string>tar</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">button_group_packer_type</string>
-               </attribute>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QRadioButton" name="rbutton_tbz">
-               <property name="text">
-                <string>tbz</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">button_group_packer_type</string>
-               </attribute>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QRadioButton" name="rbutton_gz">
-               <property name="text">
-                <string>gz</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">button_group_packer_type</string>
-               </attribute>
-              </widget>
-             </item>
-             <item row="1" column="2">
-              <widget class="QRadioButton" name="rbutton_tgz">
-               <property name="text">
-                <string>tgz</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">button_group_packer_type</string>
-               </attribute>
-              </widget>
-             </item>
-             <item row="0" column="2">
-              <widget class="QRadioButton" name="rbutton_bz2">
-               <property name="text">
-                <string>bz2</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">button_group_packer_type</string>
-               </attribute>
-              </widget>
-             </item>
-             <item row="0" column="0">
-              <widget class="QRadioButton" name="rbutton_zip">
-               <property name="text">
-                <string>zip</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">button_group_packer_type</string>
-               </attribute>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QRadioButton" name="rbutton_lzma">
-               <property name="text">
-                <string>lzma</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">button_group_packer_type</string>
-               </attribute>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QRadioButton" name="rbutton_tlz">
-               <property name="text">
-                <string>tlz</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">button_group_packer_type</string>
-               </attribute>
-              </widget>
-             </item>
-             <item row="2" column="2">
-              <widget class="QRadioButton" name="rbutton_xz">
-               <property name="text">
-                <string>xz</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">button_group_packer_type</string>
-               </attribute>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <spacer name="horizontalSpacer_6">
-             <property name="orientation">
-              <enum>Qt::Orientation::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-          </layout>
+         <item row="1" column="0">
+          <widget class="QLabel" name="compression_level_label">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>120</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Compression level:</string>
+           </property>
+          </widget>
          </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,0,1">
+         <item row="1" column="1">
+          <layout class="QHBoxLayout" name="compression_level_layout" stretch="0,1">
            <item>
-            <widget class="QLabel" name="label_compression_level">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>115</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Compression level</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QComboBox" name="cbox_compression_level">
+            <widget class="QComboBox" name="compression_level_combo">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
-             <item>
-              <property name="text">
-               <string>Normal</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Maximum</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Fast</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Fastest</string>
-              </property>
-             </item>
             </widget>
            </item>
            <item>
-            <spacer name="horizontalSpacer_7">
+            <spacer name="compression_level_spacer">
              <property name="orientation">
               <enum>Qt::Orientation::Horizontal</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
-               <width>40</width>
-               <height>20</height>
+               <width>0</width>
+               <height>0</height>
               </size>
              </property>
             </spacer>
            </item>
           </layout>
          </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,0,1">
+         <item row="2" column="0">
+          <widget class="QLabel" name="compression_method_label">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>120</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Compression method:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <layout class="QHBoxLayout" name="compression_method_layout" stretch="0,1">
            <item>
-            <widget class="QLabel" name="label_compression_method">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>Compression method</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QComboBox" name="cbox_compression_method">
+            <widget class="QComboBox" name="compression_method_combo">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
-             <item>
-              <property name="text">
-               <string>Store</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Deflate</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Optimal (2x slower)</string>
-              </property>
-             </item>
             </widget>
            </item>
            <item>
-            <spacer name="horizontalSpacer_8">
+            <spacer name="compression_method_spacer">
              <property name="orientation">
               <enum>Qt::Orientation::Horizontal</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
-               <width>40</width>
-               <height>20</height>
+               <width>0</width>
+               <height>0</height>
               </size>
              </property>
             </spacer>
@@ -728,7 +607,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1098</width>
+     <width>857</width>
      <height>22</height>
     </rect>
    </property>
@@ -812,9 +691,21 @@
    <header>packy.views.messages_widget</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>push_button_create</tabstop>
+  <tabstop>push_button_remove</tabstop>
+  <tabstop>push_button_edit</tabstop>
+  <tabstop>push_button_run_all</tabstop>
+  <tabstop>push_button_cancel</tabstop>
+  <tabstop>line_edit_source</tabstop>
+  <tabstop>push_button_source</tabstop>
+  <tabstop>tree_view_source</tabstop>
+  <tabstop>push_button_check_integrity</tabstop>
+  <tabstop>destination_folder_input</tabstop>
+  <tabstop>destination_folder_browser</tabstop>
+  <tabstop>compression_level_combo</tabstop>
+  <tabstop>compression_method_combo</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
- <buttongroups>
-  <buttongroup name="button_group_packer_type"/>
- </buttongroups>
 </ui>

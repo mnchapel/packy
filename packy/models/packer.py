@@ -15,8 +15,8 @@ from PySide6.QtCore import Qt, QRunnable, QStandardPaths
 
 # PackY
 from packy.core.settings import PreferencesGeneral, PreferencesKeys, PreferencesTask
-from packy.models.task import Task, TaskStatus
-from packy.models.packer_signals import PackerSignals
+from packy.models.tasks_model import TasksModel, TaskStatus
+# from packy.models.packer_signals import PackerSignals
 
 # Python debug
 # import debugpy
@@ -41,10 +41,10 @@ class Packer(QRunnable):
     ###########################################################################
 
     # -------------------------------------------------------------------------
-    def __init__(self, task: Task):
+    def __init__(self, task: TasksModel):
         super(Packer, self).__init__()
 
-        self.signals = PackerSignals()
+        # self.signals = PackerSignals()
         self.__task = task
 
     ###########################################################################

@@ -18,7 +18,7 @@ from zipfile import ZipFile, ZipInfo
 from PySide6.QtCore import QStandardPaths
 
 # PackY
-from packy.models.task import Task
+from packy.models.tasks_model import TasksModel
 from packy.models.zip_packer import ZipPacker
 
 # PackY tests
@@ -143,7 +143,7 @@ class TestPackTmpFolder:
         input = loadTestData[test_name]["input"]
         expected = loadTestData[test_name]["expected"]
 
-        mock_task = Mock(Task)
+        mock_task = Mock(TasksModel)
         mock_task.destFile = MagicMock(return_value=input["destination_file"])
 
         tmp_folder_path = input["tmp_dir_path"]

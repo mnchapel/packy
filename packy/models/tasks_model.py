@@ -1,24 +1,26 @@
-"""
-Copyright 2023-present, Marie-Neige Chapel
+"""_summary_
+
+_description_
+
+Copyright 2023-present, Marie-Neige Chapel and Joseph Garnier
 All rights reserved.
 
 See LICENCE.md file for more information.
 """
 
-# Python
+from dataclasses import dataclass
 import os
+from pathlib import Path
 import re
 from datetime import date
 from enum import Enum, auto
-
-# PyQt
+from typing import final
 from PySide6 import QtCore
 from PySide6.QtCore import Qt, QStandardPaths, QAbstractListModel, Signal
-
-# PackY
+from packy.core.isettings_persistable import ISettingsPersistable
 from packy.models.files_model import FilesModel
-from packy.models.packer_data import PackerData
-from packy.core.settings import PreferencesTask, PreferencesKeys
+from packy.models.archiver_config_model import ArchiverConfigModel
+from packy.core.settings import PreferencesTask, PreferencesKeys, QObject
 
 
 ###############################################################################
@@ -46,9 +48,26 @@ class TaskStatus(Enum):
     SUCCESS = auto()
     ERROR = auto()
 
+###############################################################################
+class FinalMeta(type(QAbstractListModel), type(ISettingsPersistable)):  # pyright: ignore[reportGeneralTypeIssues]  # noqa: D101
+    pass
 
 ###############################################################################
-class Task(QAbstractListModel):
+@dataclass
+class ArchiveTask:
+    """_summary_
+
+    _description_
+    """
+    __task_id: int
+    __is_enabled: bool
+    __destination_path: Path
+    __source_files: FilesModel
+
+
+###############################################################################
+@final
+class TasksModel(QAbstractListModel, ISettingsPersistable, metaclass=FinalMeta):
     ###########################################################################
     # PRIVATE MEMBER VARIABLES
     #
@@ -65,19 +84,11 @@ class Task(QAbstractListModel):
     # __files_selected:
     ###########################################################################
 
-    ###########################################################################
-    # SIGNALS
-    ###########################################################################
-
     statusChanged = Signal(int)
 
-    ###########################################################################
-    # SPECIAL METHODS
-    ###########################################################################
-
     # -------------------------------------------------------------------------
-    def __init__(self, id: int, json_dict=None) -> None:
-        super(Task, self).__init__()
+    def __init__(self, id: int, json_dict=None, parent: QObject | None = None) -> None:
+        super().__init__(parent)
 
         self.__u_dash = "\u2014"
         self.__u_check = "\u2713"
@@ -95,7 +106,7 @@ class Task(QAbstractListModel):
 
     # -------------------------------------------------------------------------
     def initStaticMembers(self) -> None:
-        if not hasattr(Task, "funcDstSuffix"):
+        if not hasattr(TasksModel, "funcDstSuffix"):
             settings = packySettings()
             suffix_value = settings.value(PreferencesKeys.TASK_SUFFIX.value, type=int)
             self.updateDestSuffix(PreferencesTask(suffix_value))
@@ -105,7 +116,7 @@ class Task(QAbstractListModel):
         qt_folder_location = QStandardPaths.StandardLocation.DownloadLocation
 
         self.__checked = Qt.CheckState.Checked.value
-        self.__packer_data = PackerData()
+        self.__packer_data = ArchiverConfigModel()
         self.__files_selected = FilesModel()
         self.__dest_raw_basename = "output"
         self.__dest_folder = QStandardPaths.writableLocation(qt_folder_location)
@@ -115,16 +126,13 @@ class Task(QAbstractListModel):
     def deserialization(self, json_dict: dict) -> None:
         self.__id = json_dict[TaskSerialKeys.ID.value]
         self.__checked = json_dict[TaskSerialKeys.CHECKED.value]
-        self.__packer_data = PackerData(json_dict[TaskSerialKeys.PACKER_DATA.value])
+        self.__packer_data = ArchiverConfigModel(json_dict[TaskSerialKeys.PACKER_DATA.value])
         self.__files_selected = FilesModel(json_dict[TaskSerialKeys.FILES_SELECTED.value])
         self.__dest_raw_basename = json_dict[TaskSerialKeys.DEST_RAW_BASENAME.value]
         self.__dest_folder = json_dict[TaskSerialKeys.DEST_FOLDER.value]
 
-    ###########################################################################
-    # GETTERS
-    ###########################################################################
-
     # -------------------------------------------------------------------------
+    @property
     def id(self) -> int:
         return self.__id
 
@@ -149,7 +157,7 @@ class Task(QAbstractListModel):
 
     # -------------------------------------------------------------------------
     def destBasename(self) -> str:
-        dst_suffix = Task.funcDstSuffix(self)
+        dst_suffix = TasksModel.funcDstSuffix(self)
         extension = self.__packer_data.extension()
         return self.__dest_raw_basename + dst_suffix + "." + extension
 
@@ -197,20 +205,20 @@ class Task(QAbstractListModel):
     # -------------------------------------------------------------------------
     @staticmethod
     def updateDestSuffix(value):
-        func_dst_suffix = Task.__suffixTimeStamp
+        func_dst_suffix = TasksModel.__suffixTimeStamp
 
         match value:
             case PreferencesTask.SUFFIX_CURR_DATE:
-                func_dst_suffix = Task.__suffixTimeStamp
+                func_dst_suffix = TasksModel.__suffixTimeStamp
             case PreferencesTask.SUFFIX_VERSION_NUM:
-                func_dst_suffix = Task.__suffixId
+                func_dst_suffix = TasksModel.__suffixId
             case PreferencesTask.SUFFIX_NOTHING:
-                func_dst_suffix = Task.__suffixNothing
+                func_dst_suffix = TasksModel.__suffixNothing
             case _:
                 msg = "value not recognized."
                 QtCore.qWarning(msg)
 
-        Task.funcDstSuffix = func_dst_suffix
+        TasksModel.funcDstSuffix = func_dst_suffix
 
     ###########################################################################
     # PUBLIC MEMBER FUNCTIONS
