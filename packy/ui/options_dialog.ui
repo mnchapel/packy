@@ -46,7 +46,7 @@
          </property>
          <layout class="QVBoxLayout" name="retention_policy_layout">
           <item>
-           <widget class="QRadioButton" name="retention_keep_all_radio">
+           <widget class="QRadioButton" name="keep_all_policiy_radio">
             <property name="text">
              <string>Keep all snapshots</string>
             </property>
@@ -59,9 +59,9 @@
            </widget>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout">
+           <layout class="QHBoxLayout" name="keep_last_n_policy_layout">
             <item>
-             <widget class="QRadioButton" name="retention_keep_last_n_radio">
+             <widget class="QRadioButton" name="keep_last_n_policy_radio">
               <property name="text">
                <string>Number of latest snapshots to keep:</string>
               </property>
@@ -71,7 +71,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QSpinBox" name="retention_count_spin">
+             <widget class="QSpinBox" name="keep_last_n_policy_spin">
               <property name="enabled">
                <bool>false</bool>
               </property>
@@ -81,14 +81,14 @@
              </widget>
             </item>
             <item>
-             <spacer name="horizontal_spacer">
+             <spacer name="keep_last_n_policy_spacer">
               <property name="orientation">
                <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
                 <width>0</width>
-                <height>0</height>
+                <height>20</height>
                </size>
               </property>
              </spacer>
@@ -99,7 +99,7 @@
         </widget>
        </item>
        <item>
-        <spacer name="general_vertical_spacer">
+        <spacer name="general_spacer">
          <property name="orientation">
           <enum>Qt::Orientation::Vertical</enum>
          </property>
@@ -195,7 +195,7 @@
   <slot>apply()</slot>
  </slots>
  <buttongroups>
-  <buttongroup name="retention_policy_button_group"/>
   <buttongroup name="archive_naming_button_group"/>
+  <buttongroup name="retention_policy_button_group"/>
  </buttongroups>
 </ui>

@@ -107,8 +107,8 @@ class OptionsDialog(QDialog, ISettingsPersistable, metaclass=FinalMeta):
 
         # Widgets mapping
         self.__retention_policy_by_button: dict[QAbstractButton, SnapshotRetentionPolicy] = {
-            self.__ui.retention_keep_all_radio: SnapshotRetentionPolicy.KEEP_ALL,
-            self.__ui.retention_keep_last_n_radio: SnapshotRetentionPolicy.KEEP_LAST_N,
+            self.__ui.keep_all_policiy_radio: SnapshotRetentionPolicy.KEEP_ALL,
+            self.__ui.keep_last_n_policy_radio: SnapshotRetentionPolicy.KEEP_LAST_N,
         }
 
         self.__filename_suffix_by_button: dict[QAbstractButton, FilenameSuffix] = {
@@ -143,9 +143,9 @@ class OptionsDialog(QDialog, ISettingsPersistable, metaclass=FinalMeta):
                 radio_btn.setChecked(True)
                 break
 
-        self.__ui.retention_count_spin.setEnabled(self.__ui.retention_keep_last_n_radio.isChecked())
+        self.__ui.keep_last_n_policy_spin.setEnabled(self.__ui.keep_last_n_policy_radio.isChecked())
         snapshots_retention_count = self.__settings.value(SettingsKeys.RETENTION_COUNT, 1)
-        self.__ui.retention_count_spin.setValue(snapshots_retention_count)
+        self.__ui.keep_last_n_policy_spin.setValue(snapshots_retention_count)
 
     # -------------------------------------------------------------------------
     def __read_task_page_settings(self) -> None:
@@ -162,9 +162,9 @@ class OptionsDialog(QDialog, ISettingsPersistable, metaclass=FinalMeta):
     def __setup_connections(self) -> None:
         self.__ui.retention_policy_button_group.buttonClicked.connect(self.__on_state_changed)
         self.__ui.archive_naming_button_group.buttonClicked.connect(self.__on_state_changed)
-        self.__ui.retention_count_spin.valueChanged.connect(self.__on_state_changed)
-        self.__ui.retention_keep_last_n_radio.toggled.connect(
-            self.__ui.retention_count_spin.setEnabled,
+        self.__ui.keep_last_n_policy_spin.valueChanged.connect(self.__on_state_changed)
+        self.__ui.keep_last_n_policy_radio.toggled.connect(
+            self.__ui.keep_last_n_policy_spin.setEnabled,
         )
         self.__ui.dialog_button_box.accepted.connect(self.__on_accept)
         self.__ui.dialog_button_box.rejected.connect(self.__on_cancel)
@@ -218,7 +218,7 @@ class OptionsDialog(QDialog, ISettingsPersistable, metaclass=FinalMeta):
                 self.snapshot_retention_policy_changed.emit,
             )
 
-        retention_count = self.__ui.retention_count_spin.value()
+        retention_count = self.__ui.keep_last_n_policy_spin.value()
         self.__settings.set_value(
             SettingsKeys.RETENTION_COUNT,
             retention_count,
