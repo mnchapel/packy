@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>857</width>
+    <width>1061</width>
     <height>763</height>
    </rect>
   </property>
@@ -159,7 +159,7 @@
           </widget>
          </item>
          <item row="1" column="1">
-          <layout class="QHBoxLayout" name="destination_folder_layout" stretch="1,0">
+          <layout class="QHBoxLayout" name="destination_folder_layout" stretch="1,0,0">
            <item>
             <widget class="QLineEdit" name="destination_folder_input">
              <property name="sizePolicy">
@@ -191,6 +191,19 @@
               <string>Browse...</string>
              </property>
             </widget>
+           </item>
+           <item>
+            <spacer name="destination_folder_spacer">
+             <property name="orientation">
+              <enum>Qt::Orientation::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </item>
@@ -607,7 +620,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>857</width>
+     <width>1061</width>
      <height>22</height>
     </rect>
    </property>
