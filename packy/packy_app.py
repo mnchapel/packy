@@ -11,17 +11,16 @@ See LICENCE.md file for more information.
 """
 
 # Local application
-import resources.rc_packy  # pyright: ignore[reportUnusedImport] # noqa: F401
+from packy.core.app_config import AppConfig
 from packy.core.debug_logger import DebugLogger
 from packy.views.main_window import MainWindow
 
 # Third-party
 from PySide6 import QtCore, QtWidgets
-from PySide6.QtCore import QCoreApplication, QStandardPaths
+from PySide6.QtCore import QCoreApplication
 
 # Standard library
 import sys
-from pathlib import Path
 from typing import final
 
 
@@ -64,10 +63,11 @@ class PackyApp:
             int: The exit code of the application.
         """
         exit_code = 1
+        config: AppConfig = AppConfig()
         try:
-            app.configure()
-            app.init()
-            exit_code = app.run()
+            app.configure(config)
+            app.init(config)
+            exit_code = app.run(config)
         finally:
             app.dispose()
 
@@ -81,27 +81,20 @@ class PackyApp:
         QCoreApplication.setApplicationName("PackY")
 
     # -------------------------------------------------------------------------
-    def configure(self) -> None:
+    def configure(self, config: AppConfig) -> None:
         """Configure the application environment and settings."""
 
     # -------------------------------------------------------------------------
-    def init(self) -> None:
+    def init(self, config: AppConfig) -> None:
         """Initialize application components and logging system."""
-        # Set up logging
-        in_dev_mode = not getattr(sys, "frozen", False)
-        if in_dev_mode:
-            folder_path = Path("./logs")
-        else:
-            app_data_location = QStandardPaths.StandardLocation.AppDataLocation
-            folder_path = Path(QStandardPaths.writableLocation(app_data_location))
-        log_file_path = folder_path / "log.txt"
+        log_file_path = config.log_file_path
         has_started = DebugLogger.start(log_file_path)
         if not has_started:
             raise PackyLifeCycleError("Debug logger has already been started.")  # noqa: TRY003
         QtCore.qDebug("App initialized.")
 
     # -------------------------------------------------------------------------
-    def run(self) -> int:
+    def run(self, config: AppConfig) -> int:
         """Start the Qt application event loop and main window.
 
         This method creates the QApplication instance, sets the
@@ -112,7 +105,7 @@ class PackyApp:
             int: The exit code of the application.
         """
         app = QtWidgets.QApplication(sys.argv)
-        main_window = MainWindow()
+        main_window = MainWindow(config)
         main_window.show()
         return app.exec()
 
