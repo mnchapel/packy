@@ -65,7 +65,7 @@ class MainWindow(QMainWindow):
     def __init__(self, config: AppConfig, parent: QWidget | None = None) -> None:
         super().__init__(parent)
 
-        self.__log_folder_path = Path(config.log_file_path).parent
+        self.__log_folder_path = Path(config.LOG_FILE_PATH).parent
         self.__settings: Settings = Settings(self)
         self.__settings.setObjectName("settings")
         self.__archiver_model = ArchiverConfigModel(self)

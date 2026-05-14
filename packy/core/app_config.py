@@ -28,10 +28,12 @@ class AppConfig:
     Stores derived runtime configuration values.
 
     Attributes:
-        log_file_path (Path): Absolute path to the application log file.
+        VERSION (str): Application current version.
+        LOG_FILE_PATH (Path): Absolute path to the application log file.
     """
 
-    log_file_path: Path = field(init=False)
+    VERSION: str = "0.9.0.0"
+    LOG_FILE_PATH: Path = field(init=False)
 
     def __post_init__(self) -> None:
         """Initializes derived configuration paths after dataclass creation."""
@@ -43,6 +45,6 @@ class AppConfig:
             folder_path = Path(QStandardPaths.writableLocation(app_data_location))
         object.__setattr__(
             self,
-            "log_file_path",
+            "LOG_FILE_PATH",
             folder_path / "log.txt",
         )
