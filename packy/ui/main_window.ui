@@ -6,23 +6,17 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1061</width>
+    <width>988</width>
     <height>763</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>PackY</string>
   </property>
-  <widget class="QWidget" name="centralwidget">
-   <property name="tabletTracking">
-    <bool>false</bool>
-   </property>
-   <property name="autoFillBackground">
-    <bool>false</bool>
-   </property>
-   <layout class="QGridLayout" name="gridLayout_4">
+  <widget class="QWidget" name="central_widget">
+   <layout class="QGridLayout" name="central_widget_layout">
     <item row="2" column="1" colspan="2">
-     <layout class="QVBoxLayout" name="vlayout_bottom">
+     <layout class="QVBoxLayout" name="bottom_view_layout">
       <item>
        <widget class="QLabel" name="messages_label">
         <property name="text">
@@ -43,24 +37,24 @@
      </layout>
     </item>
     <item row="0" column="2">
-     <layout class="QVBoxLayout" name="vlayout_right">
+     <layout class="QVBoxLayout" name="right_view_layout">
       <item>
-       <widget class="QGroupBox" name="group_box_file_selection">
+       <widget class="QGroupBox" name="file_selection_group">
         <property name="enabled">
          <bool>false</bool>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>480</width>
+          <height>0</height>
+         </size>
         </property>
         <property name="title">
          <string>File(s) selection</string>
         </property>
-        <property name="flat">
-         <bool>false</bool>
-        </property>
-        <property name="checkable">
-         <bool>false</bool>
-        </property>
-        <layout class="QGridLayout" name="gridLayout_2">
+        <layout class="QGridLayout" name="file_selection_layout">
          <item row="3" column="2">
-          <spacer name="verticalSpacer">
+          <spacer name="file_selection_spacer">
            <property name="orientation">
             <enum>Qt::Orientation::Vertical</enum>
            </property>
@@ -73,7 +67,7 @@
           </spacer>
          </item>
          <item row="0" column="1">
-          <widget class="QLineEdit" name="line_edit_source">
+          <widget class="QLineEdit" name="source_folder_input">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
              <horstretch>0</horstretch>
@@ -86,7 +80,7 @@
           </widget>
          </item>
          <item row="0" column="0">
-          <widget class="QLabel" name="label_source">
+          <widget class="QLabel" name="source_folder_label">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
              <horstretch>0</horstretch>
@@ -99,7 +93,7 @@
           </widget>
          </item>
          <item row="2" column="2">
-          <widget class="QPushButton" name="push_button_check_integrity">
+          <widget class="QPushButton" name="check_integrity_button">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
              <horstretch>0</horstretch>
@@ -112,10 +106,10 @@
           </widget>
          </item>
          <item row="1" column="1" rowspan="3">
-          <widget class="QTreeView" name="tree_view_source"/>
+          <widget class="QTreeView" name="source_files_tree_view"/>
          </item>
          <item row="0" column="2">
-          <widget class="QPushButton" name="push_button_source">
+          <widget class="QPushButton" name="source_folder_browser">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
              <horstretch>0</horstretch>
@@ -159,7 +153,7 @@
           </widget>
          </item>
          <item row="1" column="1">
-          <layout class="QHBoxLayout" name="destination_folder_layout" stretch="1,0,0">
+          <layout class="QHBoxLayout" name="destination_folder_layout" stretch="1,0">
            <item>
             <widget class="QLineEdit" name="destination_folder_input">
              <property name="sizePolicy">
@@ -167,12 +161,6 @@
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>300</width>
-               <height>16777215</height>
-              </size>
              </property>
              <property name="readOnly">
               <bool>true</bool>
@@ -192,19 +180,6 @@
              </property>
             </widget>
            </item>
-           <item>
-            <spacer name="destination_folder_spacer">
-             <property name="orientation">
-              <enum>Qt::Orientation::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
           </layout>
          </item>
         </layout>
@@ -213,7 +188,7 @@
       <item>
        <widget class="QGroupBox" name="archiver_config_group">
         <property name="enabled">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="title">
          <string>Archiver Configuration</string>
@@ -356,16 +331,22 @@
      </layout>
     </item>
     <item row="0" column="1">
-     <layout class="QVBoxLayout" name="vlayout_left">
+     <layout class="QVBoxLayout" name="left_view_layout">
       <item>
-       <widget class="QLabel" name="label_list_of_tasks">
+       <widget class="QLabel" name="job_queue_label">
         <property name="text">
-         <string>List of tasks</string>
+         <string>Job queue:</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QTableView" name="table_view_session">
+       <widget class="QTableView" name="job_queue_table_view">
+        <property name="minimumSize">
+         <size>
+          <width>480</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="focusPolicy">
          <enum>Qt::FocusPolicy::NoFocus</enum>
         </property>
@@ -390,9 +371,9 @@
        </widget>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="hlayout_task_management">
+       <layout class="QHBoxLayout" name="job_top_buttons_layout">
         <item>
-         <widget class="QPushButton" name="push_button_create">
+         <widget class="QPushButton" name="create_job_button">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -405,7 +386,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="push_button_remove">
+         <widget class="QPushButton" name="remove_job_button">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -421,7 +402,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="push_button_edit">
+         <widget class="QPushButton" name="save_job_button">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -432,19 +413,51 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>Edit</string>
+           <string>Save</string>
           </property>
          </widget>
         </item>
         <item>
-         <spacer name="horizontalSpacer">
+         <widget class="QPushButton" name="move_up_job_button">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Move up</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="move_down_job_button">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Move down</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="job_buttons_top_spacer">
           <property name="orientation">
            <enum>Qt::Orientation::Horizontal</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
-            <width>40</width>
-            <height>20</height>
+            <width>0</width>
+            <height>0</height>
            </size>
           </property>
          </spacer>
@@ -452,9 +465,9 @@
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="hlayout_task_running">
+       <layout class="QHBoxLayout" name="job_bottom_buttons_layout">
         <item>
-         <widget class="QPushButton" name="push_button_run_all">
+         <widget class="QPushButton" name="run_all_jobs_button">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -470,7 +483,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="push_button_cancel">
+         <widget class="QPushButton" name="cancel_jobs_button">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -486,14 +499,14 @@
          </widget>
         </item>
         <item>
-         <spacer name="horizontalSpacer_2">
+         <spacer name="job_buttons_bottom_spacer">
           <property name="orientation">
            <enum>Qt::Orientation::Horizontal</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
-            <width>40</width>
-            <height>20</height>
+            <width>0</width>
+            <height>0</height>
            </size>
           </property>
          </spacer>
@@ -501,70 +514,61 @@
        </layout>
       </item>
       <item>
-       <widget class="QGroupBox" name="group_box_statistics">
+       <widget class="QGroupBox" name="statistics_group">
         <property name="enabled">
          <bool>false</bool>
         </property>
         <property name="title">
          <string>Statistics</string>
         </property>
-        <layout class="QGridLayout" name="gridLayout" columnstretch="0,1,0">
-         <property name="sizeConstraint">
-          <enum>QLayout::SizeConstraint::SetMinimumSize</enum>
-         </property>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_task_progress">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Task progress</string>
-           </property>
-          </widget>
-         </item>
+        <layout class="QFormLayout" name="statistics_layout">
          <item row="0" column="1">
-          <widget class="QProgressBar" name="pbar_global_progress">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>300</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="value">
-            <number>0</number>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QProgressBar" name="pbar_task_progress">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>300</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="value">
-            <number>0</number>
-           </property>
-          </widget>
+          <layout class="QHBoxLayout" name="global_progress_layout">
+           <item>
+            <widget class="QProgressBar" name="global_progress_bar">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>300</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>300</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="value">
+              <number>0</number>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="global_progress_spacer">
+             <property name="orientation">
+              <enum>Qt::Orientation::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Policy::Expanding</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
          </item>
          <item row="0" column="0">
-          <widget class="QLabel" name="label_global_progress">
+          <widget class="QLabel" name="global_progress_label">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
              <horstretch>0</horstretch>
@@ -576,37 +580,63 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="2">
-          <spacer name="horizontalSpacer_3">
-           <property name="orientation">
-            <enum>Qt::Orientation::Horizontal</enum>
-           </property>
-           <property name="sizeType">
-            <enum>QSizePolicy::Policy::Expanding</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
+         <item row="1" column="1">
+          <layout class="QHBoxLayout" name="job_progress_layout">
+           <item>
+            <widget class="QProgressBar" name="job_progress_bar">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>300</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>300</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="value">
+              <number>0</number>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="job_progress_spacer">
+             <property name="orientation">
+              <enum>Qt::Orientation::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Policy::Expanding</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
          </item>
-         <item row="1" column="2">
-          <spacer name="horizontalSpacer_4">
-           <property name="orientation">
-            <enum>Qt::Orientation::Horizontal</enum>
+         <item row="1" column="0">
+          <widget class="QLabel" name="job_progress_label">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
            </property>
-           <property name="sizeType">
-            <enum>QSizePolicy::Policy::Expanding</enum>
+           <property name="text">
+            <string>Job progress</string>
            </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
+          </widget>
          </item>
         </layout>
        </widget>
@@ -620,80 +650,149 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1061</width>
+     <width>988</width>
      <height>22</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menu_file">
+   <widget class="QMenu" name="file_menu">
     <property name="title">
-     <string>File</string>
+     <string>&amp;File</string>
     </property>
-    <addaction name="action_new_session"/>
+    <widget class="QMenu" name="open_recent_menu">
+     <property name="title">
+      <string>Open &amp;Recent</string>
+     </property>
+     <addaction name="separator"/>
+     <addaction name="clear_list_action"/>
+    </widget>
+    <addaction name="new_batch_action"/>
+    <addaction name="open_batch_action"/>
+    <addaction name="open_recent_menu"/>
     <addaction name="separator"/>
-    <addaction name="action_open"/>
+    <addaction name="save_batch_action"/>
+    <addaction name="save_batch_as_action"/>
     <addaction name="separator"/>
-    <addaction name="action_save"/>
-    <addaction name="action_save_as"/>
+    <addaction name="options_action"/>
     <addaction name="separator"/>
-    <addaction name="action_options"/>
-    <addaction name="separator"/>
-    <addaction name="action_exit"/>
+    <addaction name="close_batch_action"/>
+    <addaction name="exit_action"/>
    </widget>
-   <widget class="QMenu" name="menu_help">
+   <widget class="QMenu" name="help_menu">
     <property name="title">
-     <string>Help</string>
+     <string>&amp;Help</string>
     </property>
-    <addaction name="action_open_log_folder"/>
-    <addaction name="action_github_repo"/>
-    <addaction name="action_about"/>
+    <addaction name="open_log_folder_action"/>
+    <addaction name="github_repo_action"/>
+    <addaction name="about_action"/>
    </widget>
-   <addaction name="menu_file"/>
-   <addaction name="menu_help"/>
+   <addaction name="file_menu"/>
+   <addaction name="help_menu"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="action_about">
+  <action name="about_action">
    <property name="text">
     <string>About</string>
    </property>
-  </action>
-  <action name="action_exit">
-   <property name="text">
-    <string>Exit</string>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::AboutRole</enum>
    </property>
   </action>
-  <action name="action_github_repo">
+  <action name="exit_action">
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::ApplicationExit"/>
+   </property>
+   <property name="text">
+    <string>&amp;Exit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::QuitRole</enum>
+   </property>
+  </action>
+  <action name="github_repo_action">
    <property name="text">
     <string>GitHub Repository</string>
    </property>
   </action>
-  <action name="action_options">
+  <action name="options_action">
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::DocumentProperties"/>
+   </property>
    <property name="text">
-    <string>Options...</string>
+    <string>&amp;Options...</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::PreferencesRole</enum>
    </property>
   </action>
-  <action name="action_save">
+  <action name="save_batch_action">
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::DocumentSave"/>
+   </property>
    <property name="text">
-    <string>Save</string>
+    <string>&amp;Save</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
    </property>
   </action>
-  <action name="action_new_session">
+  <action name="new_batch_action">
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::DocumentNew"/>
+   </property>
    <property name="text">
-    <string>New Session</string>
+    <string>&amp;New Batch</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
    </property>
   </action>
-  <action name="action_open">
+  <action name="open_batch_action">
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::DocumentOpen"/>
+   </property>
    <property name="text">
-    <string>Open...</string>
+    <string>&amp;Open...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
    </property>
   </action>
-  <action name="action_save_as">
+  <action name="save_batch_as_action">
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::DocumentSaveAs"/>
+   </property>
    <property name="text">
-    <string>Save As...</string>
+    <string>Save &amp;As...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+S</string>
    </property>
   </action>
-  <action name="action_open_log_folder">
+  <action name="open_log_folder_action">
    <property name="text">
     <string>Open Log Folder</string>
+   </property>
+  </action>
+  <action name="close_batch_action">
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::WindowClose"/>
+   </property>
+   <property name="text">
+    <string>&amp;Close</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
+   </property>
+  </action>
+  <action name="clear_list_action">
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::EditClear"/>
+   </property>
+   <property name="text">
+    <string>Clear List</string>
    </property>
   </action>
  </widget>
@@ -705,15 +804,15 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>push_button_create</tabstop>
-  <tabstop>push_button_remove</tabstop>
-  <tabstop>push_button_edit</tabstop>
-  <tabstop>push_button_run_all</tabstop>
-  <tabstop>push_button_cancel</tabstop>
-  <tabstop>line_edit_source</tabstop>
-  <tabstop>push_button_source</tabstop>
-  <tabstop>tree_view_source</tabstop>
-  <tabstop>push_button_check_integrity</tabstop>
+  <tabstop>create_job_button</tabstop>
+  <tabstop>remove_job_button</tabstop>
+  <tabstop>move_up_job_button</tabstop>
+  <tabstop>run_all_jobs_button</tabstop>
+  <tabstop>cancel_jobs_button</tabstop>
+  <tabstop>source_folder_input</tabstop>
+  <tabstop>source_folder_browser</tabstop>
+  <tabstop>source_files_tree_view</tabstop>
+  <tabstop>check_integrity_button</tabstop>
   <tabstop>destination_folder_input</tabstop>
   <tabstop>destination_folder_browser</tabstop>
   <tabstop>compression_level_combo</tabstop>
