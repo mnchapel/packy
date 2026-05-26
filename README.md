@@ -317,8 +317,8 @@ The usage of commands and scripts is described below in the order of a typical d
 - To **add a new translation file** (create a TS file for a specific language in the `i18n/` directory, and reference it in `i18n/translations.txt`):
 
   ```bash
-  pyside6-lupdate -source-language "en-US" -target-language "<ISO_LOCAL_CODE>" -ts "i18n/<ISO_LOCAL_CODE>.ts"
-  echo i18n/<ISO_LOCAL_CODE>.ts>>"i18n/translations.txt"
+  pyside6-lupdate -source-language "en-US" -target-language "<ISO_LOCAL_CODE>" -ts "i18n/packy_<ISO_LOCAL_CODE>.ts"
+  echo i18n/packy_<ISO_LOCAL_CODE>.ts>>"i18n/translations.txt"
   ```
 
   Where:
@@ -495,25 +495,25 @@ Help us keep PackY open and inclusive. Please read and follow our [Code of Condu
 
 ### Add translations
 
-If you speak another language, then adding translations will help make PackY available to non-native English speakers. This is a very quick and easy task, as all application text is located in `i18n/en-US.ts`; simply follow the preparation steps below and use the [Qt Linguist](https://doc.qt.io/qt-6/qtlinguist-index.html) software to translate the various entries. You don't have to translate it all, as any missing attributes will just fallback to English.
+If you speak another language, then adding translations will help make PackY available to non-native English speakers. This is a very quick and easy task, as all application text is located in `i18n/packy_en-US.ts`; simply follow the preparation steps below and use the [Qt Linguist](https://doc.qt.io/qt-6/qtlinguist-index.html) software to translate the various entries. You don't have to translate it all, as any missing attributes will just fallback to English.
 
 **Prerequisites**:
 
 - [Qt Linguist](https://doc.qt.io/qt-6/qtlinguist-index.html) (usually installed along with Qt)
 
-Before starting the translation process, it is necessary to ensure that the translation file for the target language (a file in [TS format](https://doc.qt.io/qt-6/linguist-ts-file-format.html)) exists in the `i18n/` folder. Such a file is named using the ISO locale code following the format `<LANG_CODE>-<COUNTRY_CODE>.ts`. The `<LANG_CODE>` part is a two-letter language code from the [ISO 639](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes) standard, and the `<COUNTRY_CODE>` part is a two-letter country code from the [ISO 3166-1](https://en.wikipedia.org/wiki/ISO_3166-1) standard. For example: 'fr_FR', 'en-US', 'de-DE', etc.
+Before starting the translation process, it is necessary to ensure that the translation file for the target language (a file in [TS format](https://doc.qt.io/qt-6/linguist-ts-file-format.html)) exists in the `i18n/` folder. Such a file is named using the ISO locale code following the format `packy_<LANG_CODE>-<COUNTRY_CODE>.ts`. The `<LANG_CODE>` part is a two-letter language code from the [ISO 639](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes) standard, and the `<COUNTRY_CODE>` part is a two-letter country code from the [ISO 3166-1](https://en.wikipedia.org/wiki/ISO_3166-1) standard. For example: 'fr_FR', 'en-US', 'de-DE', etc.
 
 In addition, each translation file is referenced in the *lst-file* `i18n/translations.txt` so that it is included in the string update process for the [build process](#building) (the [`lupdate` command](https://doc.qt.io/qt-6/linguist-lupdate.html) uses it as an output argument). The build process will, among other things, rescan the code to extract strings and update the translation files (i.e., the TS files), then compile them into a compact binary format and store them as QM files (in the `i18n/` directory using the [`pyside6-lrelease` command](https://doc.qt.io/qtforpython-6/tools/pyside-lrelease.html)), which PackY will use directly. This format provides extremely fast lookup for translations compared to TS files. QM files are treated as resources (QRC files) and are therefore referenced in `resources/packy.qrc`.
 
-If the target language file does not have an associated file, it must be created from the reference translation file `i18n/en-US.ts`, which serves as the source text for all translations. It contains the original text of PackY.
+If the target language file does not have an associated file, it must be created from the reference translation file `i18n/packy_en-US.ts`, which serves as the source text for all translations. It contains the original text of PackY.
 
 Follow these steps (from the [official procedure](https://doc.qt.io/qt-6/linguist-creating-ts-files.html)) to **add a new translation file** to PackY :
 
 1. Create the TS file for the target language in the `i18n/` folder and reference it in `i18n/translations.txt` by running the `PackY: Add new translation file` task or by executing the following commands in a terminal:
 
     ```bash
-    pyside6-lupdate -source-language "en-US" -target-language "<ISO_LOCAL_CODE>" -ts "i18n/<ISO_LOCAL_CODE>.ts"
-    echo i18n/<ISO_LOCAL_CODE>.ts>>"i18n/translations.txt"
+    pyside6-lupdate -source-language "en-US" -target-language "<ISO_LOCAL_CODE>" -ts "i18n/packy_<ISO_LOCAL_CODE>.ts"
+    echo i18n/packy_<ISO_LOCAL_CODE>.ts>>"i18n/translations.txt"
     ```
 
     Replace the following:
@@ -523,17 +523,17 @@ Follow these steps (from the [official procedure](https://doc.qt.io/qt-6/linguis
 2. Run a scan of the source code to extract strings and populate the new translation file:
 
   ```bash
-  pyside6-lupdate -extensions "ui,py,qs,qml,qrc" -sort-messages -recursive -locations relative -tr-function-alias "QT_TR_NOOP+=PACKY_TR_NOOP,QT_TRANSLATE_NOOP+=PACKY_TRANSLATE_NOOP" . -ts "i18n/<ISO_LOCAL_CODE>.ts"
+  pyside6-lupdate -extensions "ui,py,qs,qml,qrc" -sort-messages -recursive -locations relative -tr-function-alias "QT_TR_NOOP+=PACKY_TR_NOOP,QT_TRANSLATE_NOOP+=PACKY_TRANSLATE_NOOP" . -ts "i18n/packy_<ISO_LOCAL_CODE>.ts"
   ```
 
   Replace the following:
 
   - `<ISO_LOCAL_CODE>` : The same ISO locale code used in step 1.
 
-3. Générer le QM file (a compact binary format that the localized application uses pour extremely fast lookup for translations) out of TS file:
+3. Generate the QM file (a compact binary format that the localized application uses pour extremely fast lookup for translations) out of TS file:
 
   ```bash
-  pyside6-lrelease "i18n/<ISO_LOCAL_CODE>.ts" -qm "i18n/<ISO_LOCAL_CODE>.qm"
+  pyside6-lrelease "i18n/packy_<ISO_LOCAL_CODE>.ts" -qm "i18n/packy_<ISO_LOCAL_CODE>.qm"
   ```
 
   Replace the following:
@@ -545,7 +545,7 @@ Follow these steps (from the [official procedure](https://doc.qt.io/qt-6/linguis
   ```xml
   <qresource prefix="/i18n">
     ...
-    <file alias="<ISO_LOCAL_CODE>">../i18n/<ISO_LOCAL_CODE>.qm</file>
+    <file alias="<ISO_LOCAL_CODE>">../i18n/packy_<ISO_LOCAL_CODE>.qm</file>
   </qresource>
   ```
 

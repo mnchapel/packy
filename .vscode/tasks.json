@@ -58,7 +58,7 @@
       "problemMatcher": [],
       "dependsOn": [
         "PackY: Update PyProject file",
-        "PackY: Update translation files"
+        // "PackY: Update translation files"
       ]
     },
     {
@@ -138,10 +138,10 @@
         "cwd": "${workspaceFolder}"
       },
       "linux": {
-        "command": "${command:python.interpreterPath}/../Scripts/pyside6-lupdate -source-language \"en-US\" -target-language \"${input:isoLocaleCode}\" -ts \"i18n/${input:isoLocaleCode}.ts\" && echo i18n/${input:isoLocaleCode}.ts>>\"i18n/translations.txt\""
+        "command": "${command:python.interpreterPath}/../Scripts/pyside6-lupdate -source-language \"en-US\" -target-language \"${input:isoLocaleCode}\" -ts \"i18n/packy_${input:isoLocaleCode}.ts\" && echo i18n/packy_${input:isoLocaleCode}.ts>>\"i18n/translations.txt\""
       },
       "windows": {
-        "command": "${command:python.interpreterPath}/../Scripts/pyside6-lupdate -source-language \"en-US\" -target-language \"${input:isoLocaleCode}\" -ts \"i18n/${input:isoLocaleCode}.ts\" && echo i18n/${input:isoLocaleCode}.ts>>\"i18n/translations.txt\""
+        "command": "${command:python.interpreterPath}/../Scripts/pyside6-lupdate -source-language \"en-US\" -target-language \"${input:isoLocaleCode}\" -ts \"i18n/packy_${input:isoLocaleCode}.ts\" && echo i18n/packy_${input:isoLocaleCode}.ts>>\"i18n/translations.txt\""
       },
       "presentation": {
         "echo": true,
