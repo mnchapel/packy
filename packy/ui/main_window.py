@@ -19,11 +19,10 @@ from packy.ui.ui_main_window import Ui_MainWindow
 
 # Third-party
 from PySide6 import QtCore
-from PySide6.QtCore import QByteArray, QUrl, Slot
+from PySide6.QtCore import QByteArray, QObject, QUrl, Slot
 from PySide6.QtGui import QAction, QCloseEvent, QDesktopServices, QIcon
 from PySide6.QtWidgets import (
     QMainWindow,
-    QMenu,
     QMessageBox,
     QWidget,
 )
@@ -43,80 +42,103 @@ if TYPE_CHECKING:
 class MainWindow(QMainWindow):
     # -------------------------------------------------------------------------
     def __init__(
-        self, config: AppConfig, settings: UserSettings, parent: QWidget | None = None
+        self,
+        config: AppConfig,
+        settings: UserSettings,
+        parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
 
-        self.__log_folder_path: Final[Path] = Path(config.LOG_FILE_PATH).parent
-        self.__settings: Final[UserSettings] = settings
+        self._log_folder_path: Final[Path] = Path(config.LOG_FILE_PATH).parent
+        self._settings: Final[UserSettings] = settings
 
-        self.__setup_ui(config)
-        self.__setup_menu_bar(config)
-        self.__setup_toolbar(config)
-        self.__setup_central_widgets(config)
-        self.__setup_menu_connections(config)
+        self._setup_ui(config)
+        self._setup_menu_bar(config)
+        self._setup_toolbar(config)
+        self._setup_central_widgets(config)
+        self._setup_menu_connections(config)
 
-        self.__batch_workspace: BatchWorkspace = BatchWorkspace(config.MAX_RECENT_BATCHES, self)
-        self.__archiver_config_panel: ArchiverConfigPanel = ArchiverConfigPanel(self.__ui, self)
+        self._batch_workspace: BatchWorkspace = BatchWorkspace(
+            config.MAX_RECENT_BATCHES,
+            self,
+        )
+        self._archiver_config_panel: ArchiverConfigPanel = ArchiverConfigPanel(
+            self._ui,
+            self,
+        )
 
-        self.__batch_workspace.batch_opened.connect(self.__on_workspace_batch_opened)
-        self.__batch_workspace.batch_closed.connect(self.__on_workspace_batch_closed)
-        self.__batch_workspace.recent_batches_changed.connect(self.__update_recent_batches_menu)
+        self._batch_workspace.batch_opened.connect(self._on_workspace_batch_opened)
+        self._batch_workspace.batch_closed.connect(self._on_workspace_batch_closed)
+        self._batch_workspace.recent_batches_changed.connect(self._update_recent_batches_menu)
 
-        self.__update_window_title()
-        self.__update_actions()
+        self._update_window_title()
+        self._update_actions()
         QtCore.qDebug(f"{self.__class__.__name__} initialized.")
         # self.__thread_pool = QThreadPool()
         # self.__thread_pool.setMaxThreadCount(1)
         # self.__is_canceled = False
+        self.dumpObjectTree()
+        self.dumpObjectInfo()
 
     # -------------------------------------------------------------------------
-    def __setup_ui(self, config: AppConfig) -> None:
-        self.__ui: Ui_MainWindow = Ui_MainWindow()
-        self.__ui.setupUi(self)  # pyright: ignore[reportUnknownMemberType]
+    def _setup_ui(self, _config: AppConfig) -> None:
+        self._ui: Ui_MainWindow = Ui_MainWindow()
+        self._ui.setupUi(self)  # pyright: ignore[reportUnknownMemberType]
         icon = QIcon(":/img/logo")
         self.setWindowIcon(icon)
 
     # -------------------------------------------------------------------------
-    def __setup_menu_bar(self, config: AppConfig) -> None:
+    def _setup_menu_bar(self, config: AppConfig) -> None:
         # Add recent file actions to the recent batches menu
-        self.__recent_batch_actions: list[QAction] = []
+        self._recent_batch_actions: list[QAction] = []
         for _ in range(config.MAX_RECENT_BATCHES):
             action = QAction(self)
             action.setVisible(False)
-            action.triggered.connect(partial(self.__open_recent_batch, action))
-            self.__recent_batch_actions.append(action)
-            self.__ui.open_recent_menu.insertAction(self.__ui.action_clear_list, action)
-        self.__ui.open_recent_menu.setToolTipsVisible(True)
+            action.triggered.connect(partial(self._open_recent_batch, action))
+            self._recent_batch_actions.append(action)
+            self._ui.open_recent_menu.insertAction(self._ui.action_clear_list, action)
+        self._ui.open_recent_menu.setToolTipsVisible(True)
 
     # -------------------------------------------------------------------------
-    def __setup_toolbar(self, config: AppConfig) -> None:
+    def _setup_toolbar(self, _config: AppConfig) -> None:
         pass
 
     # -------------------------------------------------------------------------
-    def __setup_central_widgets(self, config: AppConfig) -> None:
+    def _setup_central_widgets(self, _config: AppConfig) -> None:
         pass
 
     # -------------------------------------------------------------------------
-    def __setup_menu_connections(self, config: AppConfig) -> None:
-        self.__connect_file_menu_actions()
-        self.__connect_help_menu_actions()
+    def _setup_menu_connections(self, _config: AppConfig) -> None:
+        self._connect_file_menu_actions()
+        self._connect_help_menu_actions()
 
     # -------------------------------------------------------------------------
-    def __connect_file_menu_actions(self) -> None:
-        self.__ui.action_new_batch.triggered.connect(self.__new_batch)
-        self.__ui.action_open_batch.triggered.connect(self.__open_batch)
-        self.__ui.action_save_batch.triggered.connect(self.__save_batch)
-        self.__ui.action_save_batch_as.triggered.connect(self.__save_batch_as)
-        self.__ui.action_options.triggered.connect(self.__show_options)
-        self.__ui.action_close_batch.triggered.connect(self.__close_batch)
-        self.__ui.action_exit.triggered.connect(self.close)
+    def _connect_file_menu_actions(self) -> None:
+        self._ui.action_new_batch.triggered.connect(self._new_batch)
+        self._ui.action_open_batch.triggered.connect(self._open_batch)
+        self._ui.action_save_batch.triggered.connect(self._save_batch)
+        self._ui.action_save_batch_as.triggered.connect(self._save_batch_as)
+        self._ui.action_options.triggered.connect(self._show_options)
+        self._ui.action_close_batch.triggered.connect(self._close_batch)
+        self._ui.action_exit.triggered.connect(self.close)
 
     # -------------------------------------------------------------------------
-    def __connect_help_menu_actions(self) -> None:
-        self.__ui.action_open_log_folder.triggered.connect(self.__open_log_folder)
-        self.__ui.action_github_repo.triggered.connect(self.__open_github_repo)
-        self.__ui.action_about.triggered.connect(self.__show_about)
+    def _connect_help_menu_actions(self) -> None:
+        self._ui.action_open_log_folder.triggered.connect(self._open_log_folder)
+        self._ui.action_github_repo.triggered.connect(self._open_github_repo)
+        self._ui.action_about.triggered.connect(self._show_about)
+
+    # -------------------------------------------------------------------------
+    @property
+    def batch_workspace(self) -> BatchWorkspace:
+        """The workspace where the batch lives and can be modified."""
+        return self._batch_workspace
+
+    # -------------------------------------------------------------------------
+    @property
+    def archiver_config_panel(self) -> ArchiverConfigPanel:
+        """The panel where the archiver configuration can be modified."""
+        return self._archiver_config_panel
 
     # -------------------------------------------------------------------------
     def load_settings(self) -> None:
@@ -124,15 +146,15 @@ class MainWindow(QMainWindow):
         QtCore.qDebug(
             f"Loading {self.objectName()} settings from {MainWindowSettings.SETTINGS_GROUP}.",
         )
-        self.__settings.begin_group(MainWindowSettings.SETTINGS_GROUP)
-        self.__settings.restore_layout_geometry_for(self)
-        state: QByteArray = self.__settings.value(MainWindowSettings.STATE, QByteArray())
+        self._settings.begin_group(MainWindowSettings.SETTINGS_GROUP)
+        self._settings.restore_layout_geometry_for(self)
+        state: QByteArray = self._settings.value(MainWindowSettings.STATE, QByteArray())
         self.restoreState(state)
-        self.__settings.end_group()
+        self._settings.end_group()
 
         # Load other components
-        self.__batch_workspace.load_settings(self.__settings)
-        self.__archiver_config_panel.load_settings(self.__settings)
+        self._batch_workspace.load_settings(self._settings)
+        self._archiver_config_panel.load_settings(self._settings)
 
     # -------------------------------------------------------------------------
     def save_settings(self) -> None:
@@ -140,32 +162,27 @@ class MainWindow(QMainWindow):
         QtCore.qDebug(
             f"Saving {self.objectName()} settings in {MainWindowSettings.SETTINGS_GROUP}.",
         )
-        self.__settings.begin_group(MainWindowSettings.SETTINGS_GROUP)
-        self.__settings.save_layout_geometry_for(self)
-        self.__settings.set_value(MainWindowSettings.STATE, self.saveState())
-        self.__settings.end_group()
+        self._settings.begin_group(MainWindowSettings.SETTINGS_GROUP)
+        self._settings.save_layout_geometry_for(self)
+        self._settings.set_value(MainWindowSettings.STATE, self.saveState())
+        self._settings.end_group()
 
         # Save other components
-        self.__batch_workspace.save_settings(self.__settings)
-        self.__archiver_config_panel.save_settings(self.__settings)
+        self._batch_workspace.save_settings(self._settings)
+        self._archiver_config_panel.save_settings(self._settings)
 
     # -------------------------------------------------------------------------
     def restore_last_batch(self) -> None:
-        batch_file: Path | None = self.__batch_workspace.latest_opened
-        if batch_file is None:
-            QtCore.qDebug("No recent batch to restore.")
-            return
-
-        QtCore.qDebug("Found a recent batch to restore.")
-        if self.__batch_workspace.open_last_batch():
-            QtCore.qDebug(f"Last batch restored: '{batch_file}'.")
+        QtCore.qDebug("Restoring last batch if exists in the history.")
+        if self._batch_workspace.open_last_batch():
+            QtCore.qDebug(f"Last batch restored: '{self._batch_workspace.current_batch}'.")
         else:
             QtCore.qDebug("Last batch restoration was canceled.")
 
     # -------------------------------------------------------------------------
     @Slot(result=None)
-    def __new_batch(self) -> None:
-        new_batch: Batch | None = self.__batch_workspace.create_batch()
+    def _new_batch(self) -> None:
+        new_batch: Batch | None = self._batch_workspace.create_batch()
         if new_batch is None:
             return
 
@@ -177,54 +194,54 @@ class MainWindow(QMainWindow):
             QMessageBox.StandardButton.Yes,
         )
         if response == QMessageBox.StandardButton.Yes:
-            self.__batch_workspace.activate_batch(new_batch)
+            self._batch_workspace.activate_batch(new_batch)
 
     # -------------------------------------------------------------------------
     @Slot(result=None)
-    def __open_batch(self) -> None:
-        self.__batch_workspace.open_batch()
+    def _open_batch(self) -> None:
+        self._batch_workspace.open_batch()
 
     # -------------------------------------------------------------------------
     @Slot(QAction, result=None)
-    def __open_recent_batch(self, action: QAction) -> None:
+    def _open_recent_batch(self, action: QAction) -> None:
         batch_file: Path = action.data()
-        self.__batch_workspace.open_recent_batch(batch_file)
+        self._batch_workspace.open_recent_batch(batch_file)
 
     # -------------------------------------------------------------------------
     @Slot(result=bool)
-    def __save_batch(self) -> bool:
-        return self.__batch_workspace.save_current_batch()
+    def _save_batch(self) -> bool:
+        return self._batch_workspace.save_current_batch()
 
     # -------------------------------------------------------------------------
     @Slot(result=bool)
-    def __save_batch_as(self) -> bool:
-        return self.__batch_workspace.save_current_batch_as()
+    def _save_batch_as(self) -> bool:
+        return self._batch_workspace.save_current_batch_as()
 
     # -------------------------------------------------------------------------
     @Slot(result=bool)
-    def __close_batch(self) -> bool:
-        return self.__batch_workspace.close_current_batch()
+    def _close_batch(self) -> bool:
+        return self._batch_workspace.close_current_batch()
 
     # -------------------------------------------------------------------------
     @Slot(result=None)
-    def __show_options(self) -> None:
-        dialog = OptionsDialog(self.__settings, self)
-        dialog.load_settings(self.__settings)
+    def _show_options(self) -> None:
+        dialog = OptionsDialog(self._settings, self)
+        dialog.load_settings(self._settings)
         dialog.exec()
 
     # -------------------------------------------------------------------------
     @Slot(result=None)
-    def __open_log_folder(self) -> None:
-        QDesktopServices.openUrl(QUrl.fromLocalFile(self.__log_folder_path))
+    def _open_log_folder(self) -> None:
+        QDesktopServices.openUrl(QUrl.fromLocalFile(self._log_folder_path))
 
     # -------------------------------------------------------------------------
     @Slot(result=None)
-    def __open_github_repo(self) -> None:
+    def _open_github_repo(self) -> None:
         QDesktopServices.openUrl(QUrl("https://github.com/mnchapel/packy"))
 
     # -------------------------------------------------------------------------
     @Slot(result=None)
-    def __show_about(self) -> None:
+    def _show_about(self) -> None:
         dialog = AboutDialog(self)
         dialog.exec()
 
@@ -238,7 +255,7 @@ class MainWindow(QMainWindow):
         #     QMessageBox.StandardButton.Yes,
         # )
         # if close_button == QMessageBox.StandardButton.Yes:
-        if self.__batch_workspace.close_current_batch():
+        if self._batch_workspace.close_current_batch():
             super().closeEvent(event)
             event.accept()
         else:
@@ -248,28 +265,28 @@ class MainWindow(QMainWindow):
 
     # -------------------------------------------------------------------------
     @Slot(Batch, result=None)
-    def __on_workspace_batch_opened(self, new_batch: Batch) -> None:
-        new_batch.file_path_changed.connect(self.__update_window_title)
-        new_batch.modified_changed.connect(self.__update_window_title)
+    def _on_workspace_batch_opened(self, new_batch: Batch) -> None:
+        new_batch.file_path_changed.connect(self._update_window_title)
+        new_batch.modified_changed.connect(self._update_window_title)
 
-        self.__archiver_config_panel.set_current_batch(new_batch)
+        self._archiver_config_panel.set_current_batch(new_batch)
 
-        self.__update_window_title()
-        self.__update_actions()
+        self._update_window_title()
+        self._update_actions()
 
     # -------------------------------------------------------------------------
     @Slot(Batch, result=None)
-    def __on_workspace_batch_closed(self, old_batch: Batch) -> None:
+    def _on_workspace_batch_closed(self, old_batch: Batch) -> None:
         old_batch.disconnect(self)
 
-        self.__archiver_config_panel.set_current_batch(None)
+        self._archiver_config_panel.set_current_batch(None)
 
-        self.__update_window_title()
-        self.__update_actions()
+        self._update_window_title()
+        self._update_actions()
 
     # -------------------------------------------------------------------------
-    def __update_window_title(self) -> None:
-        current_batch: Batch | None = self.__batch_workspace.current_batch
+    def _update_window_title(self) -> None:
+        current_batch: Batch | None = self._batch_workspace.current_batch
         if current_batch is not None:
             self.setWindowTitle(current_batch.display_name + " - PackY")
             self.setWindowFilePath(str(current_batch.file_path))
@@ -280,31 +297,29 @@ class MainWindow(QMainWindow):
             self.setWindowModified(False)
 
     # -------------------------------------------------------------------------
-    def __update_actions(self) -> None:
-        has_current_batch = self.__batch_workspace.has_current_batch()
-        self.__ui.action_save_batch.setEnabled(has_current_batch)
-        self.__ui.action_save_batch_as.setEnabled(has_current_batch)
-        self.__ui.action_close_batch.setEnabled(has_current_batch)
+    def _update_actions(self) -> None:
+        has_current_batch = self._batch_workspace.has_current_batch()
+        self._ui.action_save_batch.setEnabled(has_current_batch)
+        self._ui.action_save_batch_as.setEnabled(has_current_batch)
+        self._ui.action_close_batch.setEnabled(has_current_batch)
 
         # self.__ui.job_queue_table_view.setEnabled(has_current_batch)
-        self.__ui.create_job_button.setEnabled(has_current_batch)
-        self.__ui.remove_job_button.setEnabled(False)
-        self.__ui.save_job_button.setEnabled(False)
-        self.__ui.move_up_job_button.setEnabled(False)
-        self.__ui.move_down_job_button.setEnabled(False)
-        self.__ui.run_all_jobs_button.setEnabled(False)
-        self.__ui.cancel_jobs_button.setEnabled(False)
-        self.__ui.statistics_group.setEnabled(False)
-        self.__ui.file_selection_group.setEnabled(False)
-        self.__ui.output_group.setEnabled(False)
+        self._ui.create_job_button.setEnabled(has_current_batch)
+        self._ui.remove_job_button.setEnabled(False)
+        self._ui.save_job_button.setEnabled(False)
+        self._ui.move_up_job_button.setEnabled(False)
+        self._ui.move_down_job_button.setEnabled(False)
+        self._ui.run_all_jobs_button.setEnabled(False)
+        self._ui.cancel_jobs_button.setEnabled(False)
+        self._ui.statistics_group.setEnabled(False)
+        self._ui.file_selection_group.setEnabled(False)
+        self._ui.output_group.setEnabled(False)
 
     # -------------------------------------------------------------------------
     @Slot(list, result=None)
-    def __update_recent_batches_menu(self, recently_opened: list[Path]) -> None:
+    def _update_recent_batches_menu(self, recently_opened: list[Path]) -> None:
         files: list[Path] = recently_opened
-        actions: list[QAction] = self.__recent_batch_actions
-
-        nb_visible_actions = min(len(files), len(actions))
+        actions: list[QAction] = self._recent_batch_actions
 
         for action, file in zip(actions, files, strict=False):
             action.setText(file.name)
@@ -312,10 +327,11 @@ class MainWindow(QMainWindow):
             action.setVisible(True)
             action.setToolTip(str(file))
 
+        nb_visible_actions = min(len(files), len(actions))
         for action in actions[nb_visible_actions:]:
             action.setVisible(False)
 
-        self.__ui.open_recent_menu.setEnabled(nb_visible_actions > 0)
+        self._ui.open_recent_menu.setEnabled(nb_visible_actions > 0)
 
     ###########################################################################
     # PRIVATE MEMBER METHODS
