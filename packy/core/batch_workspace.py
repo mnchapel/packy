@@ -255,6 +255,12 @@ class BatchWorkspace(QObject, Configurable, metaclass=FinalMeta):
 
     # -------------------------------------------------------------------------
     @property
+    def batch_history(self) -> tuple[Path, ...]:
+        """The recent batch paths, ordered from most to least recently opened."""
+        return self._recent_history.recently_opened
+
+    # -------------------------------------------------------------------------
+    @property
     def current_batch(self) -> Batch | None:
         """The active batch, or ``None`` when no batch is open."""
         return self._current_batch

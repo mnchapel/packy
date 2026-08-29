@@ -62,21 +62,33 @@ class Localization:
             QLibraryInfo.LibraryPath.TranslationsPath,
         )
         if self._qt_translator.load(locale, "qtbase", "_", qt_trans_dir_path):
-            QCoreApplication.installTranslator(self._qt_translator)
+            if not QCoreApplication.installTranslator(self._qt_translator):
+                QtCore.qWarning(
+                    "Translations for qtbase cannot be installed.",
+                )
         else:
-            QtCore.qDebug(
+            QtCore.qWarning(
                 f"Translations for qtbase not loaded:\
                     {qt_trans_dir_path} not found",
             )
 
         app_trans_dir_path = self._app_translations_dir
         if self._app_translator.load(locale, "packy", "_", app_trans_dir_path):
-            QCoreApplication.installTranslator(self._app_translator)
+            if not QCoreApplication.installTranslator(self._app_translator):
+                QtCore.qWarning(
+                    f"Translations for {language_code} cannot be installed.",
+                )
         else:
-            QtCore.qDebug(
+            QtCore.qWarning(
                 f"Translations for {language_code} not loaded:\
                       '{self._app_translations_dir}' not found.",
             )
+
+    # -------------------------------------------------------------------------
+    @property
+    def current_language(self) -> str:
+        """The current application language code, such as ``"en-US"`` or ``"fr-FR"``."""
+        return self._current_lang
 
     # -------------------------------------------------------------------------
     @property

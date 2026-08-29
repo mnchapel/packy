@@ -143,6 +143,18 @@ class App(QApplication):
 
     # -------------------------------------------------------------------------
     @property
+    def is_initialized(self) -> bool:
+        """Whether the application is initialized by :meth:`initialize`."""
+        return self._initialized
+
+    # -------------------------------------------------------------------------
+    @property
+    def localization(self) -> Localization | None:
+        """The localization service initialized by :meth:`initialize`."""
+        return self._localization
+
+    # -------------------------------------------------------------------------
+    @property
     def settings(self) -> UserSettings | None:
         """The persistent user settings initialized by :meth:`initialize`."""
         return self._settings
