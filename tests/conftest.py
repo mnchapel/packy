@@ -7,22 +7,20 @@ See LICENSE.md file for more information.
 """
 
 # Local application
-
-# Local application
+import packy.core.app as app_module
 from packy.core.app import App
 from packy.core.app_config import AppConfig
+from packy.core.logger import Logger
 
 # Third-party
 import pytest
+from PySide6 import QtCore
 from PySide6.QtCore import QSettings
 
 # Standard library
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    # Local application
-    from packy.ui.main_window import MainWindow
-
     # Third-party
     from PySide6.QtWidgets import QApplication
     from pytest_mock import MockerFixture
@@ -115,30 +113,58 @@ def initialized_app(
 ) -> App:
     """Provide an initialized PackY application."""
     app.initialize(app_config)
+    assert app.is_initialized is True
     return app
 
 
 # -----------------------------------------------------------------------------
 @pytest.fixture
-def main_window(
-    initialized_app: App,
+def launched_app(
+    qapp: QApplication,
+    app_config: AppConfig,
     mocker: MockerFixture,
     qtbot: QtBot,
-) -> MainWindow:
-    """Launch the application and provide its initialized main window."""
+) -> Generator[App]:
+    """Run a fully initialized application with a logger and a main window."""
+    # Setup
+    assert isinstance(qapp, App)
+    mocker.patch.object(
+        app_module,
+        "AppConfig",
+        autospec=True,
+        spec_set=True,
+        return_value=app_config,
+    )
     app_exec_mock: MagicMock = mocker.patch.object(
-        initialized_app,
+        qapp,
         "exec",
+        autospec=True,
         return_value=0,
     )
 
-    exit_code = initialized_app.run()
-    assert exit_code == 0
-    app_exec_mock.assert_called_once_with()
+    try:
+        # Initialize logging
+        has_started = Logger.start(app_config.LOG_FILE_PATH)
+        if not has_started:
+            QtCore.qWarning("Debug logger cannot be started!")
+            pytest.fail("Debug logger cannot be started")
 
-    window = initialized_app.main_window
-    assert window is not None
+        # Launch application
+        qapp.dispose()
+        qapp.initialize(app_config)
+        exit_code = qapp.run()
+        assert exit_code == 0
+        app_exec_mock.assert_called_once_with()
 
-    qtbot.waitUntil(window.isVisible)
+        window = qapp.main_window
+        assert window is not None
+        qtbot.waitUntil(window.isVisible)
 
-    return window
+        yield qapp
+    finally:
+        # Teardown
+        qapp.dispose()
+        has_stopped = Logger.stop()
+        if not has_stopped:
+            QtCore.qWarning("Debug logger cannot be stopped!")
+            pytest.fail("Debug logger cannot be stopped")
