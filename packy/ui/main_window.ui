@@ -25,7 +25,7 @@
        </widget>
       </item>
       <item>
-       <widget class="AppLogWidget" name="messages_view">
+       <widget class="FormattedLogWidget" name="messages_view">
         <property name="focusPolicy">
          <enum>Qt::FocusPolicy::NoFocus</enum>
         </property>
@@ -804,9 +804,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>AppLogWidget</class>
+   <class>FormattedLogWidget</class>
    <extends>QTextEdit</extends>
-   <header>packy.widgets.app_log_widget</header>
+   <header>packy.widgets.formatted_log_widget</header>
   </customwidget>
  </customwidgets>
  <tabstops>
