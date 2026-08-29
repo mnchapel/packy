@@ -110,13 +110,14 @@ def translator_installation_context(
 ) -> TranslatorInstallationContext:
     """Provide a localization service with isolated translation dependencies."""
     # Setup
-    qt_translator_mock = mocker.Mock(name="qt_translator")  # TODO à typer
-    app_translator_mock = mocker.Mock(name="app_translator")
+    qt_translator_mock: MagicMock = mocker.Mock(name="qt_translator")
+    app_translator_mock: MagicMock = mocker.Mock(name="app_translator")
 
-    translator_cls_mock = mocker.patch.object(
+    translator_cls_mock: MagicMock = mocker.patch.object(
         localization_module,
         "QTranslator",
         autospec=True,
+        spec_set=True,
     )
     translator_cls_mock.side_effect = [
         qt_translator_mock,
@@ -147,7 +148,7 @@ def available_languages_context(
 ) -> AvailableLanguagesContext:
     """Provide a localization service with isolated language discovery."""
     # Setup
-    directory_cls_mock = mocker.patch.object(
+    directory_cls_mock: MagicMock = mocker.patch.object(
         localization_module,
         "QDir",
         autospec=True,
@@ -190,10 +191,10 @@ class TestLocalizationInstallTranslators:
         localization = Localization(default_language_code)
 
         # Act
-        result = localization.install_translators(default_language_code)
+        localization.install_translators(default_language_code)
 
         # Assert
-        assert result is None
+        assert localization.current_language == default_language_code
         mocks.locale_cls.assert_not_called()
         mocks.remove_translator.assert_not_called()
         mocks.install_translator.assert_not_called()
@@ -252,10 +253,10 @@ class TestLocalizationInstallTranslators:
         context.app_translator.load.return_value = app_loaded
 
         # Act
-        result = context.localization.install_translators("fr-FR")
+        context.localization.install_translators("fr-FR")
 
         # Assert
-        assert result is None
+        assert context.localization.current_language == "fr-FR"
         context.qt.locale_cls.assert_called_once_with("fr-FR")
         context.qt.locale_cls.setDefault.assert_called_once_with(context.locale)
         context.qt.library_path.assert_called_once_with(
@@ -290,6 +291,35 @@ class TestLocalizationInstallTranslators:
             )
 
     # -------------------------------------------------------------------------
+    @pytest.mark.scenario_alternate_path
+    @pytest.mark.technique_state_transition
+    def test_repeated_language_after_successful_load_does_not_reconfigure_translators(
+        self,
+        translator_installation_context: TranslatorInstallationContext,
+    ) -> None:
+        """Requesting a successfully configured language again performs no reconfiguration."""
+        # Arrange
+        context = translator_installation_context
+        context.qt_translator.load.return_value = True
+        context.app_translator.load.return_value = True
+
+        # Act
+        context.localization.install_translators("fr-FR")
+        context.localization.install_translators("fr-FR")
+
+        # Assert
+        assert context.localization.current_language == "fr-FR"
+        context.qt.locale_cls.assert_called_once_with("fr-FR")
+        context.qt.locale_cls.setDefault.assert_called_once_with(context.locale)
+        context.qt.library_path.assert_called_once_with(
+            localization_module.QLibraryInfo.LibraryPath.TranslationsPath,
+        )
+        assert context.qt.remove_translator.call_count == 2
+        context.qt_translator.load.assert_called_once()
+        context.app_translator.load.assert_called_once()
+        assert context.qt.install_translator.call_count == 2
+
+    # -------------------------------------------------------------------------
     @pytest.mark.scenario_failure_error_path
     @pytest.mark.technique_state_transition
     def test_repeated_language_after_failed_load_does_not_retry_translation_loading(
@@ -307,6 +337,7 @@ class TestLocalizationInstallTranslators:
         context.localization.install_translators("fr-FR")
 
         # Assert
+        assert context.localization.current_language == "fr-FR"
         context.qt.locale_cls.assert_called_once_with("fr-FR")
         context.qt.locale_cls.setDefault.assert_called_once_with(context.locale)
         context.qt.library_path.assert_called_once_with(
@@ -330,34 +361,6 @@ class TestLocalizationInstallTranslators:
             ":/i18n",
         )
         context.qt.install_translator.assert_not_called()
-
-    # -------------------------------------------------------------------------
-    @pytest.mark.scenario_alternate_path
-    @pytest.mark.technique_state_transition
-    def test_repeated_language_after_successful_load_does_not_reconfigure_translators(
-        self,
-        translator_installation_context: TranslatorInstallationContext,
-    ) -> None:
-        """Requesting a successfully configured language again performs no reconfiguration."""
-        # Arrange
-        context = translator_installation_context
-        context.qt_translator.load.return_value = True
-        context.app_translator.load.return_value = True
-
-        # Act
-        context.localization.install_translators("fr-FR")
-        context.localization.install_translators("fr-FR")
-
-        # Assert
-        context.qt.locale_cls.assert_called_once_with("fr-FR")
-        context.qt.locale_cls.setDefault.assert_called_once_with(context.locale)
-        context.qt.library_path.assert_called_once_with(
-            localization_module.QLibraryInfo.LibraryPath.TranslationsPath,
-        )
-        assert context.qt.remove_translator.call_count == 2
-        context.qt_translator.load.assert_called_once()
-        context.app_translator.load.assert_called_once()
-        assert context.qt.install_translator.call_count == 2
 
 
 ###############################################################################

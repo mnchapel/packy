@@ -283,6 +283,7 @@ class TestAppInitialize:
         app.initialize(app_config)
 
         # Assert - Metadata
+        assert app.is_initialized is True
         assert app.organizationName() == "PackY"
         assert app.organizationDomain() == "packy.com"
         assert app.applicationName() == "PackY"
@@ -319,6 +320,7 @@ class TestAppInitialize:
         with pytest.raises(RuntimeError, match="Application already initialized"):
             app.initialize(app_config)
 
+        assert app.is_initialized is True
         dependency_mocks.localization_cls.assert_called_once_with()
         assert app._config is app_config # pyright: ignore[reportPrivateUsage]
         dependency_mocks.settings_cls.assert_called_once_with(app)
@@ -382,6 +384,7 @@ class TestAppRun:
         # Act / Assert
         with pytest.raises(RuntimeError, match="Application is not initialized"):
             app.run()
+        assert app.is_initialized is False
 
 
 ###############################################################################
@@ -411,7 +414,7 @@ class TestAppShutdown:
         assert initialized_app.main_window is dependency_mocks.main_window
 
         # Act
-        with qtbot.waitSignal(initialized_app.aboutToQuit, timeout=100):
+        with qtbot.waitSignal(initialized_app.aboutToQuit):
             initialized_app.aboutToQuit.emit()
 
         # Assert
