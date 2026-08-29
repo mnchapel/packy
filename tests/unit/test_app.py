@@ -6,8 +6,6 @@ All rights reserved.
 See LICENSE.md file for more information.
 """
 
-# pyright: reportPrivateUsage=false
-
 # Future library
 from __future__ import annotations
 
@@ -298,7 +296,7 @@ class TestAppInitialize:
         )
 
         # Assert - Configuration
-        assert app._config is app_config
+        assert app._config is app_config # pyright: ignore[reportPrivateUsage]
 
         # Assert - Settings
         dependency_mocks.settings_cls.assert_called_once_with(app)
@@ -322,7 +320,7 @@ class TestAppInitialize:
             app.initialize(app_config)
 
         dependency_mocks.localization_cls.assert_called_once_with()
-        assert app._config is app_config
+        assert app._config is app_config # pyright: ignore[reportPrivateUsage]
         dependency_mocks.settings_cls.assert_called_once_with(app)
 
 
@@ -548,6 +546,6 @@ class TestAppDispose:
         # Assert
         assert dependency_mocks.localization_cls.call_count == localization_calls_before + 1
         assert dependency_mocks.settings_cls.call_count == settings_calls_before + 1
-        assert initialized_app._config is app_config
+        assert initialized_app._config is app_config # pyright: ignore[reportPrivateUsage]
         assert initialized_app.main_window is None
         assert initialized_app.settings is dependency_mocks.settings

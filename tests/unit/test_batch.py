@@ -6,8 +6,6 @@ All rights reserved.
 See LICENSE.md file for more information.
 """
 
-# pyright: reportPrivateUsage=false
-
 # Local application
 from packy.core.archiver import Archiver
 from packy.core.batch import Batch
@@ -467,7 +465,7 @@ class TestBatchSave:
         old_file_path = tmp_path / "old.json"
         new_file_path = tmp_path / "new.json"
         batch = Batch(old_file_path)
-        batch._is_modified = True
+        batch._is_modified = True # pyright: ignore[reportPrivateUsage]
         saved_states = capture_saved_states(batch)
 
         def check_file_path_changed_signal(
@@ -521,7 +519,7 @@ class TestBatchSave:
         # Arrange
         file_path = tmp_path / "batch.json"
         batch = Batch(file_path)
-        batch._is_modified = True
+        batch._is_modified = True # pyright: ignore[reportPrivateUsage]
         saved_states = capture_saved_states(batch)
 
         # Act
@@ -578,7 +576,7 @@ class TestBatchSave:
         # Arrange
         file_path = tmp_path / "batch.json"
         batch = Batch(file_path)
-        batch._is_modified = True
+        batch._is_modified = True # pyright: ignore[reportPrivateUsage]
         previous_last_saved = batch.last_saved
         mocker.patch.object(
             Path,
@@ -694,11 +692,11 @@ class TestBatchJobs:
         """The jobs property returns a snapshot unaffected by later job changes."""
         # Arrange
         batch = Batch(tmp_path / "batch.json")
-        batch._jobs = ["first"]
+        batch._jobs = ["first"] # pyright: ignore[reportPrivateUsage]
         original_jobs = batch.jobs
 
         # Act
-        batch._jobs.append("second")
+        batch._jobs.append("second") # pyright: ignore[reportPrivateUsage]
 
         # Assert
         assert original_jobs == ("first",)
@@ -767,8 +765,8 @@ class TestBatchJobs:
         """Adding while modified preserves order without re-emitting modified_changed."""
         # Arrange
         batch = Batch(tmp_path / "batch.json")
-        batch._jobs = ["first"]
-        batch._is_modified = True
+        batch._jobs = ["first"] # pyright: ignore[reportPrivateUsage]
+        batch._is_modified = True # pyright: ignore[reportPrivateUsage]
 
         # Act
         with (
@@ -792,7 +790,7 @@ class TestBatchJobs:
         """Removing from a saved batch emits the job and marks the batch modified."""
         # Arrange
         batch = Batch(tmp_path / "batch.json")
-        batch._jobs = ["first", "second"]
+        batch._jobs = ["first", "second"] # pyright: ignore[reportPrivateUsage]
         assert batch.is_modified is False
 
         removed_state: list[bool] = []
@@ -835,7 +833,7 @@ class TestBatchJobs:
         """An index immediately outside the valid range is rejected without changing the jobs."""
         # Arrange
         batch = Batch(tmp_path / "batch.json")
-        batch._jobs = ["only"]
+        batch._jobs = ["only"] # pyright: ignore[reportPrivateUsage]
         original_jobs = batch.jobs
 
         # Act / Assert
