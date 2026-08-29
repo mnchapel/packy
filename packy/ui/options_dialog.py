@@ -87,20 +87,20 @@ class OptionsDialog(QDialog, Configurable, metaclass=FinalMeta):
         self._ui = Ui_OptionsDialog()
         self._ui.setupUi(self)
         self._settings: UserSettings = settings
-        self._apply_button: QPushButton = self._ui.dialog_button_box.button(
+        self._apply_button: QPushButton = self._ui.options_button_box.button(
             QDialogButtonBox.StandardButton.Apply,
         )
 
         # Widgets mapping
         self._retention_policy_by_button: dict[QAbstractButton, SnapshotRetentionPolicy] = {
-            self._ui.keep_all_policiy_radio: SnapshotRetentionPolicy.KEEP_ALL,
-            self._ui.keep_last_n_policy_radio: SnapshotRetentionPolicy.KEEP_LAST_N,
+            self._ui.keep_all_radio: SnapshotRetentionPolicy.KEEP_ALL,
+            self._ui.keep_latest_radio: SnapshotRetentionPolicy.KEEP_LAST_N,
         }
 
         self._filename_suffix_by_button: dict[QAbstractButton, FilenameSuffix] = {
-            self._ui.archive_naming_add_date_radio: FilenameSuffix.CURRENT_DATE,
-            self._ui.archive_naming_add_version_radio: FilenameSuffix.VERSION_NUMBER,
-            self._ui.archive_naming_no_suffix_radio: FilenameSuffix.NONE,
+            self._ui.add_date_radio: FilenameSuffix.CURRENT_DATE,
+            self._ui.add_version_radio: FilenameSuffix.VERSION_NUMBER,
+            self._ui.no_suffix_radio: FilenameSuffix.NONE,
         }
 
         self._setup_connections()
@@ -114,15 +114,15 @@ class OptionsDialog(QDialog, Configurable, metaclass=FinalMeta):
         self._ui.archive_naming_button_group.buttonClicked.connect(
             self._enable_apply_button,
         )
-        self._ui.keep_last_n_policy_spin.valueChanged.connect(
+        self._ui.keep_latest_spin.valueChanged.connect(
             self._enable_apply_button,
         )
-        self._ui.keep_last_n_policy_radio.toggled.connect(
-            self._ui.keep_last_n_policy_spin.setEnabled,
+        self._ui.keep_latest_radio.toggled.connect(
+            self._ui.keep_latest_spin.setEnabled,
         )
 
-        self._ui.dialog_button_box.accepted.connect(self._on_accept)
-        self._ui.dialog_button_box.rejected.connect(self._on_cancel)
+        self._ui.options_button_box.accepted.connect(self._on_accept)
+        self._ui.options_button_box.rejected.connect(self._on_cancel)
         self._apply_button.clicked.connect(self._on_apply)
 
     # -------------------------------------------------------------------------
@@ -185,11 +185,11 @@ class OptionsDialog(QDialog, Configurable, metaclass=FinalMeta):
             snapshot_retention_policy,
         )
 
-        self._ui.keep_last_n_policy_spin.setEnabled(
-            self._ui.keep_last_n_policy_radio.isChecked(),
+        self._ui.keep_latest_spin.setEnabled(
+            self._ui.keep_latest_radio.isChecked(),
         )
         snapshots_retention_count = settings.value(SettingsKeys.RETENTION_COUNT, 1)
-        self._ui.keep_last_n_policy_spin.setValue(snapshots_retention_count)
+        self._ui.keep_latest_spin.setValue(snapshots_retention_count)
 
     # -------------------------------------------------------------------------
     def _load_task_page_settings(self, settings: UserSettings) -> None:
@@ -256,7 +256,7 @@ class OptionsDialog(QDialog, Configurable, metaclass=FinalMeta):
                 self.snapshot_retention_policy_changed.emit,
             )
 
-        retention_count = self._ui.keep_last_n_policy_spin.value()
+        retention_count = self._ui.keep_latest_spin.value()
         settings.set_value(
             SettingsKeys.RETENTION_COUNT,
             retention_count,

@@ -22,7 +22,7 @@
   <property name="modal">
    <bool>true</bool>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="options_layout">
    <item>
     <widget class="QTabWidget" name="tab_widget">
      <property name="sizePolicy">
@@ -46,7 +46,7 @@
          </property>
          <layout class="QVBoxLayout" name="retention_policy_layout">
           <item>
-           <widget class="QRadioButton" name="keep_all_policiy_radio">
+           <widget class="QRadioButton" name="keep_all_radio">
             <property name="text">
              <string>Keep all snapshots</string>
             </property>
@@ -59,9 +59,9 @@
            </widget>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="keep_last_n_policy_layout">
+           <layout class="QHBoxLayout" name="keep_latest_layout">
             <item>
-             <widget class="QRadioButton" name="keep_last_n_policy_radio">
+             <widget class="QRadioButton" name="keep_latest_radio">
               <property name="text">
                <string>Number of latest snapshots to keep:</string>
               </property>
@@ -71,7 +71,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QSpinBox" name="keep_last_n_policy_spin">
+             <widget class="QSpinBox" name="keep_latest_spin">
               <property name="enabled">
                <bool>false</bool>
               </property>
@@ -81,7 +81,7 @@
              </widget>
             </item>
             <item>
-             <spacer name="keep_last_n_policy_spacer">
+             <spacer name="keep_latest_spacer">
               <property name="orientation">
                <enum>Qt::Orientation::Horizontal</enum>
               </property>
@@ -119,13 +119,13 @@
       </attribute>
       <layout class="QVBoxLayout" name="task_layout">
        <item>
-        <widget class="QGroupBox" name="archive_naming_suffix_group">
+        <widget class="QGroupBox" name="archive_naming_group">
          <property name="title">
           <string>Archive Naming Suffix</string>
          </property>
-         <layout class="QVBoxLayout" name="archive_naming_suffix_layout">
+         <layout class="QVBoxLayout" name="archive_naming_layout">
           <item>
-           <widget class="QRadioButton" name="archive_naming_add_date_radio">
+           <widget class="QRadioButton" name="add_date_radio">
             <property name="text">
              <string>Add the current date</string>
             </property>
@@ -138,7 +138,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QRadioButton" name="archive_naming_add_version_radio">
+           <widget class="QRadioButton" name="add_version_radio">
             <property name="text">
              <string>Add version number</string>
             </property>
@@ -148,7 +148,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QRadioButton" name="archive_naming_no_suffix_radio">
+           <widget class="QRadioButton" name="no_suffix_radio">
             <property name="text">
              <string>Add nothing</string>
             </property>
@@ -178,7 +178,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QDialogButtonBox" name="dialog_button_box">
+    <widget class="QDialogButtonBox" name="options_button_box">
      <property name="orientation">
       <enum>Qt::Orientation::Horizontal</enum>
      </property>
@@ -195,7 +195,7 @@
   <slot>apply()</slot>
  </slots>
  <buttongroups>
-  <buttongroup name="retention_policy_button_group"/>
   <buttongroup name="archive_naming_button_group"/>
+  <buttongroup name="retention_policy_button_group"/>
  </buttongroups>
 </ui>

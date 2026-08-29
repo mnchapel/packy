@@ -19,7 +19,7 @@ from packy.ui.ui_main_window import Ui_MainWindow
 
 # Third-party
 from PySide6 import QtCore
-from PySide6.QtCore import QByteArray, QObject, QUrl, Slot
+from PySide6.QtCore import QByteArray, QUrl, Slot
 from PySide6.QtGui import QAction, QCloseEvent, QDesktopServices, QIcon
 from PySide6.QtWidgets import (
     QMainWindow,
@@ -77,8 +77,6 @@ class MainWindow(QMainWindow):
         # self.__thread_pool = QThreadPool()
         # self.__thread_pool.setMaxThreadCount(1)
         # self.__is_canceled = False
-        self.dumpObjectTree()
-        self.dumpObjectInfo()
 
     # -------------------------------------------------------------------------
     def _setup_ui(self, _config: AppConfig) -> None:
@@ -96,8 +94,8 @@ class MainWindow(QMainWindow):
             action.setVisible(False)
             action.triggered.connect(partial(self._open_recent_batch, action))
             self._recent_batch_actions.append(action)
-            self._ui.open_recent_menu.insertAction(self._ui.action_clear_list, action)
-        self._ui.open_recent_menu.setToolTipsVisible(True)
+            self._ui.menu_open_recent.insertAction(self._ui.action_clear_list, action)
+        self._ui.menu_open_recent.setToolTipsVisible(True)
 
     # -------------------------------------------------------------------------
     def _setup_toolbar(self, _config: AppConfig) -> None:
@@ -331,7 +329,7 @@ class MainWindow(QMainWindow):
         for action in actions[nb_visible_actions:]:
             action.setVisible(False)
 
-        self._ui.open_recent_menu.setEnabled(nb_visible_actions > 0)
+        self._ui.menu_open_recent.setEnabled(nb_visible_actions > 0)
 
     ###########################################################################
     # PRIVATE MEMBER METHODS

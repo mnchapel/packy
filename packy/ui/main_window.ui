@@ -188,7 +188,7 @@
       <item>
        <widget class="QGroupBox" name="archiver_config">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="title">
          <string>Archiver Configuration</string>
@@ -660,11 +660,11 @@
      <height>22</height>
     </rect>
    </property>
-   <widget class="QMenu" name="file_menu">
+   <widget class="QMenu" name="menu_file">
     <property name="title">
      <string>&amp;File</string>
     </property>
-    <widget class="QMenu" name="open_recent_menu">
+    <widget class="QMenu" name="menu_open_recent">
      <property name="title">
       <string>Open &amp;Recent</string>
      </property>
@@ -673,7 +673,7 @@
     </widget>
     <addaction name="action_new_batch"/>
     <addaction name="action_open_batch"/>
-    <addaction name="open_recent_menu"/>
+    <addaction name="menu_open_recent"/>
     <addaction name="separator"/>
     <addaction name="action_save_batch"/>
     <addaction name="action_save_batch_as"/>
@@ -683,7 +683,7 @@
     <addaction name="action_close_batch"/>
     <addaction name="action_exit"/>
    </widget>
-   <widget class="QMenu" name="help_menu">
+   <widget class="QMenu" name="menu_help">
     <property name="title">
      <string>&amp;Help</string>
     </property>
@@ -691,8 +691,8 @@
     <addaction name="action_github_repo"/>
     <addaction name="action_about"/>
    </widget>
-   <addaction name="file_menu"/>
-   <addaction name="help_menu"/>
+   <addaction name="menu_file"/>
+   <addaction name="menu_help"/>
   </widget>
   <widget class="QStatusBar" name="status_bar"/>
   <action name="action_about">
