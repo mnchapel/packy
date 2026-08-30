@@ -77,7 +77,7 @@ class ArchiverConfigPanel(QObject, Configurable, metaclass=FinalMeta):
 
         rows_per_column = 3
         for index, format_label in enumerate(FormatLabel):
-            format_button = QRadioButton(self._ui.archiver_config)
+            format_button = QRadioButton(self._ui.archiver_config_group)
             format_button.setText(self.tr(format_label.str_value))
             format_button.setObjectName(f"{format_label.int_value}FormatButton")
             self._format_button_group.addButton(
@@ -90,7 +90,7 @@ class ArchiverConfigPanel(QObject, Configurable, metaclass=FinalMeta):
 
         self._format_group_widget = RadioGroupWidget(
             self._format_button_group,
-            self._ui.archiver_config,
+            self._ui.archiver_config_group,
         )
         self._format_group_widget.setObjectName("FormatGroupWidget")
 
@@ -174,4 +174,4 @@ class ArchiverConfigPanel(QObject, Configurable, metaclass=FinalMeta):
     def _update_enabled_state(self) -> None:
         """Enable the archive configuration controls when a batch is set."""
         is_batch_set: bool = self._model.current_batch is not None
-        self._ui.archiver_config.setEnabled(is_batch_set)
+        self._ui.archiver_config_group.setEnabled(is_batch_set)

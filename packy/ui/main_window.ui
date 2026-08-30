@@ -186,7 +186,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QGroupBox" name="archiver_config">
+       <widget class="QGroupBox" name="archiver_config_group">
         <property name="enabled">
          <bool>false</bool>
         </property>
