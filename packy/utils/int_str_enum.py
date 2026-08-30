@@ -82,7 +82,7 @@ class IntStrEnum(Enum):
             Self: The newly created enum member.
         """
         member = object.__new__(cls)
-        member._value_ = int_value
+        member._value_ = int(int_value) # Convert is need when a IntEnum is passed
         member._str_value = str_value  # pyright: ignore[reportAttributeAccessIssue] This syntax is allowed: <https://docs.python.org/3/howto/enum.html#when-to-use-new-vs-init>  # noqa: SLF001
         return member
 

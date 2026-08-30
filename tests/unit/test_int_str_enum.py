@@ -17,7 +17,7 @@ import pytest
 
 # Standard library
 import sys
-from enum import auto
+from enum import IntEnum, auto
 
 
 ###############################################################################
@@ -43,6 +43,24 @@ class NonSequentialLabel(IntStrEnum):
     SECOND = (42, "Second")
     AUTOMATIC = auto()
     NEXT_AUTOMATIC = auto()
+
+# -----------------------------------------------------------------------------
+class PlainInt(IntEnum):
+    """Provide an IntEnum to verify that IntStrEnum stores plain integers."""
+
+    ZERO = 0
+    ONE = 1
+    TWO = 2
+    THREE = 3
+
+# -----------------------------------------------------------------------------
+class PlainIntLabel(IntStrEnum):
+    """Provide an IntStrEnum initialized from an IntEnum."""
+
+    ZERO = (PlainInt.ZERO, "Zero")
+    ONE = (PlainInt.ONE, "One")
+    TWO = (PlainInt.TWO, "Two")
+    THREE = (PlainInt.THREE, "Three")
 
 
 ###############################################################################
@@ -74,7 +92,9 @@ class TestIntStrEnumMembers:
         )
 
         # Assert
+        assert type(run_member.value) is int
         assert run_values == (0, 0, "Run")
+        assert type(stop_member.value) is int
         assert stop_values == (3, 3, "Stop")
 
     # -------------------------------------------------------------------------
@@ -102,6 +122,19 @@ class TestIntStrEnumMembers:
         assert automatic_values == (2, 2, "automatic")
         assert next_automatic_values == (3, 3, "next_automatic")
 
+    # -------------------------------------------------------------------------
+    @pytest.mark.scenario_alternate_path
+    @pytest.mark.technique_equivalence_partitioning
+    def test_intenum_member_return_a_plain_int_value(self) -> None:
+        """A member initialized with a IntEnum returns a plain int value."""
+        # Arrange
+        member = PlainIntLabel.ONE
+
+        # Act / Assert
+        assert type(member.value) is int
+        assert type(member.int_value) is int
+        assert member.value == 1
+        assert member.int_value == 1
 
 ###############################################################################
 class TestIntStrEnumRepresentations:
@@ -233,8 +266,8 @@ class TestIntStrEnumInvalidDefinitions:
         # Act / Assert
         with pytest.raises(TypeError):
 
-            class BadEnum(IntStrEnum):
-                A = (1,)
+            class BadEnum(IntStrEnum): # pyright: ignore[reportUnusedClass]
+                A = (1,) # pyright: ignore[reportCallIssue]
 
     # -------------------------------------------------------------------------
     @pytest.mark.scenario_invalid_input
@@ -245,8 +278,8 @@ class TestIntStrEnumInvalidDefinitions:
         # Act / Assert
         with pytest.raises(TypeError):
 
-            class BadEnum(IntStrEnum):
-                A = (1, "one", "extra")
+            class BadEnum(IntStrEnum): # pyright: ignore[reportUnusedClass]
+                A = (1, "one", "extra") # pyright: ignore[reportCallIssue]
 
 
 ###############################################################################
