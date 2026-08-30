@@ -49,13 +49,13 @@ class RadioGroupWidget(QWidget):
         super().__init__(parent)
         self.setObjectName(self.__class__.__name__)
 
-        self.__current_button_id: int = button_group.checkedId()  # -1 if no button is checked
-        self.__button_group: QButtonGroup = button_group
-        self.__button_group.buttonClicked.connect(self._on_button_clicked)
+        self._current_button_id: int = button_group.checkedId()  # -1 if no button is checked
+        self._button_group: QButtonGroup = button_group
+        self._button_group.buttonClicked.connect(self._on_button_clicked)
 
         # QDataWidgetMappers can only update the model when the mapped elements lose focus.
         # Here, we detect when the radio buttons lose focus and relay this information.
-        for button in self.__button_group.buttons():
+        for button in self._button_group.buttons():
             button.installEventFilter(self)
 
     # -------------------------------------------------------------------------
@@ -89,14 +89,14 @@ class RadioGroupWidget(QWidget):
         Args:
             button (QAbstractButton): Button that was clicked.
         """
-        self.button_clicked.emit(self.__button_group.id(button))
-        self.check_button(self.__button_group.id(button))
+        self.button_clicked.emit(self._button_group.id(button))
+        self.check_button(self._button_group.id(button))
 
     # -------------------------------------------------------------------------
     @property
     def button_group(self) -> QButtonGroup:
         """The button group wrapped by this widget."""
-        return self.__button_group
+        return self._button_group
 
     # -------------------------------------------------------------------------
     @override
@@ -104,7 +104,7 @@ class RadioGroupWidget(QWidget):
         if super().isEnabled() == enabled:
             return
 
-        for button in self.__button_group.buttons():
+        for button in self._button_group.buttons():
             button.setEnabled(enabled)
         super().setEnabled(enabled)
 
@@ -116,8 +116,8 @@ class RadioGroupWidget(QWidget):
             QAbstractButton | None: The checked button, or ``None`` when no button is
               checked.
         """
-        button_id = self.__button_group.checkedId()
-        return self.__button_group.button(button_id)
+        button_id = self._button_group.checkedId()
+        return self._button_group.button(button_id)
 
     # -------------------------------------------------------------------------
     def get_checked_button_id(self) -> int:
@@ -126,7 +126,7 @@ class RadioGroupWidget(QWidget):
         Returns:
             int: The checked button ID, or ``-1`` when no button is checked.
         """
-        return self.__button_group.checkedId()
+        return self._button_group.checkedId()
 
     # -------------------------------------------------------------------------
     def check_button(self, button_id: int) -> None:
@@ -143,11 +143,11 @@ class RadioGroupWidget(QWidget):
         Raises:
             IndexError: No button exists for the given identifier.
         """
-        if button_id != self.__current_button_id:
-            self.__current_button_id = button_id
-            selected_button: QAbstractButton | None = self.__button_group.button(button_id)
-            if selected_button is None:  # pyright: ignore[reportUnnecessaryComparison]
-                for button in self.__button_group.buttons():
+        if button_id != self._current_button_id:
+            self._current_button_id = button_id
+            selected_button: QAbstractButton | None = self._button_group.button(button_id)
+            if selected_button is None:  # pyright: ignore[reportUnnecessaryComparison] A selected button really can be None
+                for button in self._button_group.buttons():
                     button.setChecked(False)
             else:
                 selected_button.setChecked(True)
@@ -158,5 +158,5 @@ class RadioGroupWidget(QWidget):
         int,
         fget=get_checked_button_id,
         fset=check_button,
-        notify=current_button_changed,  # Only used with QML
+        notify=current_button_changed,  # Notify property is only used with QML
     )
