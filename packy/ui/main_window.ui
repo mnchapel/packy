@@ -668,7 +668,6 @@
      <property name="title">
       <string>Open &amp;Recent</string>
      </property>
-     <addaction name="separator"/>
      <addaction name="action_clear_list"/>
     </widget>
     <addaction name="action_new_batch"/>

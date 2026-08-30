@@ -88,13 +88,17 @@ class MainWindow(QMainWindow):
     # -------------------------------------------------------------------------
     def _setup_menu_bar(self, config: AppConfig) -> None:
         # Add recent file actions to the recent batches menu
+        separator = self._ui.menu_open_recent.insertSeparator(self._ui.action_clear_list)
+        separator.setObjectName("separator_clear_list")
+
         self._recent_batch_actions: list[QAction] = []
         for _ in range(config.MAX_RECENT_BATCHES):
             action = QAction(self)
             action.setVisible(False)
             action.triggered.connect(partial(self._open_recent_batch, action))
             self._recent_batch_actions.append(action)
-            self._ui.menu_open_recent.insertAction(self._ui.action_clear_list, action)
+            self._ui.menu_open_recent.insertAction(separator, action)
+
         self._ui.menu_open_recent.setToolTipsVisible(True)
 
     # -------------------------------------------------------------------------
