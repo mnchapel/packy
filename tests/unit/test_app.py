@@ -34,13 +34,16 @@ if TYPE_CHECKING:
 
 
 ###############################################################################
-### Mocks
+### Helpers
 ###############################################################################
 # -----------------------------------------------------------------------------
 class ConfigurationError(BaseException):
     """Represent a non-Exception during configuration."""
 
 
+###############################################################################
+### Test Doubles
+###############################################################################
 # -----------------------------------------------------------------------------
 @dataclass(frozen=True, slots=True)
 class AppDependencyMocks:
@@ -297,7 +300,7 @@ class TestAppInitialize:
         )
 
         # Assert - Configuration
-        assert app._config is app_config # pyright: ignore[reportPrivateUsage]
+        assert app._config is app_config  # pyright: ignore[reportPrivateUsage]
 
         # Assert - Settings
         dependency_mocks.settings_cls.assert_called_once_with(app)
@@ -322,7 +325,7 @@ class TestAppInitialize:
 
         assert app.is_initialized is True
         dependency_mocks.localization_cls.assert_called_once_with()
-        assert app._config is app_config # pyright: ignore[reportPrivateUsage]
+        assert app._config is app_config  # pyright: ignore[reportPrivateUsage]
         dependency_mocks.settings_cls.assert_called_once_with(app)
 
 
@@ -549,6 +552,6 @@ class TestAppDispose:
         # Assert
         assert dependency_mocks.localization_cls.call_count == localization_calls_before + 1
         assert dependency_mocks.settings_cls.call_count == settings_calls_before + 1
-        assert initialized_app._config is app_config # pyright: ignore[reportPrivateUsage]
+        assert initialized_app._config is app_config  # pyright: ignore[reportPrivateUsage]
         assert initialized_app.main_window is None
         assert initialized_app.settings is dependency_mocks.settings

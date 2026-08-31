@@ -29,13 +29,23 @@ if TYPE_CHECKING:
     from pathlib import Path
     from unittest.mock import MagicMock
 
+
 ###############################################################################
-### Helpers
+### Test Contexts
 ###############################################################################
+# -----------------------------------------------------------------------------
+@dataclass(frozen=True, slots=True)
+class QtDialogsContext:
+    """Expose batch dialogs with their real Qt parent and translated filters."""
+
+    parent: QWidget
+    workspace_dialogs: BatchWorkspaceDialogs
+    batch_file_filter: str
+    files_filter: str
 
 
 ###############################################################################
-### Mocks
+### Test Doubles
 ###############################################################################
 # -----------------------------------------------------------------------------
 @dataclass(frozen=True, slots=True)
@@ -54,17 +64,6 @@ class QtMessageBoxMocks:
     critical: MagicMock
     warning: MagicMock
     exec: MagicMock
-
-
-# -----------------------------------------------------------------------------
-@dataclass(frozen=True, slots=True)
-class QtDialogsContext:
-    """Expose batch dialogs with their real Qt parent and translated filters."""
-
-    parent: QWidget
-    workspace_dialogs: BatchWorkspaceDialogs
-    batch_file_filter: str
-    files_filter: str
 
 
 ###############################################################################

@@ -21,7 +21,7 @@ from enum import IntEnum, auto
 
 
 ###############################################################################
-### Mocks
+### Test Doubles
 ###############################################################################
 # -----------------------------------------------------------------------------
 class ButtonLabel(IntStrEnum):
@@ -44,6 +44,7 @@ class NonSequentialLabel(IntStrEnum):
     AUTOMATIC = auto()
     NEXT_AUTOMATIC = auto()
 
+
 # -----------------------------------------------------------------------------
 class PlainInt(IntEnum):
     """Provide an IntEnum to verify that IntStrEnum stores plain integers."""
@@ -52,6 +53,7 @@ class PlainInt(IntEnum):
     ONE = 1
     TWO = 2
     THREE = 3
+
 
 # -----------------------------------------------------------------------------
 class PlainIntLabel(IntStrEnum):
@@ -135,6 +137,7 @@ class TestIntStrEnumMembers:
         assert type(member.int_value) is int
         assert member.value == 1
         assert member.int_value == 1
+
 
 ###############################################################################
 class TestIntStrEnumRepresentations:
@@ -266,8 +269,8 @@ class TestIntStrEnumInvalidDefinitions:
         # Act / Assert
         with pytest.raises(TypeError):
 
-            class BadEnum(IntStrEnum): # pyright: ignore[reportUnusedClass]
-                A = (1,) # pyright: ignore[reportCallIssue]
+            class BadEnum(IntStrEnum):  # pyright: ignore[reportUnusedClass]
+                A = (1,)  # pyright: ignore[reportCallIssue]
 
     # -------------------------------------------------------------------------
     @pytest.mark.scenario_invalid_input
@@ -278,8 +281,8 @@ class TestIntStrEnumInvalidDefinitions:
         # Act / Assert
         with pytest.raises(TypeError):
 
-            class BadEnum(IntStrEnum): # pyright: ignore[reportUnusedClass]
-                A = (1, "one", "extra") # pyright: ignore[reportCallIssue]
+            class BadEnum(IntStrEnum):  # pyright: ignore[reportUnusedClass]
+                A = (1, "one", "extra")  # pyright: ignore[reportCallIssue]
 
 
 ###############################################################################
