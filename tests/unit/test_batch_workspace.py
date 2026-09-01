@@ -171,7 +171,7 @@ def batch_workspace(
 
 # -----------------------------------------------------------------------------
 @pytest.fixture
-def batch_mocks(mocker: MockerFixture) -> BatchMocks:
+def batch_mock(mocker: MockerFixture) -> BatchMocks:
     """Replace Batch construction for create_batch scenarios without invoking Batch logic."""
     # Setup
     batch_cls_mock: MagicMock = mocker.patch.object(
@@ -203,7 +203,7 @@ def recent_batches(tmp_path: Path) -> list[Path]:
 
 # -----------------------------------------------------------------------------
 @pytest.fixture(autouse=True)
-def qt_standard_documents_dir(
+def isolate_qstandard_paths(
     mocker: MockerFixture,
     tmp_path: Path,
 ) -> Path:
@@ -248,7 +248,7 @@ def replacement_batch(batch_factory: Callable[[str], Batch]) -> Batch:
 
 # -----------------------------------------------------------------------------
 @pytest.fixture
-def batch_is_unmodified(mocker: MockerFixture) -> Mock:
+def batch_is_unmodified_mock(mocker: MockerFixture) -> Mock:
     """Make real Batch instances report an unmodified state without using Batch logic."""
     # Setup
     return mocker.patch.object(
@@ -261,7 +261,7 @@ def batch_is_unmodified(mocker: MockerFixture) -> Mock:
 
 # -----------------------------------------------------------------------------
 @pytest.fixture
-def batch_is_modified(mocker: MockerFixture) -> Mock:
+def batch_is_modified_mock(mocker: MockerFixture) -> Mock:
     """Make real Batch instances report a modified state without using Batch logic."""
     # Setup
     return mocker.patch.object(
@@ -275,9 +275,9 @@ def batch_is_modified(mocker: MockerFixture) -> Mock:
 # -----------------------------------------------------------------------------
 @pytest.fixture
 def active_batch(
-    batch_workspace: BatchWorkspace,
     batch: Batch,
     batch_workspace_history_mocks: BatchWorkspaceHistoryMocks,
+    batch_workspace: BatchWorkspace,
 ) -> Batch:
     """Provide a workspace containing one active real batch."""
     # Setup
@@ -290,8 +290,8 @@ def active_batch(
 # -----------------------------------------------------------------------------
 @pytest.fixture
 def unmodified_active_batch(
+    batch_is_unmodified_mock: Mock,  # noqa: ARG001 needed as dependency
     active_batch: Batch,
-    batch_is_unmodified: Mock,  # noqa: ARG001 needed as dependency
 ) -> Batch:
     """Provide an active batch observed by the workspace as unmodified."""
     return active_batch
@@ -300,8 +300,8 @@ def unmodified_active_batch(
 # -----------------------------------------------------------------------------
 @pytest.fixture
 def modified_active_batch(
+    batch_is_modified_mock: Mock,  # noqa: ARG001 needed as dependency
     active_batch: Batch,
-    batch_is_modified: Mock,  # noqa: ARG001 needed as dependency
 ) -> Batch:
     """Provide an active batch observed by the workspace as modified."""
     return active_batch
@@ -320,20 +320,49 @@ def batch_save_mock(mocker: MockerFixture) -> Mock:
     )
 
 
+# # -----------------------------------------------------------------------------
+# @pytest.fixture
+# def batch_load_mock(
+#     mocker: MockerFixture,
+#     batch: Batch,
+# ) -> Mock:
+#     """Prevent Batch filesystem reads and default loading to the provided real batch."""
+#     # Setup
+#     return mocker.patch.object(
+#         batch_workspace_module.Batch,
+#         "load",
+#         autospec=True,
+#         return_value=(batch, ""),
+#     )
 # -----------------------------------------------------------------------------
 @pytest.fixture
-def batch_load_mock(
-    mocker: MockerFixture,
-    batch: Batch,
-) -> Mock:
+def batch_load_mock(mocker: MockerFixture) -> Mock:
     """Prevent Batch filesystem reads and default loading to the provided real batch."""
     # Setup
+    batch = mocker.sentinel.batch
     return mocker.patch.object(
         batch_workspace_module.Batch,
         "load",
         autospec=True,
         return_value=(batch, ""),
     )
+
+
+# -----------------------------------------------------------------------------
+# @pytest.fixture
+# def batch_load_mock(mocker: MockerFixture) -> Callable[[Batch | None, str], Mock]:
+#     """Prevent Batch filesystem reads and default loading to the provided real batch."""
+
+#     # Setup
+#     def _batch_load_mock(to_load: Batch | None, error_msg: str = "") -> Mock:
+#         return mocker.patch.object(
+#             batch_workspace_module.Batch,
+#             "load",
+#             autospec=True,
+#             return_value=(to_load, error_msg),
+#         )
+
+#     return _batch_load_mock
 
 
 # -----------------------------------------------------------------------------
@@ -366,10 +395,10 @@ class TestBatchWorkspaceConstruction:
     @pytest.mark.technique_equivalence_partitioning
     def test_initializes_empty_state_and_qt_identity(
         self,
-        batch_workspace: BatchWorkspace,
         user_settings_mocks: UserSettingsMocks,
         batch_workspace_dialogs_mocks: BatchWorkspaceDialogsMocks,
         batch_workspace_history_mocks: BatchWorkspaceHistoryMocks,
+        batch_workspace: BatchWorkspace,
     ) -> None:
         """A new workspace is parented, inactive, and wires its two collaborators."""
         # Assert
@@ -400,9 +429,9 @@ class TestBatchWorkspaceSettings:
     @pytest.mark.scenario_happy_path
     def test_load_settings_delegates_to_history(
         self,
-        batch_workspace: BatchWorkspace,
         user_settings_mocks: UserSettingsMocks,
         batch_workspace_history_mocks: BatchWorkspaceHistoryMocks,
+        batch_workspace: BatchWorkspace,
     ) -> None:
         """Loading workspace settings delegates the supplied store to recent history."""
         # Act
@@ -417,9 +446,9 @@ class TestBatchWorkspaceSettings:
     @pytest.mark.scenario_happy_path
     def test_save_settings_delegates_to_history(
         self,
-        batch_workspace: BatchWorkspace,
         user_settings_mocks: UserSettingsMocks,
         batch_workspace_history_mocks: BatchWorkspaceHistoryMocks,
+        batch_workspace: BatchWorkspace,
     ) -> None:
         """Saving workspace settings delegates the supplied store to recent history."""
         # Act
@@ -441,30 +470,29 @@ class TestBatchWorkspaceCreateBatch:
     @pytest.mark.technique_branch
     def test_existing_json_path_saves_new_batch(
         self,
-        batch_mocks: BatchMocks,
-        batch_workspace: BatchWorkspace,
+        isolate_qstandard_paths: Path,
+        batch_mock: BatchMocks,
         batch_workspace_dialogs_mocks: BatchWorkspaceDialogsMocks,
-        qt_standard_documents_dir: Path,
+        batch_workspace: BatchWorkspace,
         tmp_path: Path,
     ) -> None:
         """A selected JSON path is used to construct and save a new batch."""
         # Arrange
         selected_file_path = (tmp_path / "new_batch.json").resolve()
-        batch_workspace_dialogs_mocks.instance.choose_new_batch_path.return_value = (
-            selected_file_path
-        )
+        workspace_dialogs = batch_workspace_dialogs_mocks.instance
+        workspace_dialogs.choose_new_batch_path.return_value = selected_file_path
         expected_suggested_file_path = (
-            qt_standard_documents_dir / batch_mocks.cls.default_filename.return_value
+            isolate_qstandard_paths / batch_mock.cls.default_filename.return_value
         )
 
         # Act
         created_batch = batch_workspace.create_batch()
 
         # Assert
-        assert created_batch is batch_mocks.instance
-        batch_mocks.cls.assert_called_once_with(selected_file_path)
-        batch_mocks.instance.save.assert_called_once_with()
-        batch_workspace_dialogs_mocks.instance.choose_new_batch_path.assert_called_once_with(
+        assert created_batch is batch_mock.instance
+        batch_mock.cls.assert_called_once_with(selected_file_path)
+        batch_mock.instance.save.assert_called_once_with()
+        workspace_dialogs.choose_new_batch_path.assert_called_once_with(
             expected_suggested_file_path,
         )
 
@@ -474,31 +502,30 @@ class TestBatchWorkspaceCreateBatch:
     @pytest.mark.technique_branch
     def test_missing_json_suffix_is_appended_before_save(
         self,
-        batch_mocks: BatchMocks,
-        batch_workspace: BatchWorkspace,
+        isolate_qstandard_paths: Path,
+        batch_mock: BatchMocks,
         batch_workspace_dialogs_mocks: BatchWorkspaceDialogsMocks,
-        qt_standard_documents_dir: Path,
+        batch_workspace: BatchWorkspace,
         tmp_path: Path,
     ) -> None:
         """A creation destination without .json is normalized by BatchWorkspace."""
         # Arrange
         selected_file_path = (tmp_path / "new_batch").resolve()
         expected_selected_file_path = selected_file_path.with_name("new_batch.json")
-        batch_workspace_dialogs_mocks.instance.choose_new_batch_path.return_value = (
-            selected_file_path
-        )
+        workspace_dialogs = batch_workspace_dialogs_mocks.instance
+        workspace_dialogs.choose_new_batch_path.return_value = selected_file_path
         expected_suggested_file_path = (
-            qt_standard_documents_dir / batch_mocks.cls.default_filename.return_value
+            isolate_qstandard_paths / batch_mock.cls.default_filename.return_value
         )
 
         # Act
         created_batch = batch_workspace.create_batch()
 
         # Assert
-        assert created_batch is batch_mocks.instance
-        batch_mocks.cls.assert_called_once_with(expected_selected_file_path)
-        batch_mocks.instance.save.assert_called_once_with()
-        batch_workspace_dialogs_mocks.instance.choose_new_batch_path.assert_called_once_with(
+        assert created_batch is batch_mock.instance
+        batch_mock.cls.assert_called_once_with(expected_selected_file_path)
+        batch_mock.instance.save.assert_called_once_with()
+        workspace_dialogs.choose_new_batch_path.assert_called_once_with(
             expected_suggested_file_path,
         )
 
@@ -508,10 +535,10 @@ class TestBatchWorkspaceCreateBatch:
     @pytest.mark.technique_branch
     def test_with_recent_batch_suggests_latest_batch_directory(
         self,
-        batch_mocks: BatchMocks,
-        batch_workspace: BatchWorkspace,
+        batch_mock: BatchMocks,
         batch_workspace_dialogs_mocks: BatchWorkspaceDialogsMocks,
         batch_workspace_history_mocks: BatchWorkspaceHistoryMocks,
+        batch_workspace: BatchWorkspace,
         recent_batches: list[Path],
     ) -> None:
         """The latest history path determines the initial directory for creation."""
@@ -519,21 +546,20 @@ class TestBatchWorkspaceCreateBatch:
         latest_batch = recent_batches[0]
         batch_workspace_history_mocks.instance.latest_opened = latest_batch
         selected_file_path = latest_batch.parent / "new_batch.json"
-        batch_workspace_dialogs_mocks.instance.choose_new_batch_path.return_value = (
-            selected_file_path
-        )
+        workspace_dialogs = batch_workspace_dialogs_mocks.instance
+        workspace_dialogs.choose_new_batch_path.return_value = selected_file_path
         expected_suggested_file_path = (
-            latest_batch.parent / batch_mocks.cls.default_filename.return_value
+            latest_batch.parent / batch_mock.cls.default_filename.return_value
         )
 
         # Act
         created_batch = batch_workspace.create_batch()
 
         # Assert
-        assert created_batch is batch_mocks.instance
-        batch_mocks.cls.assert_called_once_with(selected_file_path)
-        batch_mocks.instance.save.assert_called_once_with()
-        batch_workspace_dialogs_mocks.instance.choose_new_batch_path.assert_called_once_with(
+        assert created_batch is batch_mock.instance
+        batch_mock.cls.assert_called_once_with(selected_file_path)
+        batch_mock.instance.save.assert_called_once_with()
+        workspace_dialogs.choose_new_batch_path.assert_called_once_with(
             expected_suggested_file_path,
         )
 
@@ -543,31 +569,30 @@ class TestBatchWorkspaceCreateBatch:
     @pytest.mark.technique_branch
     def test_without_recent_batch_suggests_standard_documents_directory(
         self,
-        batch_mocks: BatchMocks,
-        batch_workspace: BatchWorkspace,
+        isolate_qstandard_paths: Path,
+        batch_mock: BatchMocks,
         batch_workspace_dialogs_mocks: BatchWorkspaceDialogsMocks,
         batch_workspace_history_mocks: BatchWorkspaceHistoryMocks,
-        qt_standard_documents_dir: Path,
+        batch_workspace: BatchWorkspace,
     ) -> None:
         """An empty history makes the system documents directory the creation default."""
         # Arrange
         batch_workspace_history_mocks.instance.latest_opened = None
-        selected_file_path = qt_standard_documents_dir / "new_batch.json"
-        batch_workspace_dialogs_mocks.instance.choose_new_batch_path.return_value = (
-            selected_file_path
-        )
+        selected_file_path = isolate_qstandard_paths / "new_batch.json"
+        workspace_dialogs = batch_workspace_dialogs_mocks.instance
+        workspace_dialogs.choose_new_batch_path.return_value = selected_file_path
         expected_suggested_path = (
-            qt_standard_documents_dir / batch_mocks.cls.default_filename.return_value
+            isolate_qstandard_paths / batch_mock.cls.default_filename.return_value
         )
 
         # Act
         created_batch = batch_workspace.create_batch()
 
         # Assert
-        assert created_batch is batch_mocks.instance
-        batch_mocks.cls.assert_called_once_with(selected_file_path)
-        batch_mocks.instance.save.assert_called_once_with()
-        batch_workspace_dialogs_mocks.instance.choose_new_batch_path.assert_called_once_with(
+        assert created_batch is batch_mock.instance
+        batch_mock.cls.assert_called_once_with(selected_file_path)
+        batch_mock.instance.save.assert_called_once_with()
+        workspace_dialogs.choose_new_batch_path.assert_called_once_with(
             expected_suggested_path,
         )
 
@@ -577,21 +602,22 @@ class TestBatchWorkspaceCreateBatch:
     @pytest.mark.technique_branch
     def test_canceled_dialog_returns_none_without_creating_batch(
         self,
-        batch_mocks: BatchMocks,
-        batch_workspace: BatchWorkspace,
+        batch_mock: BatchMocks,
         batch_workspace_dialogs_mocks: BatchWorkspaceDialogsMocks,
+        batch_workspace: BatchWorkspace,
     ) -> None:
         """A canceled creation selection returns None without constructing a Batch."""
         # Arrange
-        batch_workspace_dialogs_mocks.instance.choose_new_batch_path.return_value = None
+        workspace_dialogs = batch_workspace_dialogs_mocks.instance
+        workspace_dialogs.choose_new_batch_path.return_value = None
 
         # Act
         created_batch = batch_workspace.create_batch()
 
         # Assert
         assert created_batch is None
-        batch_mocks.cls.assert_not_called()
-        batch_mocks.instance.save.assert_not_called()
+        batch_mock.cls.assert_not_called()
+        batch_mock.instance.save.assert_not_called()
 
     # -------------------------------------------------------------------------
     @pytest.mark.scenario_failure_error_path
@@ -599,19 +625,18 @@ class TestBatchWorkspaceCreateBatch:
     @pytest.mark.technique_branch
     def test_initial_save_error_returns_none_and_delegates_error_display(
         self,
-        batch_mocks: BatchMocks,
-        batch_workspace: BatchWorkspace,
+        batch_mock: BatchMocks,
         batch_workspace_dialogs_mocks: BatchWorkspaceDialogsMocks,
+        batch_workspace: BatchWorkspace,
         tmp_path: Path,
     ) -> None:
         """A failed initial save reports the path and error through the dialog collaborator."""
         # Arrange
         selected_file_path = (tmp_path / "new_batch.json").resolve()
         error = "random error"
-        batch_workspace_dialogs_mocks.instance.choose_new_batch_path.return_value = (
-            selected_file_path
-        )
-        batch_mocks.instance.save.return_value = (False, error)
+        workspace_dialogs = batch_workspace_dialogs_mocks.instance
+        workspace_dialogs.choose_new_batch_path.return_value = selected_file_path
+        batch_mock.instance.save.return_value = (False, error)
 
         # Act
         created_batch = batch_workspace.create_batch()
@@ -619,10 +644,10 @@ class TestBatchWorkspaceCreateBatch:
         # Assert
         assert created_batch is None
 
-        batch_mocks.cls.assert_called_once_with(selected_file_path)
-        batch_mocks.instance.save.assert_called_once_with()
+        batch_mock.cls.assert_called_once_with(selected_file_path)
+        batch_mock.instance.save.assert_called_once_with()
 
-        batch_workspace_dialogs_mocks.instance.show_save_error.assert_called_once_with(
+        workspace_dialogs.show_save_error.assert_called_once_with(
             selected_file_path,
             error,
         )
@@ -638,13 +663,14 @@ class TestBatchWorkspaceOpenLastBatch:
     @pytest.mark.technique_branch
     def test_last_batch_is_loaded_and_activated(
         self,
-        batch: Batch,
         batch_load_mock: Mock,
-        batch_workspace: BatchWorkspace,
+        batch: Batch,
         batch_workspace_history_mocks: BatchWorkspaceHistoryMocks,
+        batch_workspace: BatchWorkspace,
     ) -> None:
         """The latest history path is loaded and becomes the active batch."""
         # Arrange
+        batch_load_mock.return_value = (batch, "")
         batch_workspace_history_mocks.instance.latest_opened = batch.file_path
 
         # Act
@@ -665,8 +691,8 @@ class TestBatchWorkspaceOpenLastBatch:
     def test_without_recent_batch_returns_false_without_loading(
         self,
         batch_load_mock: Mock,
-        batch_workspace: BatchWorkspace,
         batch_workspace_history_mocks: BatchWorkspaceHistoryMocks,
+        batch_workspace: BatchWorkspace,
     ) -> None:
         """An empty history cannot provide a last batch to open."""
         # Arrange
@@ -688,8 +714,8 @@ class TestBatchWorkspaceOpenLastBatch:
     def test_load_error_returns_false(
         self,
         batch_load_mock: Mock,
-        batch_workspace: BatchWorkspace,
         batch_workspace_history_mocks: BatchWorkspaceHistoryMocks,
+        batch_workspace: BatchWorkspace,
         recent_batches: list[Path],
     ) -> None:
         """A loader failure for the latest path leaves the workspace inactive."""
@@ -718,13 +744,14 @@ class TestBatchWorkspaceOpenRecentBatch:
     @pytest.mark.technique_branch
     def test_history_path_loads_and_activates(
         self,
-        batch: Batch,
         batch_load_mock: Mock,
-        batch_workspace: BatchWorkspace,
+        batch: Batch,
         batch_workspace_history_mocks: BatchWorkspaceHistoryMocks,
+        batch_workspace: BatchWorkspace,
     ) -> None:
         """A path exposed by recent history is loaded and activated."""
         # Arrange
+        batch_load_mock.return_value = (batch, "")
         batch_workspace_history_mocks.instance.recently_opened = (batch.file_path,)
 
         # Act
@@ -745,8 +772,8 @@ class TestBatchWorkspaceOpenRecentBatch:
     def test_path_outside_history_returns_false_without_loading(
         self,
         batch_load_mock: Mock,
-        batch_workspace: BatchWorkspace,
         batch_workspace_history_mocks: BatchWorkspaceHistoryMocks,
+        batch_workspace: BatchWorkspace,
         tmp_path: Path,
     ) -> None:
         """A path absent from history is rejected before filesystem loading."""
@@ -769,15 +796,15 @@ class TestBatchWorkspaceOpenRecentBatch:
     @pytest.mark.technique_branch
     def test_load_error_returns_false(
         self,
-        batch: Batch,
         batch_load_mock: Mock,
-        batch_workspace: BatchWorkspace,
+        batch: Batch,
         batch_workspace_history_mocks: BatchWorkspaceHistoryMocks,
+        batch_workspace: BatchWorkspace,
     ) -> None:
         """A known recent path that cannot be loaded leaves the workspace inactive."""
         # Arrange
         batch_workspace_history_mocks.instance.recently_opened = (batch.file_path,)
-        batch_load_mock.return_value = (None, "invalid JSON")
+        batch_load_mock.return_value = (None, "random error")
 
         # Act
         is_batch_open = batch_workspace.open_recent_batch(batch.file_path)
@@ -799,20 +826,20 @@ class TestBatchWorkspaceOpenBatch:
     @pytest.mark.technique_branch
     def test_selected_file_loads_and_activates(
         self,
-        batch: Batch,
+        isolate_qstandard_paths: Path,
         batch_load_mock: Mock,
-        batch_workspace: BatchWorkspace,
+        batch: Batch,
         batch_workspace_dialogs_mocks: BatchWorkspaceDialogsMocks,
         batch_workspace_history_mocks: BatchWorkspaceHistoryMocks,
-        qt_standard_documents_dir: Path,
+        batch_workspace: BatchWorkspace,
     ) -> None:
         """A selected readable file is loaded and becomes the active batch."""
         # Arrange
+        batch_load_mock.return_value = (batch, "")
         selected_file_path = batch.file_path
-        batch_workspace_dialogs_mocks.instance.choose_open_batch_path.return_value = (
-            selected_file_path
-        )
-        expected_suggested_file_path = qt_standard_documents_dir
+        workspace_dialogs = batch_workspace_dialogs_mocks.instance
+        workspace_dialogs.choose_open_batch_path.return_value = selected_file_path
+        expected_suggested_file_path = isolate_qstandard_paths
 
         # Act
         is_batch_open = batch_workspace.open_batch()
@@ -821,7 +848,7 @@ class TestBatchWorkspaceOpenBatch:
         assert is_batch_open is True
         assert batch_workspace.current_batch is batch
         batch_load_mock.assert_called_once_with(selected_file_path)
-        batch_workspace_dialogs_mocks.instance.choose_open_batch_path.assert_called_once_with(
+        workspace_dialogs.choose_open_batch_path.assert_called_once_with(
             expected_suggested_file_path,
         )
         batch_workspace_history_mocks.instance.add_recently_opened.assert_called_once_with(
@@ -834,16 +861,17 @@ class TestBatchWorkspaceOpenBatch:
     @pytest.mark.technique_branch
     def test_canceled_dialog_returns_false_without_loading(
         self,
+        isolate_qstandard_paths: Path,
         batch_load_mock: Mock,
-        batch_workspace: BatchWorkspace,
         batch_workspace_dialogs_mocks: BatchWorkspaceDialogsMocks,
         batch_workspace_history_mocks: BatchWorkspaceHistoryMocks,
-        qt_standard_documents_dir: Path,
+        batch_workspace: BatchWorkspace,
     ) -> None:
         """A canceled open selection returns False without loading a batch."""
         # Arrange
-        batch_workspace_dialogs_mocks.instance.choose_open_batch_path.return_value = None
-        expected_suggested_file_path = qt_standard_documents_dir
+        workspace_dialogs = batch_workspace_dialogs_mocks.instance
+        workspace_dialogs.choose_open_batch_path.return_value = None
+        expected_suggested_file_path = isolate_qstandard_paths
 
         # Act
         is_batch_open = batch_workspace.open_batch()
@@ -852,7 +880,7 @@ class TestBatchWorkspaceOpenBatch:
         assert is_batch_open is False
         assert batch_workspace.current_batch is None
         batch_load_mock.assert_not_called()
-        batch_workspace_dialogs_mocks.instance.choose_open_batch_path.assert_called_once_with(
+        workspace_dialogs.choose_open_batch_path.assert_called_once_with(
             expected_suggested_file_path,
         )
         batch_workspace_history_mocks.instance.add_recently_opened.assert_not_called()
@@ -863,20 +891,19 @@ class TestBatchWorkspaceOpenBatch:
     @pytest.mark.technique_branch
     def test_current_file_returns_true_without_reloading(
         self,
-        active_batch: Batch,
+        isolate_qstandard_paths: Path,
         batch_load_mock: Mock,
-        batch_workspace: BatchWorkspace,
+        active_batch: Batch,
         batch_workspace_dialogs_mocks: BatchWorkspaceDialogsMocks,
         batch_workspace_history_mocks: BatchWorkspaceHistoryMocks,
-        qt_standard_documents_dir: Path,
+        batch_workspace: BatchWorkspace,
     ) -> None:
         """Selecting the already active path succeeds without invoking the loader."""
         # Arrange
         active_file_path = active_batch.file_path
-        batch_workspace_dialogs_mocks.instance.choose_open_batch_path.return_value = (
-            active_file_path
-        )
-        expected_suggested_file_path = qt_standard_documents_dir
+        workspace_dialogs = batch_workspace_dialogs_mocks.instance
+        workspace_dialogs.choose_open_batch_path.return_value = active_file_path
+        expected_suggested_file_path = isolate_qstandard_paths
 
         # Act
         is_batch_open = batch_workspace.open_batch()
@@ -885,7 +912,7 @@ class TestBatchWorkspaceOpenBatch:
         assert is_batch_open is True
         assert batch_workspace.current_batch is active_batch
         batch_load_mock.assert_not_called()
-        batch_workspace_dialogs_mocks.instance.choose_open_batch_path.assert_called_once_with(
+        workspace_dialogs.choose_open_batch_path.assert_called_once_with(
             expected_suggested_file_path,
         )
         batch_workspace_history_mocks.instance.add_recently_opened.assert_not_called()
@@ -896,22 +923,21 @@ class TestBatchWorkspaceOpenBatch:
     @pytest.mark.technique_branch
     def test_load_error_returns_false_and_delegates_open_error(
         self,
-        batch: Batch,
+        isolate_qstandard_paths: Path,
         batch_load_mock: Mock,
-        batch_workspace: BatchWorkspace,
+        batch: Batch,
         batch_workspace_dialogs_mocks: BatchWorkspaceDialogsMocks,
         batch_workspace_history_mocks: BatchWorkspaceHistoryMocks,
-        qt_standard_documents_dir: Path,
+        batch_workspace: BatchWorkspace,
     ) -> None:
         """A selected-file load error is delegated to the dialog collaborator."""
         # Arrange
-        selected_file_path = batch.file_path
         error = "random error"
-        batch_workspace_dialogs_mocks.instance.choose_open_batch_path.return_value = (
-            selected_file_path
-        )
         batch_load_mock.return_value = (None, error)
-        expected_suggested_file_path = qt_standard_documents_dir
+        selected_file_path = batch.file_path
+        workspace_dialogs = batch_workspace_dialogs_mocks.instance
+        workspace_dialogs.choose_open_batch_path.return_value = selected_file_path
+        expected_suggested_file_path = isolate_qstandard_paths
 
         # Act
         is_batch_open = batch_workspace.open_batch()
@@ -919,10 +945,10 @@ class TestBatchWorkspaceOpenBatch:
         # Assert
         assert is_batch_open is False
         assert batch_workspace.current_batch is None
-        batch_workspace_dialogs_mocks.instance.choose_open_batch_path.assert_called_once_with(
+        workspace_dialogs.choose_open_batch_path.assert_called_once_with(
             expected_suggested_file_path,
         )
-        batch_workspace_dialogs_mocks.instance.show_open_error.assert_called_once_with(
+        workspace_dialogs.show_open_error.assert_called_once_with(
             selected_file_path,
             error,
         )
@@ -935,24 +961,21 @@ class TestBatchWorkspaceOpenBatch:
     @pytest.mark.technique_branch
     def test_activation_cancel_returns_false_without_open_error(
         self,
+        isolate_qstandard_paths: Path,
+        batch_load_mock: Mock,
         replacement_batch: Batch,
         modified_active_batch: Batch,
-        batch_load_mock: Mock,
-        batch_workspace: BatchWorkspace,
         batch_workspace_dialogs_mocks: BatchWorkspaceDialogsMocks,
-        qt_standard_documents_dir: Path,
+        batch_workspace: BatchWorkspace,
     ) -> None:
         """Canceling replacement is not treated as a file-loading error."""
         # Arrange
-        selected_file_path = replacement_batch.file_path
-        batch_workspace_dialogs_mocks.instance.choose_open_batch_path.return_value = (
-            selected_file_path
-        )
-        batch_workspace_dialogs_mocks.instance.confirm_unsaved_changes.return_value = (
-            SaveDecision.CANCEL
-        )
         batch_load_mock.return_value = (replacement_batch, "")
-        expected_suggested_file_path = qt_standard_documents_dir
+        selected_file_path = replacement_batch.file_path
+        workspace_dialogs = batch_workspace_dialogs_mocks.instance
+        workspace_dialogs.choose_open_batch_path.return_value = selected_file_path
+        workspace_dialogs.confirm_unsaved_changes.return_value = SaveDecision.CANCEL
+        expected_suggested_file_path = isolate_qstandard_paths
 
         assert batch_workspace.current_batch is modified_active_batch
         assert modified_active_batch.parent() is batch_workspace
@@ -965,11 +988,12 @@ class TestBatchWorkspaceOpenBatch:
         assert batch_workspace.current_batch is modified_active_batch
         assert modified_active_batch.parent() is batch_workspace
         assert replacement_batch.parent() is None
-        batch_workspace_dialogs_mocks.instance.choose_open_batch_path.assert_called_once_with(
+        batch_load_mock.assert_called_once_with(selected_file_path)
+        workspace_dialogs.choose_open_batch_path.assert_called_once_with(
             expected_suggested_file_path,
         )
-        batch_workspace_dialogs_mocks.instance.confirm_unsaved_changes.assert_called_once_with()
-        batch_workspace_dialogs_mocks.instance.show_open_error.assert_not_called()
+        workspace_dialogs.confirm_unsaved_changes.assert_called_once_with()
+        workspace_dialogs.show_open_error.assert_not_called()
 
 
 ###############################################################################
@@ -1024,8 +1048,8 @@ class TestBatchWorkspaceActivation:
     def test_first_batch_becomes_active_emits_and_updates_recent_history(
         self,
         batch: Batch,
-        batch_workspace: BatchWorkspace,
         batch_workspace_history_mocks: BatchWorkspaceHistoryMocks,
+        batch_workspace: BatchWorkspace,
         qtbot: QtBot,
     ) -> None:
         """Activating the first batch parents it, emits, and delegates the MRU update."""
@@ -1057,8 +1081,8 @@ class TestBatchWorkspaceActivation:
     def test_same_batch_returns_false_without_state_change(
         self,
         active_batch: Batch,
-        batch_workspace: BatchWorkspace,
         batch_workspace_history_mocks: BatchWorkspaceHistoryMocks,
+        batch_workspace: BatchWorkspace,
         qtbot: QtBot,
     ) -> None:
         """Reactivating the same Batch is rejected without another history update."""
@@ -1084,8 +1108,8 @@ class TestBatchWorkspaceActivation:
         self,
         batch: Batch,
         replacement_batch: Batch,
-        batch_workspace: BatchWorkspace,
         batch_workspace_history_mocks: BatchWorkspaceHistoryMocks,
+        batch_workspace: BatchWorkspace,
         qtbot: QtBot,
     ) -> None:
         """Replacing a clean active batch closes it before installing the new one."""
@@ -1134,18 +1158,17 @@ class TestBatchWorkspaceActivation:
     @pytest.mark.technique_branch
     def test_close_cancellation_preserves_existing_batch(
         self,
-        modified_active_batch: Batch,
         replacement_batch: Batch,
-        batch_workspace: BatchWorkspace,
+        modified_active_batch: Batch,
         batch_workspace_dialogs_mocks: BatchWorkspaceDialogsMocks,
         batch_workspace_history_mocks: BatchWorkspaceHistoryMocks,
+        batch_workspace: BatchWorkspace,
         qtbot: QtBot,
     ) -> None:
         """A canceled close prevents replacement and preserves the existing active batch."""
         # Arrange
-        batch_workspace_dialogs_mocks.instance.confirm_unsaved_changes.return_value = (
-            SaveDecision.CANCEL
-        )
+        workspace_dialogs = batch_workspace_dialogs_mocks.instance
+        workspace_dialogs.confirm_unsaved_changes.return_value = SaveDecision.CANCEL
         assert batch_workspace.current_batch is modified_active_batch
         assert modified_active_batch.parent() is batch_workspace
 
@@ -1161,7 +1184,7 @@ class TestBatchWorkspaceActivation:
         assert batch_workspace.current_batch is modified_active_batch
         assert modified_active_batch.parent() is batch_workspace
         assert replacement_batch.parent() is None
-        batch_workspace_dialogs_mocks.instance.confirm_unsaved_changes.assert_called_once_with()
+        workspace_dialogs.confirm_unsaved_changes.assert_called_once_with()
         batch_workspace_history_mocks.instance.add_recently_opened.assert_not_called()
 
 
@@ -1175,8 +1198,8 @@ class TestBatchWorkspaceSaveCurrentBatch:
     @pytest.mark.technique_branch
     def test_successful_save_returns_true_and_emits_signal(
         self,
-        active_batch: Batch,
         batch_save_mock: Mock,
+        active_batch: Batch,
         batch_workspace: BatchWorkspace,
         qtbot: QtBot,
     ) -> None:
@@ -1225,16 +1248,17 @@ class TestBatchWorkspaceSaveCurrentBatch:
     @pytest.mark.technique_branch
     def test_save_error_returns_false_and_delegates_error_display(
         self,
-        active_batch: Batch,
         batch_save_mock: Mock,
-        batch_workspace: BatchWorkspace,
+        active_batch: Batch,
         batch_workspace_dialogs_mocks: BatchWorkspaceDialogsMocks,
+        batch_workspace: BatchWorkspace,
         qtbot: QtBot,
     ) -> None:
         """A failed active-batch save delegates the exact path and error to dialogs."""
         # Arrange
         error = "randomn error"
         batch_save_mock.return_value = (False, error)
+        workspace_dialogs = batch_workspace_dialogs_mocks.instance
 
         # Act
         with (
@@ -1245,7 +1269,7 @@ class TestBatchWorkspaceSaveCurrentBatch:
         # Assert
         assert is_batch_saved is False
         batch_save_mock.assert_called_once_with(active_batch)
-        batch_workspace_dialogs_mocks.instance.show_save_error.assert_called_once_with(
+        workspace_dialogs.show_save_error.assert_called_once_with(
             active_batch.file_path,
             error,
         )
@@ -1261,21 +1285,20 @@ class TestBatchWorkspaceSaveCurrentBatchAs:
     @pytest.mark.technique_branch
     def test_selected_destination_is_saved_exactly_and_emits_signal(
         self,
-        active_batch: Batch,
+        isolate_qstandard_paths: Path,
         batch_save_mock: Mock,
-        batch_workspace: BatchWorkspace,
+        active_batch: Batch,
         batch_workspace_dialogs_mocks: BatchWorkspaceDialogsMocks,
-        qt_standard_documents_dir: Path,
+        batch_workspace: BatchWorkspace,
         qtbot: QtBot,
         tmp_path: Path,
     ) -> None:
         """BatchWorkspace trusts the destination returned by its dialog collaborator."""
         # Arrange
         selected_file_path = (tmp_path / "copy.json").resolve()
-        batch_workspace_dialogs_mocks.instance.choose_save_batch_path.return_value = (
-            selected_file_path
-        )
-        expected_suggested_path = qt_standard_documents_dir / Batch.default_filename()
+        workspace_dialogs = batch_workspace_dialogs_mocks.instance
+        workspace_dialogs.choose_save_batch_path.return_value = selected_file_path
+        expected_suggested_path = isolate_qstandard_paths / Batch.default_filename()
 
         # Act
         with qtbot.waitSignal(
@@ -1287,7 +1310,7 @@ class TestBatchWorkspaceSaveCurrentBatchAs:
         # Assert
         assert is_batch_saved is True
         batch_save_mock.assert_called_once_with(active_batch, selected_file_path)
-        batch_workspace_dialogs_mocks.instance.choose_save_batch_path.assert_called_once_with(
+        workspace_dialogs.choose_save_batch_path.assert_called_once_with(
             expected_suggested_path,
         )
 
@@ -1297,12 +1320,13 @@ class TestBatchWorkspaceSaveCurrentBatchAs:
     @pytest.mark.technique_branch
     def test_without_current_batch_returns_false_without_asking_for_path(
         self,
-        batch_workspace: BatchWorkspace,
         batch_workspace_dialogs_mocks: BatchWorkspaceDialogsMocks,
+        batch_workspace: BatchWorkspace,
         qtbot: QtBot,
     ) -> None:
         """Saving as without an active batch returns before using the dialog collaborator."""
         # Arrange
+        workspace_dialogs = batch_workspace_dialogs_mocks.instance
         assert batch_workspace.current_batch is None
 
         # Act
@@ -1313,7 +1337,7 @@ class TestBatchWorkspaceSaveCurrentBatchAs:
 
         # Assert
         assert is_batch_saved is False
-        batch_workspace_dialogs_mocks.instance.choose_save_batch_path.assert_not_called()
+        workspace_dialogs.choose_save_batch_path.assert_not_called()
 
     # -------------------------------------------------------------------------
     @pytest.mark.scenario_alternate_path
@@ -1321,17 +1345,18 @@ class TestBatchWorkspaceSaveCurrentBatchAs:
     @pytest.mark.technique_branch
     def test_canceled_dialog_returns_false_without_saving(
         self,
-        active_batch: Batch,  # noqa: ARG002 needed to get batch active
+        isolate_qstandard_paths: Path,
         batch_save_mock: Mock,
-        batch_workspace: BatchWorkspace,
+        active_batch: Batch,  # noqa: ARG002 needed to have an activated batch in workspace
         batch_workspace_dialogs_mocks: BatchWorkspaceDialogsMocks,
-        qt_standard_documents_dir: Path,
+        batch_workspace: BatchWorkspace,
         qtbot: QtBot,
     ) -> None:
         """A canceled Save As selection leaves the active batch unsaved."""
         # Arrange
-        batch_workspace_dialogs_mocks.instance.choose_save_batch_path.return_value = None
-        expected_suggested_path = qt_standard_documents_dir / Batch.default_filename()
+        workspace_dialogs = batch_workspace_dialogs_mocks.instance
+        workspace_dialogs.choose_save_batch_path.return_value = None
+        expected_suggested_path = isolate_qstandard_paths / Batch.default_filename()
 
         # Act
         with (
@@ -1342,7 +1367,7 @@ class TestBatchWorkspaceSaveCurrentBatchAs:
         # Assert
         assert is_batch_saved is False
         batch_save_mock.assert_not_called()
-        batch_workspace_dialogs_mocks.instance.choose_save_batch_path.assert_called_once_with(
+        workspace_dialogs.choose_save_batch_path.assert_called_once_with(
             expected_suggested_path,
         )
 
@@ -1352,10 +1377,10 @@ class TestBatchWorkspaceSaveCurrentBatchAs:
     @pytest.mark.technique_branch
     def test_save_error_returns_false_and_delegates_error_display(
         self,
-        active_batch: Batch,
         batch_save_mock: Mock,
-        batch_workspace: BatchWorkspace,
+        active_batch: Batch,
         batch_workspace_dialogs_mocks: BatchWorkspaceDialogsMocks,
+        batch_workspace: BatchWorkspace,
         tmp_path: Path,
         qtbot: QtBot,
     ) -> None:
@@ -1363,9 +1388,8 @@ class TestBatchWorkspaceSaveCurrentBatchAs:
         # Arrange
         selected_file_path = (tmp_path / "copy.json").resolve()
         error = "random error"
-        batch_workspace_dialogs_mocks.instance.choose_save_batch_path.return_value = (
-            selected_file_path
-        )
+        workspace_dialogs = batch_workspace_dialogs_mocks.instance
+        workspace_dialogs.choose_save_batch_path.return_value = selected_file_path
         batch_save_mock.return_value = (False, error)
 
         # Act
@@ -1377,7 +1401,7 @@ class TestBatchWorkspaceSaveCurrentBatchAs:
         # Assert
         assert is_batch_saved is False
         batch_save_mock.assert_called_once_with(active_batch, selected_file_path)
-        batch_workspace_dialogs_mocks.instance.show_save_error.assert_called_once_with(
+        workspace_dialogs.show_save_error.assert_called_once_with(
             selected_file_path,
             error,
         )
@@ -1393,12 +1417,13 @@ class TestBatchWorkspaceCloseCurrentBatch:
     @pytest.mark.technique_branch
     def test_without_current_batch_returns_true(
         self,
-        batch_workspace: BatchWorkspace,
         batch_workspace_dialogs_mocks: BatchWorkspaceDialogsMocks,
+        batch_workspace: BatchWorkspace,
         qtbot: QtBot,
     ) -> None:
         """Closing an already empty workspace succeeds without prompting."""
         # Arrange
+        workspace_dialogs = batch_workspace_dialogs_mocks.instance
         assert batch_workspace.current_batch is None
 
         # Act
@@ -1410,7 +1435,7 @@ class TestBatchWorkspaceCloseCurrentBatch:
         # Assert
         assert is_batch_closed is True
         assert batch_workspace.current_batch is None
-        batch_workspace_dialogs_mocks.instance.confirm_unsaved_changes.assert_not_called()
+        workspace_dialogs.confirm_unsaved_changes.assert_not_called()
 
     # -------------------------------------------------------------------------
     @pytest.mark.scenario_happy_path
@@ -1420,12 +1445,13 @@ class TestBatchWorkspaceCloseCurrentBatch:
         self,
         mocker: MockerFixture,
         unmodified_active_batch: Batch,
-        batch_workspace: BatchWorkspace,
         batch_workspace_dialogs_mocks: BatchWorkspaceDialogsMocks,
+        batch_workspace: BatchWorkspace,
         qtbot: QtBot,
     ) -> None:
         """An unmodified batch closes without consulting the dialog collaborator."""
         # Arrange
+        workspace_dialogs = batch_workspace_dialogs_mocks.instance
         disconnect_spy = mocker.spy(unmodified_active_batch, "disconnect")
         assert batch_workspace.current_batch is unmodified_active_batch
         assert unmodified_active_batch.parent() is batch_workspace
@@ -1445,7 +1471,7 @@ class TestBatchWorkspaceCloseCurrentBatch:
         assert batch_workspace.current_batch is None
         assert unmodified_active_batch.parent() is None
         disconnect_spy.assert_called_once_with(batch_workspace)
-        batch_workspace_dialogs_mocks.instance.confirm_unsaved_changes.assert_not_called()
+        workspace_dialogs.confirm_unsaved_changes.assert_not_called()
 
     # -------------------------------------------------------------------------
     @pytest.mark.scenario_alternate_path
@@ -1455,18 +1481,17 @@ class TestBatchWorkspaceCloseCurrentBatch:
     def test_modified_save_choice_closes_after_successful_save(
         self,
         mocker: MockerFixture,
-        modified_active_batch: Batch,
         batch_save_mock: Mock,
-        batch_workspace: BatchWorkspace,
+        modified_active_batch: Batch,
         batch_workspace_dialogs_mocks: BatchWorkspaceDialogsMocks,
+        batch_workspace: BatchWorkspace,
         qtbot: QtBot,
     ) -> None:
         """Choosing Save closes a modified batch when its save succeeds."""
         # Arrange
         disconnect_spy = mocker.spy(modified_active_batch, "disconnect")
-        batch_workspace_dialogs_mocks.instance.confirm_unsaved_changes.return_value = (
-            SaveDecision.SAVE
-        )
+        workspace_dialogs = batch_workspace_dialogs_mocks.instance
+        workspace_dialogs.confirm_unsaved_changes.return_value = SaveDecision.SAVE
         assert batch_workspace.current_batch is modified_active_batch
         assert modified_active_batch.parent() is batch_workspace
 
@@ -1495,7 +1520,7 @@ class TestBatchWorkspaceCloseCurrentBatch:
         assert modified_active_batch.parent() is None
         batch_save_mock.assert_called_once_with(modified_active_batch)
         disconnect_spy.assert_called_once_with(batch_workspace)
-        batch_workspace_dialogs_mocks.instance.confirm_unsaved_changes.assert_called_once_with()
+        workspace_dialogs.confirm_unsaved_changes.assert_called_once_with()
 
     # -------------------------------------------------------------------------
     @pytest.mark.scenario_failure_error_path
@@ -1505,10 +1530,10 @@ class TestBatchWorkspaceCloseCurrentBatch:
     def test_modified_save_choice_preserves_batch_when_save_errors(
         self,
         mocker: MockerFixture,
-        modified_active_batch: Batch,
         batch_save_mock: Mock,
-        batch_workspace: BatchWorkspace,
+        modified_active_batch: Batch,
         batch_workspace_dialogs_mocks: BatchWorkspaceDialogsMocks,
+        batch_workspace: BatchWorkspace,
         qtbot: QtBot,
     ) -> None:
         """A failed requested save cancels closing and preserves the active batch."""
@@ -1516,9 +1541,8 @@ class TestBatchWorkspaceCloseCurrentBatch:
         error = "random error"
         batch_save_mock.return_value = (False, error)
         disconnect_spy = mocker.spy(modified_active_batch, "disconnect")
-        batch_workspace_dialogs_mocks.instance.confirm_unsaved_changes.return_value = (
-            SaveDecision.SAVE
-        )
+        workspace_dialogs = batch_workspace_dialogs_mocks.instance
+        workspace_dialogs.confirm_unsaved_changes.return_value = SaveDecision.SAVE
 
         # Act
         with (
@@ -1533,8 +1557,8 @@ class TestBatchWorkspaceCloseCurrentBatch:
         assert modified_active_batch.parent() is batch_workspace
         batch_save_mock.assert_called_once_with(modified_active_batch)
         disconnect_spy.assert_not_called()
-        batch_workspace_dialogs_mocks.instance.confirm_unsaved_changes.assert_called_once_with()
-        batch_workspace_dialogs_mocks.instance.show_save_error.assert_called_once_with(
+        workspace_dialogs.confirm_unsaved_changes.assert_called_once_with()
+        workspace_dialogs.show_save_error.assert_called_once_with(
             modified_active_batch.file_path,
             error,
         )
@@ -1547,18 +1571,17 @@ class TestBatchWorkspaceCloseCurrentBatch:
     def test_modified_discard_choice_closes_without_saving(
         self,
         mocker: MockerFixture,
-        modified_active_batch: Batch,
         batch_save_mock: Mock,
-        batch_workspace: BatchWorkspace,
+        modified_active_batch: Batch,
         batch_workspace_dialogs_mocks: BatchWorkspaceDialogsMocks,
+        batch_workspace: BatchWorkspace,
         qtbot: QtBot,
     ) -> None:
         """Choosing Discard closes a modified batch without saving it."""
         # Arrange
         disconnect_spy = mocker.spy(modified_active_batch, "disconnect")
-        batch_workspace_dialogs_mocks.instance.confirm_unsaved_changes.return_value = (
-            SaveDecision.DISCARD
-        )
+        workspace_dialogs = batch_workspace_dialogs_mocks.instance
+        workspace_dialogs.confirm_unsaved_changes.return_value = SaveDecision.DISCARD
 
         def check_batch_closed_signal(old_batch: Batch) -> bool:
             return old_batch == modified_active_batch
@@ -1579,7 +1602,7 @@ class TestBatchWorkspaceCloseCurrentBatch:
         assert modified_active_batch.parent() is None
         disconnect_spy.assert_called_once_with(batch_workspace)
         batch_save_mock.assert_not_called()
-        batch_workspace_dialogs_mocks.instance.confirm_unsaved_changes.assert_called_once_with()
+        workspace_dialogs.confirm_unsaved_changes.assert_called_once_with()
 
     # -------------------------------------------------------------------------
     @pytest.mark.scenario_alternate_path
@@ -1589,18 +1612,17 @@ class TestBatchWorkspaceCloseCurrentBatch:
     def test_modified_cancel_choice_preserves_active_batch(
         self,
         mocker: MockerFixture,
-        modified_active_batch: Batch,
         batch_save_mock: Mock,
-        batch_workspace: BatchWorkspace,
+        modified_active_batch: Batch,
         batch_workspace_dialogs_mocks: BatchWorkspaceDialogsMocks,
+        batch_workspace: BatchWorkspace,
         qtbot: QtBot,
     ) -> None:
         """Choosing Cancel leaves a modified batch active and attached."""
         # Arrange
         disconnect_spy = mocker.spy(modified_active_batch, "disconnect")
-        batch_workspace_dialogs_mocks.instance.confirm_unsaved_changes.return_value = (
-            SaveDecision.CANCEL
-        )
+        workspace_dialogs = batch_workspace_dialogs_mocks.instance
+        workspace_dialogs.confirm_unsaved_changes.return_value = SaveDecision.CANCEL
 
         # Act
         with (
@@ -1615,4 +1637,4 @@ class TestBatchWorkspaceCloseCurrentBatch:
         assert modified_active_batch.parent() is batch_workspace
         disconnect_spy.assert_not_called()
         batch_save_mock.assert_not_called()
-        batch_workspace_dialogs_mocks.instance.confirm_unsaved_changes.assert_called_once_with()
+        workspace_dialogs.confirm_unsaved_changes.assert_called_once_with()

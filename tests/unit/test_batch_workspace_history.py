@@ -193,8 +193,8 @@ class TestWorkspaceHistoryAddRecentlyOpened:
     @pytest.mark.technique_branch
     def test_new_path_becomes_latest_and_is_persisted(
         self,
-        workspace_history: BatchWorkspaceHistory,
         user_settings_mock: NonCallableMagicMock,
+        workspace_history: BatchWorkspaceHistory,
         mocker: MockerFixture,
         qtbot: QtBot,
         tmp_path: Path,
@@ -232,8 +232,8 @@ class TestWorkspaceHistoryAddRecentlyOpened:
     @pytest.mark.technique_branch
     def test_existing_path_moves_to_front_without_duplication(
         self,
-        workspace_history: BatchWorkspaceHistory,
         user_settings_mock: NonCallableMagicMock,
+        workspace_history: BatchWorkspaceHistory,
         mocker: MockerFixture,
         tmp_path: Path,
     ) -> None:
@@ -272,8 +272,8 @@ class TestWorkspaceHistoryAddRecentlyOpened:
     @pytest.mark.technique_branch
     def test_capacity_overflow_discards_oldest_path(
         self,
-        workspace_history: BatchWorkspaceHistory,
         user_settings_mock: NonCallableMagicMock,
+        workspace_history: BatchWorkspaceHistory,
         mocker: MockerFixture,
         tmp_path: Path,
     ) -> None:
@@ -314,8 +314,8 @@ class TestWorkspaceHistoryClearRecentlyOpened:
     @pytest.mark.technique_state_transition
     def test_nonempty_history_persists_and_emits_empty_state(
         self,
-        workspace_history: BatchWorkspaceHistory,
         user_settings_mock: NonCallableMagicMock,
+        workspace_history: BatchWorkspaceHistory,
         mocker: MockerFixture,
         tmp_path: Path,
         qtbot: QtBot,
@@ -360,8 +360,8 @@ class TestWorkspaceHistoryLoadFromSettings:
     @pytest.mark.technique_state_transition
     def test_stored_paths_replace_history_and_are_emitted(
         self,
-        workspace_history: BatchWorkspaceHistory,
         user_settings_mock: NonCallableMagicMock,
+        workspace_history: BatchWorkspaceHistory,
         mocker: MockerFixture,
         qtbot: QtBot,
         tmp_path: Path,
@@ -401,8 +401,8 @@ class TestWorkspaceHistoryLoadFromSettings:
     @pytest.mark.technique_equivalence_partitioning
     def test_missing_setting_loads_and_emits_empty_history(
         self,
-        workspace_history: BatchWorkspaceHistory,
         user_settings_mock: NonCallableMagicMock,
+        workspace_history: BatchWorkspaceHistory,
         mocker: MockerFixture,
         qtbot: QtBot,
     ) -> None:
@@ -442,8 +442,8 @@ class TestWorkspaceHistorySaveToSettings:
     @pytest.mark.technique_equivalence_partitioning
     def test_save_to_settings_persists_current_history_and_routes_change_signal(
         self,
-        workspace_history: BatchWorkspaceHistory,
         user_settings_mock: NonCallableMagicMock,
+        workspace_history: BatchWorkspaceHistory,
         mocker: MockerFixture,
         qtbot: QtBot,
         tmp_path: Path,

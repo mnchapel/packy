@@ -277,9 +277,9 @@ class TestAppInitialize:
     @pytest.mark.technique_equivalence_partitioning
     def test_valid_config_initializes_metadata_services_and_settings(
         self,
+        dependency_mocks: AppDependencyMocks,
         app: App,
         app_config: AppConfig,
-        dependency_mocks: AppDependencyMocks,
     ) -> None:
         """A valid configuration initializes Qt metadata and PackY services."""
         # Act
@@ -311,9 +311,9 @@ class TestAppInitialize:
     @pytest.mark.technique_state_transition
     def test_second_initialization_raises_runtime_error_without_replacing_settings(
         self,
+        dependency_mocks: AppDependencyMocks,
         app: App,
         app_config: AppConfig,
-        dependency_mocks: AppDependencyMocks,
     ) -> None:
         """Reinitializing an initialized application is rejected without replacing settings."""
         # Arrange
@@ -338,9 +338,9 @@ class TestAppRun:
     @pytest.mark.technique_state_transition
     def test_initialized_app_restores_window_and_returns_event_loop_exit_code(
         self,
+        dependency_mocks: AppDependencyMocks,
         initialized_app: App,
         app_config: AppConfig,
-        dependency_mocks: AppDependencyMocks,
         mocker: MockerFixture,
     ) -> None:
         """Running an initialized application restores and shows its window before returning."""
@@ -382,7 +382,10 @@ class TestAppRun:
     # -------------------------------------------------------------------------
     @pytest.mark.scenario_invalid_input
     @pytest.mark.technique_state_transition
-    def test_run_before_initialization_raises_runtime_error(self, app: App) -> None:
+    def test_run_before_initialization_raises_runtime_error(
+        self,
+        app: App,
+    ) -> None:
         """Running before initialization is rejected with the documented lifecycle error."""
         # Act / Assert
         with pytest.raises(RuntimeError, match="Application is not initialized"):
@@ -399,8 +402,8 @@ class TestAppShutdown:
     @pytest.mark.technique_state_transition
     def test_about_to_quit_after_run_saves_main_window_settings(
         self,
-        initialized_app: App,
         dependency_mocks: AppDependencyMocks,
+        initialized_app: App,
         mocker: MockerFixture,
         qtbot: QtBot,
     ) -> None:
@@ -451,8 +454,8 @@ class TestAppDispose:
     @pytest.mark.technique_state_transition
     def test_with_main_window_closes_window_and_clears_public_state(
         self,
-        initialized_app: App,
         dependency_mocks: AppDependencyMocks,
+        initialized_app: App,
         mocker: MockerFixture,
     ) -> None:
         """Disposal after running closes the window and clears exposed lifecycle state."""
@@ -500,9 +503,9 @@ class TestAppDispose:
     @pytest.mark.technique_state_transition
     def test_repeated_disposal_allows_reinitialization(
         self,
+        dependency_mocks: AppDependencyMocks,
         initialized_app: App,
         app_config: AppConfig,
-        dependency_mocks: AppDependencyMocks,
     ) -> None:
         """Repeated disposal leaves the application eligible for initialization again."""
         # Act
@@ -519,9 +522,9 @@ class TestAppDispose:
     @pytest.mark.technique_state_transition
     def test_disposal_closes_resources_and_allows_reinitialization(
         self,
+        dependency_mocks: AppDependencyMocks,
         initialized_app: App,
         app_config: AppConfig,
-        dependency_mocks: AppDependencyMocks,
         mocker: MockerFixture,
     ) -> None:
         """Disposal closes the running window and leaves the app eligible for initialization."""
