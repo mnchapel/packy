@@ -16,13 +16,13 @@ from packy.core.logger import Logger
 import pytest
 from PySide6 import QtCore
 from PySide6.QtCore import QSettings
+from PySide6.QtWidgets import QApplication
 
 # Standard library
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     # Third-party
-    from PySide6.QtWidgets import QApplication
     from pytest_mock import MockerFixture
     from pytestqt.qtbot import QtBot
 
@@ -58,6 +58,9 @@ def isolate_qsettings(tmp_path: Path) -> None:
 
     user_directory.mkdir()
     system_directory.mkdir()
+
+    QApplication.setOrganizationName("PackY")
+    QApplication.setApplicationName("PackY")
 
     QSettings.setDefaultFormat(QSettings.Format.IniFormat)
     QSettings.setPath(
