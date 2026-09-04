@@ -79,7 +79,7 @@ class ArchiverConfigPanel(QObject, Configurable, metaclass=FinalMeta):
         for index, format_label in enumerate(FormatLabel):
             format_button = QRadioButton(self._ui.archiver_config_group)
             format_button.setText(self.tr(format_label.str_value))
-            format_button.setObjectName(f"{format_label.int_value}FormatButton")
+            format_button.setObjectName(f"{format_label.str_value}FormatButton")
             self._format_button_group.addButton(
                 format_button,
                 format_label.int_value,
@@ -136,6 +136,12 @@ class ArchiverConfigPanel(QObject, Configurable, metaclass=FinalMeta):
             b"currentIndex",
         )
         self._config_mapper.toFirst()
+
+    # -------------------------------------------------------------------------
+    @property
+    def model(self) -> ArchiverConfigModel:
+        """The model associtated with this panel and used by its components."""
+        return self._model
 
     # -------------------------------------------------------------------------
     @override

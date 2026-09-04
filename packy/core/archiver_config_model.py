@@ -53,6 +53,12 @@ class FormatLabel(IntStrEnum):
     TLZ = (Archiver.Format.TLZ, "tlz")
     XZ = (Archiver.Format.XZ, "xz")
 
+    # -------------------------------------------------------------------------
+    @property
+    def format(self) -> Archiver.Format:
+        """The archive format associated with the label."""
+        return Archiver.Format(self.int_value)
+
 
 ###############################################################################
 @unique
@@ -62,6 +68,12 @@ class CompressionMethodLabel(IntStrEnum):
     DEFLATE = (Archiver.CompressionMethod.DEFLATE, "Deflate")
     STORE = (Archiver.CompressionMethod.STORE, "Store")
     OPTIMAL = (Archiver.CompressionMethod.OPTIMAL, "Optimal (2x slower)")
+
+    # -------------------------------------------------------------------------
+    @property
+    def compression_method(self) -> Archiver.CompressionMethod:
+        """The archive compression method associated with the label."""
+        return Archiver.CompressionMethod(self.int_value)
 
 
 ###############################################################################
@@ -73,6 +85,12 @@ class CompressionLevelLabel(IntStrEnum):
     MAXIMUM = (Archiver.CompressionLevel.MAXIMUM, "Maximum")
     FAST = (Archiver.CompressionLevel.FAST, "Fast")
     FASTEST = (Archiver.CompressionLevel.FASTEST, "Fastest")
+
+    # -------------------------------------------------------------------------
+    @property
+    def compression_level(self) -> Archiver.CompressionLevel:
+        """The archive compression level associated with the label."""
+        return Archiver.CompressionLevel(self.int_value)
 
 
 ###############################################################################
@@ -245,11 +263,11 @@ class ArchiverConfigModel(QAbstractListModel, Configurable, metaclass=FinalMeta)
         """
         match column:
             case ArchiverConfigModel.Field.FORMAT:
-                return self.format
+                return self.format_label
             case ArchiverConfigModel.Field.COMPRESSION_METHOD:
-                return self.compression_method
+                return self.compression_method_label
             case ArchiverConfigModel.Field.COMPRESSION_LEVEL:
-                return self.compression_level
+                return self.compression_level_label
 
     # -------------------------------------------------------------------------
     @override
@@ -294,11 +312,11 @@ class ArchiverConfigModel(QAbstractListModel, Configurable, metaclass=FinalMeta)
         """
         match column:
             case ArchiverConfigModel.Field.FORMAT:
-                self.format = FormatLabel(value) if value_is_int else value
+                self.format_label = FormatLabel(value) if value_is_int else value
             case ArchiverConfigModel.Field.COMPRESSION_METHOD:
-                self.compression_method = CompressionMethodLabel(value) if value_is_int else value
+                self.compression_method_label = CompressionMethodLabel(value) if value_is_int else value
             case ArchiverConfigModel.Field.COMPRESSION_LEVEL:
-                self.compression_level = CompressionLevelLabel(value) if value_is_int else value
+                self.compression_level_label = CompressionLevelLabel(value) if value_is_int else value
 
     # -------------------------------------------------------------------------
     @override
@@ -365,15 +383,15 @@ class ArchiverConfigModel(QAbstractListModel, Configurable, metaclass=FinalMeta)
 
     # -------------------------------------------------------------------------
     @property
-    def format(self) -> FormatLabel:
+    def format_label(self) -> FormatLabel:
         """The archive format for the current batch, or the default format."""
         if self._current_batch is None:
             return self._default_format
         return FormatLabel(self._current_batch.archiver_format)
 
     # -------------------------------------------------------------------------
-    @format.setter  # noqa: A003
-    def format(self, value: FormatLabel) -> None:
+    @format_label.setter
+    def format_label(self, value: FormatLabel) -> None:
         """Set the archive format for the current batch.
 
         The assignment has no effect when no batch is set or the value is unchanged.
@@ -382,11 +400,11 @@ class ArchiverConfigModel(QAbstractListModel, Configurable, metaclass=FinalMeta)
         Args:
             value (FormatLabel): Archive format to assign.
         """
-        if self._current_batch is None or self.format == value:
+        if self._current_batch is None or self.format_label == value:
             return
 
         old_value = self._current_batch.archiver_format
-        self._current_batch.archiver_format = Archiver.Format(value.int_value)
+        self._current_batch.archiver_format = value.format
         self._default_options = FormatOptions.create(value)
         self._emit_format_changed(
             old_value,
@@ -429,7 +447,7 @@ class ArchiverConfigModel(QAbstractListModel, Configurable, metaclass=FinalMeta)
 
     # -------------------------------------------------------------------------
     @property
-    def compression_method(self) -> CompressionMethodLabel:
+    def compression_method_label(self) -> CompressionMethodLabel:
         """The compression method for the current batch, or the default method."""
         if self._current_batch is None:
             return self._default_compression_method
@@ -438,8 +456,8 @@ class ArchiverConfigModel(QAbstractListModel, Configurable, metaclass=FinalMeta)
         )
 
     # -------------------------------------------------------------------------
-    @compression_method.setter
-    def compression_method(self, value: CompressionMethodLabel) -> None:
+    @compression_method_label.setter
+    def compression_method_label(self, value: CompressionMethodLabel) -> None:
         """Set the compression method for the current batch.
 
         The assignment has no effect when no batch is set or the value is unchanged.
@@ -448,13 +466,11 @@ class ArchiverConfigModel(QAbstractListModel, Configurable, metaclass=FinalMeta)
         Args:
             value (CompressionMethodLabel): Compression method to assign.
         """
-        if self._current_batch is None or self.compression_method == value:
+        if self._current_batch is None or self.compression_method_label == value:
             return
 
         old_value = self._current_batch.archiver_compression_method
-        self._current_batch.archiver_compression_method = Archiver.CompressionMethod(
-            value.int_value,
-        )
+        self._current_batch.archiver_compression_method = value.compression_method
         self._emit_compression_method_changed(
             old_value,
             self._current_batch.archiver_compression_method,
@@ -478,7 +494,7 @@ class ArchiverConfigModel(QAbstractListModel, Configurable, metaclass=FinalMeta)
 
     # -------------------------------------------------------------------------
     @property
-    def compression_level(self) -> CompressionLevelLabel:
+    def compression_level_label(self) -> CompressionLevelLabel:
         """The compression level for the current batch, or the default level."""
         if self._current_batch is None:
             return self._default_compression_level
@@ -487,8 +503,8 @@ class ArchiverConfigModel(QAbstractListModel, Configurable, metaclass=FinalMeta)
         )
 
     # -------------------------------------------------------------------------
-    @compression_level.setter
-    def compression_level(self, value: CompressionLevelLabel) -> None:
+    @compression_level_label.setter
+    def compression_level_label(self, value: CompressionLevelLabel) -> None:
         """Set the compression level for the current batch.
 
         The assignment has no effect when no batch is set or the value is unchanged.
@@ -497,13 +513,11 @@ class ArchiverConfigModel(QAbstractListModel, Configurable, metaclass=FinalMeta)
         Args:
             value (CompressionLevelLabel): Compression level to assign.
         """
-        if self._current_batch is None or self.compression_level == value:
+        if self._current_batch is None or self.compression_level_label == value:
             return
 
         old_value: Archiver.CompressionLevel = self._current_batch.archiver_compression_level
-        self._current_batch.archiver_compression_level = Archiver.CompressionLevel(
-            value.int_value,
-        )
+        self._current_batch.archiver_compression_level = value.compression_level
         self._emit_compression_level_changed(
             old_value,
             self._current_batch.archiver_compression_level,
