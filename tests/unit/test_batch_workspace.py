@@ -320,20 +320,6 @@ def batch_save_mock(mocker: MockerFixture) -> Mock:
     )
 
 
-# # -----------------------------------------------------------------------------
-# @pytest.fixture
-# def batch_load_mock(
-#     mocker: MockerFixture,
-#     batch: Batch,
-# ) -> Mock:
-#     """Prevent Batch filesystem reads and default loading to the provided real batch."""
-#     # Setup
-#     return mocker.patch.object(
-#         batch_workspace_module.Batch,
-#         "load",
-#         autospec=True,
-#         return_value=(batch, ""),
-#     )
 # -----------------------------------------------------------------------------
 @pytest.fixture
 def batch_load_mock(mocker: MockerFixture) -> Mock:
@@ -346,23 +332,6 @@ def batch_load_mock(mocker: MockerFixture) -> Mock:
         autospec=True,
         return_value=(batch, ""),
     )
-
-
-# -----------------------------------------------------------------------------
-# @pytest.fixture
-# def batch_load_mock(mocker: MockerFixture) -> Callable[[Batch | None, str], Mock]:
-#     """Prevent Batch filesystem reads and default loading to the provided real batch."""
-
-#     # Setup
-#     def _batch_load_mock(to_load: Batch | None, error_msg: str = "") -> Mock:
-#         return mocker.patch.object(
-#             batch_workspace_module.Batch,
-#             "load",
-#             autospec=True,
-#             return_value=(to_load, error_msg),
-#         )
-
-#     return _batch_load_mock
 
 
 # -----------------------------------------------------------------------------
