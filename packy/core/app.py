@@ -122,9 +122,9 @@ class App(QApplication):
 
         self._main_window = MainWindow(self._config, self._settings)
         self._main_window.load_settings()
+        self._main_window.show()
         self._main_window.restore_last_batch()
         QtCore.qDebug("Previous app state restored.")
-        self._main_window.show()
 
         return self.exec()
 

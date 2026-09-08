@@ -374,8 +374,8 @@ class TestAppRun:
                 initialized_app.settings,
             ),
             mocker.call.main_window.load_settings(),
-            mocker.call.main_window.restore_last_batch(),
             mocker.call.main_window.show(),
+            mocker.call.main_window.restore_last_batch(),
             mocker.call.exec(),
         ]
 
