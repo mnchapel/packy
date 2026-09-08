@@ -59,9 +59,11 @@ class QtFileDialogMocks:
 # -----------------------------------------------------------------------------
 @dataclass(frozen=True, slots=True)
 class QtMessageBoxMocks:
-    """Expose blocking message-box operations patched for BatchWorkspace tests."""
+    """Expose blocking message-box operations patched for tests."""
 
     critical: MagicMock
+    information: MagicMock
+    question: MagicMock
     warning: MagicMock
     exec: MagicMock
 
@@ -103,21 +105,31 @@ def qt_message_box_mocks(mocker: MockerFixture) -> QtMessageBoxMocks:
         "critical",
         autospec=True,
     )
+    information_mock: MagicMock = mocker.patch.object(
+        bw_dialogs_module.QMessageBox,
+        "information",
+        autospec=True,
+    )
+    question_mock: MagicMock = mocker.patch.object(
+        bw_dialogs_module.QMessageBox,
+        "question",
+        autospec=True,
+    )
     warning_mock: MagicMock = mocker.patch.object(
         bw_dialogs_module.QMessageBox,
         "warning",
         autospec=True,
-        return_value=QMessageBox.StandardButton.Cancel,
     )
     exec_mock: MagicMock = mocker.patch.object(
         bw_dialogs_module.QMessageBox,
         "exec",
         autospec=True,
-        return_value=QMessageBox.StandardButton.Yes,
     )
 
     return QtMessageBoxMocks(
         critical=critical_mock,
+        information=information_mock,
+        question=question_mock,
         warning=warning_mock,
         exec=exec_mock,
     )
@@ -461,8 +473,8 @@ class TestWorkspaceDialogsChooseSaveBatchPath:
 
 
 ###############################################################################
-class TestWorkspaceDialogsMessageBox:
-    """Cover info, warning and error dialogs."""
+class TestWorkspaceDialogsConfirmUnsavedChanges:
+    """Cover all choice points for unsaved changes."""
 
     # -------------------------------------------------------------------------
     @pytest.mark.technique_decision_table
@@ -520,6 +532,11 @@ class TestWorkspaceDialogsMessageBox:
         assert user_response is expected_decision
         message_box_warning_mock.assert_called_once()
 
+
+###############################################################################
+class TestWorkspaceDialogsMessageBox:
+    """Cover info, warning and error dialogs."""
+
     # -------------------------------------------------------------------------
     @pytest.mark.scenario_happy_path
     def test_show_save_error_displays_file_path_and_error(
@@ -566,4 +583,48 @@ class TestWorkspaceDialogsMessageBox:
         args = message_box_critical_mock.call_args.args
         assert args[0] == qt_dialogs_context.parent
         assert str(file_path) in args[2]
+        assert error in args[2]
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.scenario_happy_path
+    def test_show_open_last_success_displays_batch_name(
+        self,
+        qt_dialogs_context: QtDialogsContext,
+        qt_message_box_mocks: QtMessageBoxMocks,
+    ) -> None:
+        """A successful last-batch open displays the batch name in an information message."""
+        # Arrange
+        batch_name = "default.json"
+        workspace_dialogs = qt_dialogs_context.workspace_dialogs
+        message_box_info_mock = qt_message_box_mocks.information
+
+        # Act
+        workspace_dialogs.show_open_last_success(batch_name)
+
+        # Assert
+        args = message_box_info_mock.call_args.args
+        assert args[0] == qt_dialogs_context.parent
+        assert str(batch_name) in args[2]
+
+    # -------------------------------------------------------------------------
+    @pytest.mark.scenario_happy_path
+    def test_show_open_last_error_displays_batch_name(
+        self,
+        qt_dialogs_context: QtDialogsContext,
+        qt_message_box_mocks: QtMessageBoxMocks,
+    ) -> None:
+        """A last-batch open failure displays the batch name and error in a warning message."""
+        # Arrange
+        batch_name = "default.json"
+        error = "Random error"
+        workspace_dialogs = qt_dialogs_context.workspace_dialogs
+        message_box_warning_mock = qt_message_box_mocks.warning
+
+        # Act
+        workspace_dialogs.show_open_last_error(batch_name, error)
+
+        # Assert
+        args = message_box_warning_mock.call_args.args
+        assert args[0] == qt_dialogs_context.parent
+        assert str(batch_name) in args[2]
         assert error in args[2]

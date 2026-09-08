@@ -208,11 +208,48 @@ class BatchWorkspaceDialogs:
 
     # -------------------------------------------------------------------------
     def show_open_error(self, file_path: Path, error: str) -> None:
-        """Inform the user that a batch could not be opened."""
+        """Inform the user that a batch could not be opened.
+
+        Args:
+            file_path (Path): Path of the batch that could not be opened.
+            error (str): Error message describing the open failure.
+        """
         QMessageBox.critical(
             self._parent,
             self._tr("Error Opening Batch"),
             self._tr(
                 "Error to open '{0}':\n{1}",
             ).format(file_path, error),
+        )
+
+    # -------------------------------------------------------------------------
+    def show_open_last_success(self, batch_display_name: str) -> None:
+        """Inform the user that the last batch has been opened.
+
+        Args:
+            batch_display_name (str): Display name of the batch that was opened.
+        """
+        QMessageBox.information(
+            self._parent,
+            self._tr("Batch Opened"),
+            self._tr(
+                "Last batch '{0}' opened.",
+            ).format(batch_display_name),
+        )
+
+    # -------------------------------------------------------------------------
+    def show_open_last_error(self, batch_display_name: str, error: str) -> None:
+        """Inform the user that the last batch could not be opened.
+
+        Args:
+            batch_display_name (str): Display name of the batch that could not
+              be opened.
+            error (str): Error message describing the restoration failure.
+        """
+        QMessageBox.warning(
+            self._parent,
+            self._tr("Error Opening Batch"),
+            self._tr(
+                "Cannot open the last batch '{0}':\n{1}",
+            ).format(batch_display_name, error),
         )

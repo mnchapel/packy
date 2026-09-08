@@ -109,6 +109,8 @@ files = [
   "packy/core/archiver_config_panel.py",
   "packy/core/batch.py",
   "packy/core/batch_workspace.py",
+  "packy/core/batch_workspace_dialogs.py",
+  "packy/core/batch_workspace_history.py",
   "packy/core/configurable.py",
   "packy/core/localization.py",
   "packy/core/logger.py",

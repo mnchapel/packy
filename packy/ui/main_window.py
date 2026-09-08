@@ -313,6 +313,7 @@ class MainWindow(QMainWindow):
         self._ui.move_down_job_button.setEnabled(False)
         self._ui.run_all_jobs_button.setEnabled(False)
         self._ui.cancel_jobs_button.setEnabled(False)
+
         self._ui.statistics_group.setEnabled(False)
         self._ui.file_selection_group.setEnabled(False)
         self._ui.output_group.setEnabled(False)

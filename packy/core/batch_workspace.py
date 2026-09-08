@@ -163,12 +163,13 @@ class BatchWorkspace(QObject, Configurable, metaclass=FinalMeta):
             QtCore.qDebug("No recent batch to open.")
             return False
 
-        [opened, _] = self._open_batch_file(batch_file)
-        if opened:
-            QtCore.qDebug(f"Last batch opened: '{batch_file}'.")
-        else:
+        [opened, error] = self._open_batch_file(batch_file)
+        if not opened and error != "":
             QtCore.qWarning(f"Failed to open the last batch: '{batch_file}'.")
-
+            self._dialogs.show_open_last_error(batch_file.name, error)
+        else:
+            QtCore.qDebug(f"Last batch opened: '{batch_file}'.")
+            self._dialogs.show_open_last_success(batch_file.name)
         return opened
 
     # -------------------------------------------------------------------------

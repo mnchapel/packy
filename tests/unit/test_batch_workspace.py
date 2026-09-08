@@ -634,12 +634,14 @@ class TestBatchWorkspaceOpenLastBatch:
         self,
         batch_load_mock: Mock,
         batch: Batch,
+        batch_workspace_dialogs_mocks: BatchWorkspaceDialogsMocks,
         batch_workspace_history_mocks: BatchWorkspaceHistoryMocks,
         batch_workspace: BatchWorkspace,
     ) -> None:
         """The latest history path is loaded and becomes the active batch."""
         # Arrange
         batch_load_mock.return_value = (batch, "")
+        workspace_dialogs = batch_workspace_dialogs_mocks.instance
         batch_workspace_history_mocks.instance.latest_opened = batch.file_path
 
         # Act
@@ -649,6 +651,10 @@ class TestBatchWorkspaceOpenLastBatch:
         assert is_batch_open is True
         assert batch_workspace.current_batch is batch
         batch_load_mock.assert_called_once_with(batch.file_path)
+        workspace_dialogs.show_open_last_error.assert_not_called()
+        workspace_dialogs.show_open_last_success.assert_called_once_with(
+            batch.display_name,
+        )
         batch_workspace_history_mocks.instance.add_recently_opened.assert_called_once_with(
             batch.file_path,
         )
@@ -660,11 +666,13 @@ class TestBatchWorkspaceOpenLastBatch:
     def test_without_recent_batch_returns_false_without_loading(
         self,
         batch_load_mock: Mock,
+        batch_workspace_dialogs_mocks: BatchWorkspaceDialogsMocks,
         batch_workspace_history_mocks: BatchWorkspaceHistoryMocks,
         batch_workspace: BatchWorkspace,
     ) -> None:
         """An empty history cannot provide a last batch to open."""
         # Arrange
+        workspace_dialogs = batch_workspace_dialogs_mocks.instance
         batch_workspace_history_mocks.instance.latest_opened = None
 
         # Act
@@ -674,6 +682,8 @@ class TestBatchWorkspaceOpenLastBatch:
         assert is_batch_open is False
         assert batch_workspace.current_batch is None
         batch_load_mock.assert_not_called()
+        workspace_dialogs.show_open_last_error.assert_not_called()
+        workspace_dialogs.show_open_last_success.assert_not_called()
         batch_workspace_history_mocks.instance.add_recently_opened.assert_not_called()
 
     # -------------------------------------------------------------------------
@@ -683,6 +693,7 @@ class TestBatchWorkspaceOpenLastBatch:
     def test_load_error_returns_false(
         self,
         batch_load_mock: Mock,
+        batch_workspace_dialogs_mocks: BatchWorkspaceDialogsMocks,
         batch_workspace_history_mocks: BatchWorkspaceHistoryMocks,
         batch_workspace: BatchWorkspace,
         recent_batches: list[Path],
@@ -690,6 +701,7 @@ class TestBatchWorkspaceOpenLastBatch:
         """A loader failure for the latest path leaves the workspace inactive."""
         # Arrange
         latest_batch = recent_batches[0]
+        workspace_dialogs = batch_workspace_dialogs_mocks.instance
         batch_workspace_history_mocks.instance.latest_opened = latest_batch
         batch_load_mock.return_value = (None, "invalid JSON")
 
@@ -700,6 +712,11 @@ class TestBatchWorkspaceOpenLastBatch:
         assert is_batch_open is False
         assert batch_workspace.current_batch is None
         batch_load_mock.assert_called_once_with(latest_batch)
+        workspace_dialogs.show_open_last_error.assert_called_once_with(
+            latest_batch.name,
+            "invalid JSON",
+        )
+        workspace_dialogs.show_open_last_success.assert_not_called()
         batch_workspace_history_mocks.instance.add_recently_opened.assert_not_called()
 
 
