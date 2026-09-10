@@ -621,7 +621,7 @@ class TestBatchLoad:
         file_path.write_text("arbitrary existing content", encoding="utf-8")
 
         # Act
-        loaded_batch, error_msg = Batch.load(file_path)
+        [loaded_batch, error_msg] = Batch.load(file_path)
 
         # Assert
         assert error_msg == ""
@@ -644,7 +644,7 @@ class TestBatchLoad:
         file_path = tmp_path / "missing.json"
 
         # Act
-        loaded_batch, error_msg = Batch.load(file_path)
+        [loaded_batch, error_msg] = Batch.load(file_path)
 
         # Assert
         assert loaded_batch is None
@@ -671,7 +671,7 @@ class TestBatchLoad:
         )
 
         # Act
-        loaded_batch, error_msg = Batch.load(file_path)
+        [loaded_batch, error_msg] = Batch.load(file_path)
 
         # Assert
         assert loaded_batch is None
