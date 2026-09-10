@@ -21,13 +21,15 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    # Local application
+    from tests.conftest import QtFileDialogMocks, QtMessageBoxMocks
+
     # Third-party
     from pytest_mock import MockerFixture
     from pytestqt.qtbot import QtBot
 
     # Standard library
     from pathlib import Path
-    from unittest.mock import MagicMock
 
 
 ###############################################################################
@@ -45,96 +47,8 @@ class QtDialogsContext:
 
 
 ###############################################################################
-### Test Doubles
-###############################################################################
-# -----------------------------------------------------------------------------
-@dataclass(frozen=True, slots=True)
-class QtFileDialogMocks:
-    """Expose blocking native file dialogs patched for tests."""
-
-    get_save_file_name: MagicMock
-    get_open_file_name: MagicMock
-
-
-# -----------------------------------------------------------------------------
-@dataclass(frozen=True, slots=True)
-class QtMessageBoxMocks:
-    """Expose blocking message-box operations patched for tests."""
-
-    critical: MagicMock
-    information: MagicMock
-    question: MagicMock
-    warning: MagicMock
-    exec: MagicMock
-
-
-###############################################################################
 ### Fixtures
 ###############################################################################
-# -----------------------------------------------------------------------------
-@pytest.fixture
-def qt_file_dialog_mocks(mocker: MockerFixture) -> QtFileDialogMocks:
-    """Patch blocking native file dialogs with canceled responses by default."""
-    # Setup
-    get_save_file_name_mock: MagicMock = mocker.patch.object(
-        bw_dialogs_module.QFileDialog,
-        "getSaveFileName",
-        autospec=True,
-        return_value=("", ""),
-    )
-    get_open_file_name_mock: MagicMock = mocker.patch.object(
-        bw_dialogs_module.QFileDialog,
-        "getOpenFileName",
-        autospec=True,
-        return_value=("", ""),
-    )
-
-    return QtFileDialogMocks(
-        get_save_file_name=get_save_file_name_mock,
-        get_open_file_name=get_open_file_name_mock,
-    )
-
-
-# -----------------------------------------------------------------------------
-@pytest.fixture
-def qt_message_box_mocks(mocker: MockerFixture) -> QtMessageBoxMocks:
-    """Patch only blocking QMessageBox operations while keeping real Qt widgets."""
-    # Setup
-    critical_mock: MagicMock = mocker.patch.object(
-        bw_dialogs_module.QMessageBox,
-        "critical",
-        autospec=True,
-    )
-    information_mock: MagicMock = mocker.patch.object(
-        bw_dialogs_module.QMessageBox,
-        "information",
-        autospec=True,
-    )
-    question_mock: MagicMock = mocker.patch.object(
-        bw_dialogs_module.QMessageBox,
-        "question",
-        autospec=True,
-    )
-    warning_mock: MagicMock = mocker.patch.object(
-        bw_dialogs_module.QMessageBox,
-        "warning",
-        autospec=True,
-    )
-    exec_mock: MagicMock = mocker.patch.object(
-        bw_dialogs_module.QMessageBox,
-        "exec",
-        autospec=True,
-    )
-
-    return QtMessageBoxMocks(
-        critical=critical_mock,
-        information=information_mock,
-        question=question_mock,
-        warning=warning_mock,
-        exec=exec_mock,
-    )
-
-
 # -----------------------------------------------------------------------------
 @pytest.fixture
 def qt_dialogs_context(mocker: MockerFixture, qtbot: QtBot) -> QtDialogsContext:
