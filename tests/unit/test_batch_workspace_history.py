@@ -203,13 +203,13 @@ class TestWorkspaceHistoryAddRecentlyOpened:
         # Arrange
         new_batch_path = (tmp_path / "newest.json").resolve()
 
-        def check_recent_batches_signal(recent_batch_paths: list[Path]) -> bool:
+        def capture_recent_batches_signal(recent_batch_paths: list[Path]) -> bool:
             return recent_batch_paths == [new_batch_path]
 
         # Act
         with qtbot.waitSignal(
             workspace_history.recent_batches_changed,
-            check_params_cb=check_recent_batches_signal,
+            check_params_cb=capture_recent_batches_signal,
         ):
             workspace_history.add_recently_opened(new_batch_path)
 
@@ -326,13 +326,13 @@ class TestWorkspaceHistoryClearRecentlyOpened:
         workspace_history._recent_batches = [new_batch_path]  # pyright: ignore[reportPrivateUsage]
         user_settings_mock.reset_mock()
 
-        def check_recent_batches_signal(recent_batch_paths: list[Path]) -> bool:
+        def capture_recent_batches_signal(recent_batch_paths: list[Path]) -> bool:
             return recent_batch_paths == []
 
         # Act
         with qtbot.waitSignal(
             workspace_history.recent_batches_changed,
-            check_params_cb=check_recent_batches_signal,
+            check_params_cb=capture_recent_batches_signal,
         ):
             workspace_history.clear_recently_opened()
 
@@ -374,13 +374,13 @@ class TestWorkspaceHistoryLoadFromSettings:
         ]
         user_settings_mock.value.return_value = recent_batches_paths
 
-        def check_recent_batches_signal(recent_batch_paths: list[Path]) -> bool:
+        def capture_recent_batches_signal(recent_batch_paths: list[Path]) -> bool:
             return recent_batch_paths == recent_batches_paths
 
         # Act
         with qtbot.waitSignal(
             workspace_history.recent_batches_changed,
-            check_params_cb=check_recent_batches_signal,
+            check_params_cb=capture_recent_batches_signal,
         ):
             workspace_history.load_from_settings(user_settings_mock)
 
@@ -410,13 +410,13 @@ class TestWorkspaceHistoryLoadFromSettings:
         # Arrange
         user_settings_mock.value.return_value = []
 
-        def check_recent_batches_signal(recent_batch_paths: list[Path]) -> bool:
+        def capture_recent_batches_signal(recent_batch_paths: list[Path]) -> bool:
             return recent_batch_paths == []
 
         # Act
         with qtbot.waitSignal(
             workspace_history.recent_batches_changed,
-            check_params_cb=check_recent_batches_signal,
+            check_params_cb=capture_recent_batches_signal,
         ):
             workspace_history.load_from_settings(user_settings_mock)
 
@@ -458,13 +458,13 @@ class TestWorkspaceHistorySaveToSettings:
         user_settings_mock.value.return_value = recent_batches_paths
         user_settings_mock.reset_mock()
 
-        def check_recent_batches_signal(recent_batch_paths: list[Path]) -> bool:
+        def capture_recent_batches_signal(recent_batch_paths: list[Path]) -> bool:
             return recent_batch_paths == recent_batches_paths
 
         # Act
         with qtbot.waitSignal(
             workspace_history.recent_batches_changed,
-            check_params_cb=check_recent_batches_signal,
+            check_params_cb=capture_recent_batches_signal,
         ):
             workspace_history.save_to_settings(user_settings_mock)
 

@@ -41,7 +41,7 @@ class SettingNotFoundError(Exception):
         Args:
             setting_name (str): Name of the setting that could not be found.
         """
-        msg = f'The setting with the name "{setting_name}" cannot be found'
+        msg = f"The setting with the name '{setting_name}'' cannot be found"
         super().__init__(msg)
 
 

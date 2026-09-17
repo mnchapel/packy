@@ -110,8 +110,8 @@ def translator_installation_context(
 ) -> TranslatorInstallationContext:
     """Provide a localization service with isolated translation dependencies."""
     # Setup
-    qt_translator_mock: MagicMock = mocker.Mock(name="qt_translator")
-    app_translator_mock: MagicMock = mocker.Mock(name="app_translator")
+    qt_translator_mock: Mock = mocker.Mock(name="qt_translator")
+    app_translator_mock: Mock = mocker.Mock(name="app_translator")
 
     translator_cls_mock: MagicMock = mocker.patch.object(
         localization_module,

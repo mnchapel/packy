@@ -35,7 +35,7 @@ if TYPE_CHECKING:
 ### Helpers
 ###############################################################################
 # -----------------------------------------------------------------------------
-def check_signal_without_args() -> bool:
+def capture_signal_without_args() -> bool:
     """Return a signal that carries no arguments."""
     return True
 
@@ -1042,13 +1042,13 @@ class TestBatchWorkspaceActivation:
         # Arrange
         assert batch_workspace.current_batch is None
 
-        def check_batch_opened_signal(new_batch: Batch) -> bool:
+        def capture_batch_opened_signal(new_batch: Batch) -> bool:
             return new_batch == batch
 
         # Act
         with qtbot.waitSignal(
             batch_workspace.batch_opened,
-            check_params_cb=check_batch_opened_signal,
+            check_params_cb=capture_batch_opened_signal,
         ):
             is_batch_activate = batch_workspace.activate_batch(batch)
 
@@ -1106,10 +1106,10 @@ class TestBatchWorkspaceActivation:
         assert batch.is_modified is False
         batch_workspace_history_mocks.instance.add_recently_opened.reset_mock()
 
-        def check_batch_closed_signal(old_batch: Batch) -> bool:
+        def capture_batch_closed_signal(old_batch: Batch) -> bool:
             return old_batch == batch
 
-        def check_batch_opened_signal(new_batch: Batch) -> bool:
+        def capture_batch_opened_signal(new_batch: Batch) -> bool:
             return new_batch == replacement_batch
 
         # Act
@@ -1120,8 +1120,8 @@ class TestBatchWorkspaceActivation:
                     batch_workspace.batch_opened,
                 ],
                 check_params_cbs=[
-                    check_batch_closed_signal,
-                    check_batch_opened_signal,
+                    capture_batch_closed_signal,
+                    capture_batch_opened_signal,
                 ],
                 order="strict",
             ),
@@ -1197,7 +1197,7 @@ class TestBatchWorkspaceSaveCurrentBatch:
         # Act
         with qtbot.waitSignal(
             batch_workspace.batch_saved,
-            check_params_cb=check_signal_without_args,
+            check_params_cb=capture_signal_without_args,
         ):
             is_batch_saved = batch_workspace.save_current_batch()
 
@@ -1289,7 +1289,7 @@ class TestBatchWorkspaceSaveCurrentBatchAs:
         # Act
         with qtbot.waitSignal(
             batch_workspace.batch_saved,
-            check_params_cb=check_signal_without_args,
+            check_params_cb=capture_signal_without_args,
         ):
             is_batch_saved = batch_workspace.save_current_batch_as()
 
@@ -1442,13 +1442,13 @@ class TestBatchWorkspaceCloseCurrentBatch:
         assert batch_workspace.current_batch is unmodified_active_batch
         assert unmodified_active_batch.parent() is batch_workspace
 
-        def check_batch_closed_signal(old_batch: Batch) -> bool:
+        def capture_batch_closed_signal(old_batch: Batch) -> bool:
             return old_batch == unmodified_active_batch
 
         # Act
         with qtbot.waitSignal(
             batch_workspace.batch_closed,
-            check_params_cb=check_batch_closed_signal,
+            check_params_cb=capture_batch_closed_signal,
         ):
             is_batch_closed = batch_workspace.close_current_batch()
 
@@ -1481,7 +1481,7 @@ class TestBatchWorkspaceCloseCurrentBatch:
         assert batch_workspace.current_batch is modified_active_batch
         assert modified_active_batch.parent() is batch_workspace
 
-        def check_batch_closed_signal(old_batch: Batch) -> bool:
+        def capture_batch_closed_signal(old_batch: Batch) -> bool:
             return old_batch == modified_active_batch
 
         # Act
@@ -1492,8 +1492,8 @@ class TestBatchWorkspaceCloseCurrentBatch:
                     batch_workspace.batch_closed,
                 ],
                 check_params_cbs=[
-                    check_signal_without_args,
-                    check_batch_closed_signal,
+                    capture_signal_without_args,
+                    capture_batch_closed_signal,
                 ],
                 order="strict",
             ),
@@ -1569,7 +1569,7 @@ class TestBatchWorkspaceCloseCurrentBatch:
         workspace_dialogs = batch_workspace_dialogs_mocks.instance
         workspace_dialogs.confirm_unsaved_changes.return_value = SaveDecision.DISCARD
 
-        def check_batch_closed_signal(old_batch: Batch) -> bool:
+        def capture_batch_closed_signal(old_batch: Batch) -> bool:
             return old_batch == modified_active_batch
 
         # Act
@@ -1577,7 +1577,7 @@ class TestBatchWorkspaceCloseCurrentBatch:
             qtbot.assertNotEmitted(batch_workspace.batch_saved),
             qtbot.waitSignal(
                 batch_workspace.batch_closed,
-                check_params_cb=check_batch_closed_signal,
+                check_params_cb=capture_batch_closed_signal,
             ),
         ):
             is_batch_closed = batch_workspace.close_current_batch()

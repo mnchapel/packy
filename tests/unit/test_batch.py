@@ -36,31 +36,31 @@ type ArchiverSettingValue = Archiver.Format | Archiver.CompressionLevel | Archiv
 
 
 # -----------------------------------------------------------------------------
-def check_modified_signal(is_modified: bool) -> bool:  # noqa: FBT001
+def check_is_modified_signal(is_modified: bool) -> bool:  # noqa: FBT001
     """Return whether a modified_changed signal reports a modified batch."""
     return is_modified is True
 
 
 # -----------------------------------------------------------------------------
-def check_unmodified_signal(is_modified: bool) -> bool:  # noqa: FBT001
+def check_is_unmodified_signal(is_modified: bool) -> bool:  # noqa: FBT001
     """Return whether a modified_changed signal reports an unmodified batch."""
     return is_modified is False
 
 
 # -----------------------------------------------------------------------------
-def check_signal_without_args() -> bool:
+def capture_signal_without_args() -> bool:
     """Return a signal that carries no arguments."""
     return True
 
 
 # -----------------------------------------------------------------------------
-def check_job_signal(expected_job: str) -> Callable[[str], bool]:
+def capture_job_signal(expected_job: str) -> Callable[[str], bool]:
     """Return a signal predicate matching one expected job."""
 
-    def check_job(job: str) -> bool:
+    def capture_job(job: str) -> bool:
         return job == expected_job
 
-    return check_job
+    return capture_job
 
 
 # -----------------------------------------------------------------------------
@@ -75,7 +75,12 @@ class SavedState:
 
 # -----------------------------------------------------------------------------
 def capture_saved_states(batch: Batch) -> list[SavedState]:
-    """Capture the public batch state whenever saved is emitted."""
+    """Capture the public batch state whenever saved is emitted.
+
+    This helper records an immediate snapshot of the batch's public state at the exact
+    moment the ``saved`` signal is triggered. It allows tests to verify that internal
+    properties are fully updated prior to notifying signal subscribers.
+    """
     saved_states: list[SavedState] = []
 
     def capture() -> None:
@@ -284,22 +289,22 @@ class TestBatchArchiverSettingsChanges:
         old_value = cast("ArchiverSettingValue", getattr(batch, property_name))
         signal = getattr(batch, signal_name)
 
-        def check_setting_signal(
+        def capture_setting_changed_signal(
             actual_old_value: ArchiverSettingValue,
             actual_new_value: ArchiverSettingValue,
         ) -> bool:
             return actual_old_value is old_value and actual_new_value is new_value
 
         # Act
-        with (
-            qtbot.waitSignal(
+        with qtbot.waitSignals(
+            [
                 signal,
-                check_params_cb=check_setting_signal,
-            ),
-            qtbot.waitSignal(
                 batch.modified_changed,
-                check_params_cb=check_modified_signal,
-            ),
+            ],
+            check_params_cbs=[
+                capture_setting_changed_signal,
+                check_is_modified_signal,
+            ],
         ):
             setattr(batch, property_name, new_value)
 
@@ -413,7 +418,7 @@ class TestBatchSave:
         batch = Batch(old_file_path)
         saved_states = capture_saved_states(batch)
 
-        def check_file_path_changed_signal(
+        def capture_file_path_changed_signal(
             actual_old_path: Path,
             actual_new_path: Path,
         ) -> bool:
@@ -428,8 +433,8 @@ class TestBatchSave:
                     batch.saved,
                 ],
                 check_params_cbs=[
-                    check_file_path_changed_signal,
-                    check_signal_without_args,
+                    capture_file_path_changed_signal,
+                    capture_signal_without_args,
                 ],
                 order="strict",
             ),
@@ -469,7 +474,7 @@ class TestBatchSave:
         batch._is_modified = True  # pyright: ignore[reportPrivateUsage]
         saved_states = capture_saved_states(batch)
 
-        def check_file_path_changed_signal(
+        def capture_file_path_changed_signal(
             actual_old_path: Path,
             actual_new_path: Path,
         ) -> bool:
@@ -483,9 +488,9 @@ class TestBatchSave:
                 batch.saved,
             ],
             check_params_cbs=[
-                check_file_path_changed_signal,
-                check_unmodified_signal,
-                check_signal_without_args,
+                capture_file_path_changed_signal,
+                check_is_unmodified_signal,
+                capture_signal_without_args,
             ],
             order="strict",
         ):
@@ -532,8 +537,8 @@ class TestBatchSave:
                     batch.saved,
                 ],
                 check_params_cbs=[
-                    check_unmodified_signal,
-                    check_signal_without_args,
+                    check_is_unmodified_signal,
+                    capture_signal_without_args,
                 ],
                 order="strict",
             ),
@@ -743,8 +748,8 @@ class TestBatchJobs:
                 batch.job_added,
             ],
             check_params_cbs=[
-                check_modified_signal,
-                check_job_signal("first"),
+                check_is_modified_signal,
+                capture_job_signal("first"),
             ],
             order="strict",
         ):
@@ -772,7 +777,7 @@ class TestBatchJobs:
         # Act
         with (
             qtbot.assertNotEmitted(batch.modified_changed),
-            qtbot.waitSignal(batch.job_added, check_params_cb=check_job_signal("second")),
+            qtbot.waitSignal(batch.job_added, check_params_cb=capture_job_signal("second")),
         ):
             batch.add_job("second")
 
@@ -808,8 +813,8 @@ class TestBatchJobs:
                 batch.job_removed,
             ],
             check_params_cbs=[
-                check_modified_signal,
-                check_job_signal("first"),
+                check_is_modified_signal,
+                capture_job_signal("first"),
             ],
             order="strict",
         ):
