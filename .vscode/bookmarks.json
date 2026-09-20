@@ -1,0 +1,79 @@
+{
+	"files": [
+		{
+			"path": "README.md",
+			"bookmarks": [
+				{
+					"line": 248,
+					"column": 3,
+					"label": ""
+				},
+				{
+					"line": 417,
+					"column": 17,
+					"label": ""
+				}
+			]
+		},
+		{
+			"path": "packy/ui/main_window.py",
+			"bookmarks": [
+				{
+					"line": 207,
+					"column": 24,
+					"label": ""
+				},
+				{
+					"line": 253,
+					"column": 17,
+					"label": ""
+				}
+			]
+		},
+		{
+			"path": ".vscode/tasks.json",
+			"bookmarks": [
+				{
+					"line": 60,
+					"column": 37,
+					"label": ""
+				}
+			]
+		},
+		{
+			"path": "packy/core/batch_workspace.py",
+			"bookmarks": [
+				{
+					"line": 307,
+					"column": 28,
+					"label": ""
+				},
+				{
+					"line": 444,
+					"column": 27,
+					"label": ""
+				}
+			]
+		},
+		{
+			"path": "tests/unit/test_batch_workspace_OLD.py",
+			"bookmarks": [
+				{
+					"line": 396,
+					"column": 46,
+					"label": ""
+				}
+			]
+		},
+		{
+			"path": "tests/functional/conftest.py",
+			"bookmarks": [
+				{
+					"line": 95,
+					"column": 9,
+					"label": ""
+				}
+			]
+		}
+	]
+}

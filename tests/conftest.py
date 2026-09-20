@@ -108,12 +108,21 @@ def app(qapp: QApplication) -> Generator[App]:
     assert isinstance(qapp, App)
 
     try:
+        assert qapp.state is AppState.CREATED
         qapp.dispose()
         yield qapp
     finally:
         # Teardown
-        qapp.dispose()
+        if qapp.state is AppState.INITIALIZED:
+            qapp.dispose()
+        if qapp.state is AppState.RUNNING:
+            QApplication.quit() # Should call app.post_run() and FINISH transition
+            assert qapp.state is AppState.FINISHED
+        if qapp.state is AppState.FINISHED:
+            qapp.dispose()
 
+        assert qapp.state is AppState.DISPOSED
+        qapp._lifecycle._state = AppState.CREATED # pyright: ignore[reportPrivateUsage] Forces the app to be in the first state to restore it to its initial state.
 
 # -----------------------------------------------------------------------------
 @pytest.fixture
@@ -141,7 +150,7 @@ def initialized_app(
 ) -> App:
     """Provide an initialized PackY application."""
     app.initialize(app_config)
-    assert app.is_initialized is True
+    assert app.state is AppState.INITIALIZED
     return app
 
 
