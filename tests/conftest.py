@@ -109,18 +109,14 @@ def app(qapp: QApplication) -> Generator[App]:
 
     try:
         assert qapp.state is AppState.CREATED
-        qapp.dispose()
         yield qapp
     finally:
         # Teardown
-        if qapp.state is AppState.INITIALIZED:
-            qapp.dispose()
         if qapp.state is AppState.RUNNING:
-            QApplication.quit() # Should call app.post_run() and FINISH transition
+            qapp.post_run()
             assert qapp.state is AppState.FINISHED
-        if qapp.state is AppState.FINISHED:
-            qapp.dispose()
 
+        qapp.dispose()
         assert qapp.state is AppState.DISPOSED
         qapp._lifecycle._state = AppState.CREATED # pyright: ignore[reportPrivateUsage] Forces the app to be in the first state to restore it to its initial state.
 

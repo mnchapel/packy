@@ -56,20 +56,10 @@
 			]
 		},
 		{
-			"path": "tests/unit/test_batch_workspace_OLD.py",
-			"bookmarks": [
-				{
-					"line": 396,
-					"column": 46,
-					"label": ""
-				}
-			]
-		},
-		{
 			"path": "tests/functional/conftest.py",
 			"bookmarks": [
 				{
-					"line": 95,
+					"line": 97,
 					"column": 9,
 					"label": ""
 				}
