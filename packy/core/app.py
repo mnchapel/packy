@@ -134,6 +134,9 @@ class App(QApplication):
             self._main_window.restore_last_batch()
             QtCore.qDebug("Previous app state restored.")
 
+        # Keep exec() outside the transition scope: transition.RUN moves the lifecycle
+        # to RUNNING, so the event loop must start only after that transition completes
+        # and the state changed.
         return self.exec()
 
     # -------------------------------------------------------------------------

@@ -8,6 +8,7 @@ See LICENSE.md file for more information.
 
 # Future library
 from __future__ import annotations
+from unittest.mock import call
 
 # Local application
 import packy.core.app as app_module
@@ -260,11 +261,11 @@ class TestAppLaunch:
     # -------------------------------------------------------------------------
     @pytest.mark.scenario_failure_error_path
     @pytest.mark.technique_decision_table
-    def test_configuration_error_propagates_after_disposal(
+    def test_configuration_error_raises_after_disposal(
         self,
         mocker: MockerFixture,
     ) -> None:
-        """A configuration construction error propagates after disposal."""
+        """A configuration construction error raises after disposal."""
         # Arrange
         error = ConfigurationError("Configuration failed")
         app_config_cls_mock = mocker.patch.object(
@@ -293,11 +294,11 @@ class TestAppLaunch:
     # -------------------------------------------------------------------------
     @pytest.mark.scenario_failure_error_path
     @pytest.mark.technique_decision_table
-    def test_initialization_error_propagates_after_disposal(
+    def test_initialization_error_raises_after_disposal(
         self,
         mocker: MockerFixture,
     ) -> None:
-        """An initialization error propagates after disposal and skips run."""
+        """An initialization error raises after disposal and skips run."""
         # Arrange
         config = mocker.sentinel.config
         app_config_cls_mock = mocker.patch.object(
@@ -328,11 +329,11 @@ class TestAppLaunch:
     # -------------------------------------------------------------------------
     @pytest.mark.scenario_failure_error_path
     @pytest.mark.technique_decision_table
-    def test_execution_error_propagates_after_disposal(
+    def test_execution_error_raises_after_disposal(
         self,
         mocker: MockerFixture,
     ) -> None:
-        """A run exception propagates after disposal."""
+        """A run exception raises after disposal."""
         # Arrange
         config = mocker.sentinel.config
         mocker.patch.object(
@@ -396,18 +397,16 @@ class TestAppInitialize:
         dependency_mocks.localization.install_translators.assert_called_once_with(
             app_config.DEFAULT_LANGUAGE_CODE,
         )
-
         assert app._config is app_config  # pyright: ignore[reportPrivateUsage]
         assert app.settings is dependency_mocks.settings
         dependency_mocks.settings_cls.assert_called_once_with(app)
-
         assert app.main_window is None
         dependency_mocks.main_window_cls.assert_not_called()
 
     # -------------------------------------------------------------------------
     @pytest.mark.scenario_invalid_input
     @pytest.mark.technique_state_transition
-    def test_second_initialization_propagates_lifecycle_error_without_replacing_services(
+    def test_second_initialization_raises_lifecycle_error_without_replacing_services(
         self,
         app_context: AppContext,
         dependency_mocks: AppDependencyMocks,
@@ -441,35 +440,34 @@ class TestAppInitialize:
         dependency_mocks.localization.install_translators.assert_called_once_with(
             app_config.DEFAULT_LANGUAGE_CODE,
         )
-
         assert app._config is app_config  # pyright: ignore[reportPrivateUsage]
         assert app.settings is settings_before
         dependency_mocks.settings_cls.assert_called_once_with(app)
-
         assert app.main_window is None
         dependency_mocks.main_window_cls.assert_not_called()
 
     # -------------------------------------------------------------------------
     @pytest.mark.scenario_failure_error_path
     @pytest.mark.technique_state_transition
-    def test_localization_error_propagates_without_creating_settings(
+    def test_dependency_error_keep_created_state_and_allows_retry(
         self,
         app_context: AppContext,
         dependency_mocks: AppDependencyMocks,
         app_config: AppConfig,
     ) -> None:
-        """A localization failure propagates before settings are created."""
+        """A localization error rolls back the transition and permits retry."""
         # Arrange
         app = app_context.app
         lifecycle_mock = app_context.lifecycle_mock
 
         error = RuntimeError("Translation installation failed")
-        dependency_mocks.localization.install_translators.side_effect = error
+        dependency_mocks.localization.install_translators.side_effect = [error, None]
 
-        # Act / Assert
+        # Act - First try
         with pytest.raises(RuntimeError) as exc_info:
             app.initialize(app_config)
 
+        # Assert - First try
         assert exc_info.value is error
         lifecycle_mock.transition.assert_called_once_with(Transition.INITIALIZE)
         assert app.state is AppState.CREATED
@@ -479,11 +477,35 @@ class TestAppInitialize:
         dependency_mocks.localization.install_translators.assert_called_once_with(
             app_config.DEFAULT_LANGUAGE_CODE,
         )
-
         assert app._config is None  # pyright: ignore[reportPrivateUsage]
         assert app.settings is None
         dependency_mocks.settings_cls.assert_not_called()
+        assert app.main_window is None
+        dependency_mocks.main_window_cls.assert_not_called()
 
+        # Act - Second try
+        app.initialize(app_config)
+
+        # Assert - Second try
+        assert exc_info.value is error
+        assert lifecycle_mock.transition.call_args_list == [
+            call(Transition.INITIALIZE),
+            call(Transition.INITIALIZE),
+        ]
+        assert app.state is AppState.CREATED
+
+        assert app.localization is dependency_mocks.localization
+        assert dependency_mocks.localization_cls.call_args_list == [
+            call(),
+            call(),
+        ]
+        assert dependency_mocks.localization.install_translators.call_args_list == [
+            call(app_config.DEFAULT_LANGUAGE_CODE),
+            call(app_config.DEFAULT_LANGUAGE_CODE),
+        ]
+        assert app._config is app_config  # pyright: ignore[reportPrivateUsage]
+        assert app.settings is dependency_mocks.settings
+        dependency_mocks.settings_cls.assert_called_once_with(app)
         assert app.main_window is None
         dependency_mocks.main_window_cls.assert_not_called()
 
@@ -545,27 +567,28 @@ class TestAppRun:
     # -------------------------------------------------------------------------
     @pytest.mark.scenario_invalid_input
     @pytest.mark.technique_state_transition
-    def test_run_before_initialization_propagates_lifecycle_error(
+    def test_run_before_initialization_raises_lifecycle_error(
         self,
         app_context: AppContext,
         dependency_mocks: AppDependencyMocks,
         mocker: MockerFixture,
     ) -> None:
-        """Running before initialization is rejected without creating a window or calling exec."""
+        """Running before initialization is rejected without creating a window and calling exec."""
         # Arrange
         app = app_context.app
         lifecycle_mock = app_context.lifecycle_mock
 
+        app_exec_mock = mocker.patch.object(
+            app,
+            "exec",
+            autospec=True,
+            return_value=2,
+        )
         error = LifecycleTransitionNotAllowedError(
             Transition.RUN,
             AppState.CREATED,
         )
         lifecycle_mock.transition.side_effect = error
-        app_exec_mock = mocker.patch.object(
-            app,
-            "exec",
-            autospec=True,
-        )
 
         # Act / Assert
         with pytest.raises(LifecycleTransitionNotAllowedError) as exc_info:
@@ -590,24 +613,23 @@ class TestAppRun:
     # -------------------------------------------------------------------------
     @pytest.mark.scenario_failure_error_path
     @pytest.mark.technique_state_transition
-    def test_main_window_restoration_error_propagates_without_entering_event_loop(
+    def test_restoration_error_raises_error_keeps_initialized_state_and_allows_retry(
         self,
         initialized_app_context: InitializedAppContext,
         mocker: MockerFixture,
     ) -> None:
-        """A main window restoration error propagates before event-loop entry."""
+        """A main window restoration error raises before event-loop entry."""
         # Arrange
         initialized_app = initialized_app_context.app_context.app
         app_config = initialized_app_context.app_config
         dependency_mocks = initialized_app_context.dependency_mocks
         lifecycle_mock = initialized_app_context.app_context.lifecycle_mock
 
-        error = RuntimeError("Restoration failed")
-        dependency_mocks.main_window.restore_last_batch.side_effect = error
         app_exec_mock = mocker.patch.object(
             initialized_app,
             "exec",
             autospec=True,
+            return_value=2,
         )
         call_stack_mock = mocker.Mock(name="app_run_call_stack")
         call_stack_mock.attach_mock(
@@ -619,14 +641,16 @@ class TestAppRun:
             "main_window",
         )
         call_stack_mock.attach_mock(app_exec_mock, "exec")
+        error = RuntimeError("Restoration failed")
+        dependency_mocks.main_window.restore_last_batch.side_effect = [error, None]
 
-        # Act / Assert
+        # Act - First try
         with pytest.raises(RuntimeError) as exc_info:
-            initialized_app.run()
+            exit_code = initialized_app.run()
 
+        # Assert - First try
         assert exc_info.value is error
         lifecycle_mock.transition.assert_called_once_with(Transition.RUN)
-
         assert initialized_app.main_window is dependency_mocks.main_window
         assert call_stack_mock.mock_calls == [
             mocker.call.main_window_cls(
@@ -638,6 +662,36 @@ class TestAppRun:
             mocker.call.main_window.restore_last_batch(),
         ]
         app_exec_mock.assert_not_called()
+
+        # Act - Second try
+        exit_code = initialized_app.run()
+
+        # Assert - Second try
+        assert exit_code == 2
+        assert exc_info.value is error
+        assert lifecycle_mock.transition.call_args_list == [
+            call(Transition.RUN),
+            call(Transition.RUN),
+        ]
+        assert initialized_app.main_window is dependency_mocks.main_window
+        assert call_stack_mock.mock_calls == [
+            mocker.call.main_window_cls(
+                app_config,
+                initialized_app.settings,
+            ),
+            mocker.call.main_window.load_settings(),
+            mocker.call.main_window.show(),
+            mocker.call.main_window.restore_last_batch(),
+            mocker.call.main_window_cls(
+                app_config,
+                initialized_app.settings,
+            ),
+            mocker.call.main_window.load_settings(),
+            mocker.call.main_window.show(),
+            mocker.call.main_window.restore_last_batch(),
+            mocker.call.exec(),
+        ]
+        app_exec_mock.assert_called_once_with()
 
 
 ###############################################################################
@@ -682,7 +736,7 @@ class TestAppPostRun:
     # -------------------------------------------------------------------------
     @pytest.mark.scenario_invalid_input
     @pytest.mark.technique_state_transition
-    def test_post_run_before_run_propagates_lifecycle_error(
+    def test_post_run_before_run_raises_lifecycle_error(
         self,
         initialized_app_context: InitializedAppContext,
         mocker: MockerFixture,
@@ -712,12 +766,12 @@ class TestAppPostRun:
     # -------------------------------------------------------------------------
     @pytest.mark.scenario_failure_error_path
     @pytest.mark.technique_state_transition
-    def test_save_app_state_error_propagates_from_post_run(
+    def test_save_app_error_raises_error_keeps_running_state_and_allows_retry(
         self,
         initialized_app_context: InitializedAppContext,
         mocker: MockerFixture,
     ) -> None:
-        """A save app state error propagates after a successful transition."""
+        """A save error rolls back finish and permits a subsequent retry."""
         # Arrange
         initialized_app = initialized_app_context.app_context.app
         dependency_mocks = initialized_app_context.dependency_mocks
@@ -728,23 +782,38 @@ class TestAppPostRun:
             initialized_app,
             "exec",
             autospec=True,
-            return_value=0,
+            return_value=2,
         )
 
         initialized_app.run()
         reset_lifecycle_mock_calls(initialized_app_context.app_context)
-
         error = RuntimeError("State save failed")
-        dependency_mocks.main_window.save_settings.side_effect = error
+        dependency_mocks.main_window.save_settings.side_effect = [error, None]
 
-        # Act / Assert
+        # Act - First try
         with pytest.raises(RuntimeError) as exc_info:
             initialized_app.post_run()
 
+        # Assert - First try
         assert exc_info.value is error
         lifecycle_mock.transition.assert_called_once_with(Transition.FINISH)
         save_app_state_spy.assert_called_once_with()
         dependency_mocks.main_window.save_settings.assert_called_once_with()
+
+        # Act - Second try
+        initialized_app.post_run()
+
+        # Assert - Second try
+        assert exc_info.value is error
+        assert lifecycle_mock.transition.call_args_list == [
+            call(Transition.FINISH),
+            call(Transition.FINISH),
+        ]
+        assert save_app_state_spy.call_count == 2
+        assert dependency_mocks.main_window.save_settings.call_args_list == [
+            call(),
+            call(),
+        ]
 
 
 ###############################################################################
@@ -754,12 +823,12 @@ class TestAppDispose:
     # -------------------------------------------------------------------------
     @pytest.mark.scenario_happy_path
     @pytest.mark.technique_state_transition
-    def test_finished_app_clears_services_and_main_window(
+    def test_finished_app_clears_services_and_window_reference(
         self,
         initialized_app_context: InitializedAppContext,
         mocker: MockerFixture,
     ) -> None:
-        """Disposal after finishing clears the retained window reference."""
+        """Disposal from FINISHED clears the window and service references."""
         # Arrange
         initialized_app = initialized_app_context.app_context.app
         lifecycle_mock = initialized_app_context.app_context.lifecycle_mock
@@ -788,11 +857,11 @@ class TestAppDispose:
     # -------------------------------------------------------------------------
     @pytest.mark.scenario_alternate_path
     @pytest.mark.technique_state_transition
-    def test_disposing_after_initializing_clears_services_and_main_window(
+    def test_initialized_app_clears_services_and_enters_disposed_state(
         self,
         initialized_app_context: InitializedAppContext,
     ) -> None:
-        """Accepted disposal clears all application-owned service references."""
+        """Disposal from INITIALIZED clears all service references and becomes terminal."""
         # Arrange
         initialized_app = initialized_app_context.app_context.app
         lifecycle_mock = initialized_app_context.app_context.lifecycle_mock
@@ -811,15 +880,15 @@ class TestAppDispose:
     @pytest.mark.scenario_alternate_path
     @pytest.mark.technique_branch
     @pytest.mark.technique_state_transition
-    def test_disposing_on_already_disposed_has_no_effect(
+    def test_repeated_disposal_is_idempotent_from_created_state(
         self,
         app_context: AppContext,
     ) -> None:
-        """An already-disposed application returns without changing app state."""
+        """Repeated disposal returns without changing app state."""
         # Arrange
         app = app_context.app
         lifecycle_mock = app_context.lifecycle_mock
-        lifecycle_mock.state = AppState.DISPOSED
+        lifecycle_mock.state = AppState.FINISHED
 
         assert app.localization is None
         assert app._config is None  # pyright: ignore[reportPrivateUsage]
@@ -828,9 +897,12 @@ class TestAppDispose:
 
         # Act
         app.dispose()
+        lifecycle_mock.state = AppState.DISPOSED
+        app.dispose()
 
         # Assert
-        lifecycle_mock.transition.assert_not_called()
+        assert lifecycle_mock.transition.call_count == 1
+        assert app.state is AppState.DISPOSED
         assert app.localization is None
         assert app._config is None  # pyright: ignore[reportPrivateUsage]
         assert app.settings is None
@@ -873,7 +945,7 @@ class TestAppDispose:
     # -------------------------------------------------------------------------
     @pytest.mark.scenario_invalid_input
     @pytest.mark.technique_state_transition
-    def test_disposal_while_running_propagates_lifecycle_error_and_preserves_services(
+    def test_disposal_while_running_raises_lifecycle_error_and_preserves_services(
         self,
         initialized_app_context: InitializedAppContext,
         mocker: MockerFixture,
