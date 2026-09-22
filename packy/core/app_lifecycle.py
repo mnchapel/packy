@@ -66,8 +66,14 @@ class LifecycleTransitionInProgressError(LifecycleError):
         Args:
             transition (Transition): Transition already in progress.
         """
+        self._transition = transition
         msg = f"Lifecycle transition '{transition.name}' is already in progress."
         super().__init__(msg)
+
+    @property
+    def transition(self) -> Transition:
+        """The disallowed transition."""
+        return self._transition
 
 
 ###############################################################################
@@ -76,8 +82,8 @@ class LifecycleTransitionNotAllowedError(LifecycleError):
 
     def __init__(
         self,
-        transition: Transition,
         state: AppState,
+        transition: Transition,
     ) -> None:
         """Initialize the error for a disallowed lifecycle transition.
 
@@ -85,20 +91,20 @@ class LifecycleTransitionNotAllowedError(LifecycleError):
             transition (Transition): Transition that was requested.
             state (AppState): State from which the transition was requested.
         """
-        self._transition = transition
         self._state = state
+        self._transition = transition
         msg = f"Transition '{transition.name}' is not allowed from state '{state.name}'."
         super().__init__(msg)
-
-    @property
-    def transition(self) -> Transition:
-        """The disallowed transition."""
-        return self._transition
 
     @property
     def state(self) -> AppState:
         """The state from which the disallowed transition was requested."""
         return self._state
+
+    @property
+    def transition(self) -> Transition:
+        """The disallowed transition."""
+        return self._transition
 
 
 ###############################################################################
@@ -187,8 +193,8 @@ class AppLifecycle:
             target_state = self._TRANSITIONS[self._state][transition]
         except KeyError:
             raise LifecycleTransitionNotAllowedError(
-                transition,
                 self._state,
+                transition,
             ) from None
 
         self._transition = transition

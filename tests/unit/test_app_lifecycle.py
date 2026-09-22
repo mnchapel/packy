@@ -297,6 +297,8 @@ class TestAppLifecycleTransitions:
             pass
 
         # Assert
+        assert exc_info.value.state is source_state
+        assert exc_info.value.transition is transition
         assert re.search(
             rf"'{re.escape(transition.name)}'.*'{re.escape(source_state.name)}'",
             str(exc_info.value),
@@ -324,6 +326,7 @@ class TestAppLifecycleTransitions:
         state_after_outer_exit = lifecycle.state
 
         # Assert
+        assert exc_info.value.transition is Transition.INITIALIZE
         assert Transition.INITIALIZE.name in str(exc_info.value)
         assert state_after_rejection is AppState.CREATED
         assert state_after_outer_exit is AppState.INITIALIZED
