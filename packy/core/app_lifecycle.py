@@ -85,8 +85,20 @@ class LifecycleTransitionNotAllowedError(LifecycleError):
             transition (Transition): Transition that was requested.
             state (AppState): State from which the transition was requested.
         """
+        self._transition = transition
+        self._state = state
         msg = f"Transition '{transition.name}' is not allowed from state '{state.name}'."
         super().__init__(msg)
+
+    @property
+    def transition(self) -> Transition:
+        """The disallowed transition."""
+        return self._transition
+
+    @property
+    def state(self) -> AppState:
+        """The state from which the disallowed transition was requested."""
+        return self._state
 
 
 ###############################################################################

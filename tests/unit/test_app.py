@@ -8,13 +8,11 @@ See LICENSE.md file for more information.
 
 # Future library
 from __future__ import annotations
-from unittest.mock import call
 
 # Local application
 import packy.core.app as app_module
 from packy.core.app import App
 from packy.core.app_lifecycle import (
-    AppLifecycle,
     AppState,
     LifecycleTransitionNotAllowedError,
     Transition,
@@ -26,6 +24,7 @@ import pytest
 # Standard library
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
+from unittest.mock import call
 
 if TYPE_CHECKING:
     # Local application
@@ -36,18 +35,8 @@ if TYPE_CHECKING:
     from pytestqt.qtbot import QtBot
 
     # Standard library
-    from collections.abc import Generator
     from pathlib import Path
     from unittest.mock import MagicMock, Mock, NonCallableMagicMock
-
-
-###############################################################################
-### Helpers
-###############################################################################
-# -----------------------------------------------------------------------------
-def reset_lifecycle_mock_calls(context: AppContext) -> None:
-    """Clear lifecycle interaction history without changing configured behavior."""
-    context.lifecycle_mock.transition.reset_mock()
 
 
 ###############################################################################
@@ -59,13 +48,13 @@ class AppContext:
     """Expose an application with its isolated lifecycle dependency."""
 
     app: App
-    lifecycle_mock: MagicMock
+    lifecycle_transition_spy: MagicMock
 
 
 # -----------------------------------------------------------------------------
 @dataclass(frozen=True, slots=True)
 class InitializedAppContext:
-    """Expose an initialized application and its isolated dependencies."""
+    """Expose an initialized application with its configuration and isolated dependencies."""
 
     app_context: AppContext
     app_config: AppConfig
@@ -101,37 +90,15 @@ class AppDependencyMocks:
 def app_context(
     app: App,
     mocker: MockerFixture,
-) -> Generator[AppContext]:
+) -> AppContext:
     """Replace the shared application's real lifecycle with an isolated mock."""
     # Setup
-    lifecycle_mock: NonCallableMagicMock = mocker.create_autospec(
-        AppLifecycle,
-        instance=True,
-        spec_set=True,
-    )
-    transition_mock: MagicMock = mocker.MagicMock(
-        name="app_lifecycle_transition",
-    )
-    transition_mock.__exit__.return_value = False
+    lifecycle_transition_spy = mocker.spy(app._lifecycle, "transition")  # pyright: ignore[reportPrivateUsage]
 
-    lifecycle_mock.state = AppState.CREATED
-    lifecycle_mock.transition.return_value = transition_mock
-
-    mocker.patch.object(
-        app,
-        "_lifecycle",
-        lifecycle_mock,
+    return AppContext(
+        app=app,
+        lifecycle_transition_spy=lifecycle_transition_spy,
     )
-
-    try:
-        yield AppContext(
-            app=app,
-            lifecycle_mock=lifecycle_mock,
-        )
-    finally:
-        # Teardown
-        lifecycle_mock.state = AppState.DISPOSED
-        lifecycle_mock.transition.side_effect = None
 
 
 # -----------------------------------------------------------------------------
@@ -182,11 +149,9 @@ def initialized_app_context(
     app_config: AppConfig,
     dependency_mocks: AppDependencyMocks,
 ) -> InitializedAppContext:
-    """Provide an initialized App with lifecycle calls reset for the next action."""
+    """Provide an initialized application and its isolated dependencies."""
     # Setup
     app_context.app.initialize(app_config)
-    app_context.lifecycle_mock.state = AppState.INITIALIZED
-    reset_lifecycle_mock_calls(app_context)
 
     return InitializedAppContext(
         app_context=app_context,
@@ -207,15 +172,15 @@ class TestAppConstruction:
     @pytest.mark.technique_equivalence_partitioning
     def test_exposes_lifecycle_state_and_empty_services(
         self,
-        app_context: AppContext,
+        app: App,
     ) -> None:
         """The application exposes lifecycle state and initially empty services."""
         # Assert
-        assert app_context.app.objectName() == "App"
-        assert app_context.app.state is AppState.CREATED
-        assert app_context.app.localization is None
-        assert app_context.app.settings is None
-        assert app_context.app.main_window is None
+        assert app.objectName() == "App"
+        assert app.state is AppState.CREATED
+        assert app.localization is None
+        assert app.settings is None
+        assert app.main_window is None
 
 
 ###############################################################################
@@ -261,11 +226,11 @@ class TestAppLaunch:
     # -------------------------------------------------------------------------
     @pytest.mark.scenario_failure_error_path
     @pytest.mark.technique_decision_table
-    def test_configuration_error_raises_after_disposal(
+    def test_configuration_error_propagates_after_disposal(
         self,
         mocker: MockerFixture,
     ) -> None:
-        """A configuration construction error raises after disposal."""
+        """A configuration construction error propagates after disposal."""
         # Arrange
         error = ConfigurationError("Configuration failed")
         app_config_cls_mock = mocker.patch.object(
@@ -294,11 +259,11 @@ class TestAppLaunch:
     # -------------------------------------------------------------------------
     @pytest.mark.scenario_failure_error_path
     @pytest.mark.technique_decision_table
-    def test_initialization_error_raises_after_disposal(
+    def test_initialization_error_propagates_after_disposal(
         self,
         mocker: MockerFixture,
     ) -> None:
-        """An initialization error raises after disposal and skips run."""
+        """An initialization error propagates after disposal and skips run."""
         # Arrange
         config = mocker.sentinel.config
         app_config_cls_mock = mocker.patch.object(
@@ -329,11 +294,11 @@ class TestAppLaunch:
     # -------------------------------------------------------------------------
     @pytest.mark.scenario_failure_error_path
     @pytest.mark.technique_decision_table
-    def test_execution_error_raises_after_disposal(
+    def test_execution_error_propagates_after_disposal(
         self,
         mocker: MockerFixture,
     ) -> None:
-        """A run exception raises after disposal."""
+        """A run exception propagates after disposal."""
         # Arrange
         config = mocker.sentinel.config
         mocker.patch.object(
@@ -375,16 +340,17 @@ class TestAppInitialize:
         dependency_mocks: AppDependencyMocks,
         app_config: AppConfig,
     ) -> None:
-        """A valid configuration initializes Qt metadata and PackY services."""
+        """A valid configuration initializes Qt metadata and services."""
         # Arrange
         app = app_context.app
-        lifecycle_mock = app_context.lifecycle_mock
+        lifecycle_transition_spy: MagicMock = app_context.lifecycle_transition_spy
 
         # Act
         app.initialize(app_config)
 
         # Assert
-        lifecycle_mock.transition.assert_called_once_with(Transition.INITIALIZE)
+        assert app.state is AppState.INITIALIZED
+        lifecycle_transition_spy.assert_called_once_with(Transition.INITIALIZE)
 
         assert app.organizationName() == "PackY"
         assert app.organizationDomain() == "packy.com"
@@ -393,14 +359,14 @@ class TestAppInitialize:
         assert app.applicationVersion() == app_config.VERSION
 
         assert app.localization is dependency_mocks.localization
+        assert app._config is app_config  # pyright: ignore[reportPrivateUsage]
+        assert app.settings is dependency_mocks.settings
+        assert app.main_window is None
         dependency_mocks.localization_cls.assert_called_once_with()
         dependency_mocks.localization.install_translators.assert_called_once_with(
             app_config.DEFAULT_LANGUAGE_CODE,
         )
-        assert app._config is app_config  # pyright: ignore[reportPrivateUsage]
-        assert app.settings is dependency_mocks.settings
         dependency_mocks.settings_cls.assert_called_once_with(app)
-        assert app.main_window is None
         dependency_mocks.main_window_cls.assert_not_called()
 
     # -------------------------------------------------------------------------
@@ -412,38 +378,37 @@ class TestAppInitialize:
         dependency_mocks: AppDependencyMocks,
         app_config: AppConfig,
     ) -> None:
-        """A rejected second initialization preserves existing services."""
+        """Repeated initialization is rejected without replacing services."""
         # Arrange
         app = app_context.app
-        lifecycle_mock = app_context.lifecycle_mock
+        lifecycle_transition_spy = app_context.lifecycle_transition_spy
 
         app.initialize(app_config)
-        error = LifecycleTransitionNotAllowedError(
-            Transition.INITIALIZE,
-            AppState.INITIALIZED,
-        )
-        lifecycle_mock.transition.side_effect = error
-
         localization_before = app.localization
         settings_before = app.settings
-        reset_lifecycle_mock_calls(app_context)
 
-        # Act / Assert
+        # Act
         with pytest.raises(LifecycleTransitionNotAllowedError) as exc_info:
             app.initialize(app_config)
 
-        assert exc_info.value is error
-        lifecycle_mock.transition.assert_called_once_with(Transition.INITIALIZE)
+        # Assert
+        assert exc_info.value.state is AppState.INITIALIZED
+        assert exc_info.value.transition is Transition.INITIALIZE
+        assert app.state is AppState.INITIALIZED
+        assert lifecycle_transition_spy.call_args_list == [
+            call(Transition.INITIALIZE),
+            call(Transition.INITIALIZE),
+        ]
 
         assert app.localization is localization_before
+        assert app._config is app_config  # pyright: ignore[reportPrivateUsage]
+        assert app.settings is settings_before
+        assert app.main_window is None
         dependency_mocks.localization_cls.assert_called_once_with()
         dependency_mocks.localization.install_translators.assert_called_once_with(
             app_config.DEFAULT_LANGUAGE_CODE,
         )
-        assert app._config is app_config  # pyright: ignore[reportPrivateUsage]
-        assert app.settings is settings_before
         dependency_mocks.settings_cls.assert_called_once_with(app)
-        assert app.main_window is None
         dependency_mocks.main_window_cls.assert_not_called()
 
     # -------------------------------------------------------------------------
@@ -458,7 +423,7 @@ class TestAppInitialize:
         """A localization error rolls back the transition and permits retry."""
         # Arrange
         app = app_context.app
-        lifecycle_mock = app_context.lifecycle_mock
+        lifecycle_transition_spy = app_context.lifecycle_transition_spy
 
         error = RuntimeError("Translation installation failed")
         dependency_mocks.localization.install_translators.side_effect = [error, None]
@@ -469,32 +434,34 @@ class TestAppInitialize:
 
         # Assert - First try
         assert exc_info.value is error
-        lifecycle_mock.transition.assert_called_once_with(Transition.INITIALIZE)
         assert app.state is AppState.CREATED
+        lifecycle_transition_spy.assert_called_once_with(Transition.INITIALIZE)
 
         assert app.localization is dependency_mocks.localization
+        assert app._config is None  # pyright: ignore[reportPrivateUsage]
+        assert app.settings is None
+        assert app.main_window is None
         dependency_mocks.localization_cls.assert_called_once_with()
         dependency_mocks.localization.install_translators.assert_called_once_with(
             app_config.DEFAULT_LANGUAGE_CODE,
         )
-        assert app._config is None  # pyright: ignore[reportPrivateUsage]
-        assert app.settings is None
         dependency_mocks.settings_cls.assert_not_called()
-        assert app.main_window is None
         dependency_mocks.main_window_cls.assert_not_called()
 
         # Act - Second try
         app.initialize(app_config)
 
         # Assert - Second try
-        assert exc_info.value is error
-        assert lifecycle_mock.transition.call_args_list == [
+        assert app.state is AppState.INITIALIZED
+        assert lifecycle_transition_spy.call_args_list == [
             call(Transition.INITIALIZE),
             call(Transition.INITIALIZE),
         ]
-        assert app.state is AppState.CREATED
 
         assert app.localization is dependency_mocks.localization
+        assert app._config is app_config  # pyright: ignore[reportPrivateUsage]
+        assert app.settings is dependency_mocks.settings
+        assert app.main_window is None
         assert dependency_mocks.localization_cls.call_args_list == [
             call(),
             call(),
@@ -503,10 +470,7 @@ class TestAppInitialize:
             call(app_config.DEFAULT_LANGUAGE_CODE),
             call(app_config.DEFAULT_LANGUAGE_CODE),
         ]
-        assert app._config is app_config  # pyright: ignore[reportPrivateUsage]
-        assert app.settings is dependency_mocks.settings
         dependency_mocks.settings_cls.assert_called_once_with(app)
-        assert app.main_window is None
         dependency_mocks.main_window_cls.assert_not_called()
 
 
@@ -527,7 +491,7 @@ class TestAppRun:
         initialized_app = initialized_app_context.app_context.app
         app_config = initialized_app_context.app_config
         dependency_mocks = initialized_app_context.dependency_mocks
-        lifecycle_mock = initialized_app_context.app_context.lifecycle_mock
+        lifecycle_transition_spy = initialized_app_context.app_context.lifecycle_transition_spy
 
         app_exec_mock = mocker.patch.object(
             initialized_app,
@@ -550,8 +514,12 @@ class TestAppRun:
         exit_code = initialized_app.run()
 
         # Assert
-        lifecycle_mock.transition.assert_called_once_with(Transition.RUN)
         assert exit_code == 2
+        assert initialized_app.state is AppState.RUNNING
+        assert lifecycle_transition_spy.call_args_list == [
+            call(Transition.INITIALIZE),
+            call(Transition.RUN),
+        ]
         assert initialized_app.main_window is dependency_mocks.main_window
         assert call_stack_mock.mock_calls == [
             mocker.call.main_window_cls(
@@ -576,7 +544,7 @@ class TestAppRun:
         """Running before initialization is rejected without creating a window and calling exec."""
         # Arrange
         app = app_context.app
-        lifecycle_mock = app_context.lifecycle_mock
+        lifecycle_transition_spy = app_context.lifecycle_transition_spy
 
         app_exec_mock = mocker.patch.object(
             app,
@@ -584,36 +552,30 @@ class TestAppRun:
             autospec=True,
             return_value=2,
         )
-        error = LifecycleTransitionNotAllowedError(
-            Transition.RUN,
-            AppState.CREATED,
-        )
-        lifecycle_mock.transition.side_effect = error
 
-        # Act / Assert
+        # Act
         with pytest.raises(LifecycleTransitionNotAllowedError) as exc_info:
             app.run()
 
-        assert exc_info.value is error
-        lifecycle_mock.transition.assert_called_once_with(Transition.RUN)
+        # Assert
+        assert exc_info.value.state is AppState.CREATED
+        assert exc_info.value.transition is Transition.RUN
         assert app.state is AppState.CREATED
+        lifecycle_transition_spy.assert_called_once_with(Transition.RUN)
 
         assert app.localization is None
-        dependency_mocks.localization_cls.assert_not_called()
-
         assert app._config is None  # pyright: ignore[reportPrivateUsage]
         assert app.settings is None
-        dependency_mocks.settings_cls.assert_not_called()
-
         assert app.main_window is None
+        dependency_mocks.localization_cls.assert_not_called()
+        dependency_mocks.settings_cls.assert_not_called()
         dependency_mocks.main_window_cls.assert_not_called()
-
         app_exec_mock.assert_not_called()
 
     # -------------------------------------------------------------------------
     @pytest.mark.scenario_failure_error_path
     @pytest.mark.technique_state_transition
-    def test_restoration_error_raises_error_keeps_initialized_state_and_allows_retry(
+    def test_restoration_error_keeps_initialized_state_and_allows_retry(
         self,
         initialized_app_context: InitializedAppContext,
         mocker: MockerFixture,
@@ -623,7 +585,7 @@ class TestAppRun:
         initialized_app = initialized_app_context.app_context.app
         app_config = initialized_app_context.app_config
         dependency_mocks = initialized_app_context.dependency_mocks
-        lifecycle_mock = initialized_app_context.app_context.lifecycle_mock
+        lifecycle_transition_spy = initialized_app_context.app_context.lifecycle_transition_spy
 
         app_exec_mock = mocker.patch.object(
             initialized_app,
@@ -641,16 +603,22 @@ class TestAppRun:
             "main_window",
         )
         call_stack_mock.attach_mock(app_exec_mock, "exec")
+
         error = RuntimeError("Restoration failed")
         dependency_mocks.main_window.restore_last_batch.side_effect = [error, None]
 
         # Act - First try
         with pytest.raises(RuntimeError) as exc_info:
-            exit_code = initialized_app.run()
+            initialized_app.run()
 
         # Assert - First try
         assert exc_info.value is error
-        lifecycle_mock.transition.assert_called_once_with(Transition.RUN)
+        assert initialized_app.state is AppState.INITIALIZED
+        assert lifecycle_transition_spy.call_args_list == [
+            call(Transition.INITIALIZE),
+            call(Transition.RUN),
+        ]
+
         assert initialized_app.main_window is dependency_mocks.main_window
         assert call_stack_mock.mock_calls == [
             mocker.call.main_window_cls(
@@ -668,11 +636,13 @@ class TestAppRun:
 
         # Assert - Second try
         assert exit_code == 2
-        assert exc_info.value is error
-        assert lifecycle_mock.transition.call_args_list == [
+        assert initialized_app.state is AppState.RUNNING
+        assert lifecycle_transition_spy.call_args_list == [
+            call(Transition.INITIALIZE),
             call(Transition.RUN),
             call(Transition.RUN),
         ]
+
         assert initialized_app.main_window is dependency_mocks.main_window
         assert call_stack_mock.mock_calls == [
             mocker.call.main_window_cls(
@@ -707,11 +677,11 @@ class TestAppPostRun:
         mocker: MockerFixture,
         qtbot: QtBot,
     ) -> None:
-        """The real quit signal requests FINISH and saves app state."""
+        """The Qt quit signal saves app state, settings and enters in FINISHED state."""
         # Arrange
         initialized_app = initialized_app_context.app_context.app
         dependency_mocks = initialized_app_context.dependency_mocks
-        lifecycle_mock = initialized_app_context.app_context.lifecycle_mock
+        lifecycle_transition_spy = initialized_app_context.app_context.lifecycle_transition_spy
         save_app_state_spy = mocker.spy(initialized_app, "_save_app_state")
 
         mocker.patch.object(
@@ -722,14 +692,18 @@ class TestAppPostRun:
         )
 
         initialized_app.run()
-        reset_lifecycle_mock_calls(initialized_app_context.app_context)
 
         # Act
         with qtbot.waitSignal(initialized_app.aboutToQuit):
             initialized_app.aboutToQuit.emit()
 
         # Assert
-        lifecycle_mock.transition.assert_called_once_with(Transition.FINISH)
+        assert initialized_app.state is AppState.FINISHED
+        assert lifecycle_transition_spy.call_args_list == [
+            call(Transition.INITIALIZE),
+            call(Transition.RUN),
+            call(Transition.FINISH),
+        ]
         save_app_state_spy.assert_called_once_with()
         dependency_mocks.main_window.save_settings.assert_called_once_with()
 
@@ -745,28 +719,28 @@ class TestAppPostRun:
         # Arrange
         initialized_app = initialized_app_context.app_context.app
         dependency_mocks = initialized_app_context.dependency_mocks
-        lifecycle_mock = initialized_app_context.app_context.lifecycle_mock
+        lifecycle_transition_spy = initialized_app_context.app_context.lifecycle_transition_spy
         save_app_state_spy = mocker.spy(initialized_app, "_save_app_state")
 
-        error = LifecycleTransitionNotAllowedError(
-            Transition.FINISH,
-            AppState.INITIALIZED,
-        )
-        lifecycle_mock.transition.side_effect = error
-
-        # Act / Assert
+        # Act
         with pytest.raises(LifecycleTransitionNotAllowedError) as exc_info:
             initialized_app.post_run()
 
-        assert exc_info.value is error
-        lifecycle_mock.transition.assert_called_once_with(Transition.FINISH)
+        # Assert
+        assert exc_info.value.state is AppState.INITIALIZED
+        assert exc_info.value.transition is Transition.FINISH
+        assert initialized_app.state is AppState.INITIALIZED
+        assert lifecycle_transition_spy.call_args_list == [
+            call(Transition.INITIALIZE),
+            call(Transition.FINISH),
+        ]
         save_app_state_spy.assert_not_called()
         dependency_mocks.main_window.save_settings.assert_not_called()
 
     # -------------------------------------------------------------------------
     @pytest.mark.scenario_failure_error_path
     @pytest.mark.technique_state_transition
-    def test_save_app_error_raises_error_keeps_running_state_and_allows_retry(
+    def test_save_app_error_keeps_running_state_and_allows_retry(
         self,
         initialized_app_context: InitializedAppContext,
         mocker: MockerFixture,
@@ -775,7 +749,7 @@ class TestAppPostRun:
         # Arrange
         initialized_app = initialized_app_context.app_context.app
         dependency_mocks = initialized_app_context.dependency_mocks
-        lifecycle_mock = initialized_app_context.app_context.lifecycle_mock
+        lifecycle_transition_spy = initialized_app_context.app_context.lifecycle_transition_spy
         save_app_state_spy = mocker.spy(initialized_app, "_save_app_state")
 
         mocker.patch.object(
@@ -786,7 +760,6 @@ class TestAppPostRun:
         )
 
         initialized_app.run()
-        reset_lifecycle_mock_calls(initialized_app_context.app_context)
         error = RuntimeError("State save failed")
         dependency_mocks.main_window.save_settings.side_effect = [error, None]
 
@@ -796,7 +769,12 @@ class TestAppPostRun:
 
         # Assert - First try
         assert exc_info.value is error
-        lifecycle_mock.transition.assert_called_once_with(Transition.FINISH)
+        assert initialized_app.state is AppState.RUNNING
+        assert lifecycle_transition_spy.call_args_list == [
+            call(Transition.INITIALIZE),
+            call(Transition.RUN),
+            call(Transition.FINISH),
+        ]
         save_app_state_spy.assert_called_once_with()
         dependency_mocks.main_window.save_settings.assert_called_once_with()
 
@@ -804,8 +782,10 @@ class TestAppPostRun:
         initialized_app.post_run()
 
         # Assert - Second try
-        assert exc_info.value is error
-        assert lifecycle_mock.transition.call_args_list == [
+        assert initialized_app.state is AppState.FINISHED
+        assert lifecycle_transition_spy.call_args_list == [
+            call(Transition.INITIALIZE),
+            call(Transition.RUN),
             call(Transition.FINISH),
             call(Transition.FINISH),
         ]
@@ -831,7 +811,7 @@ class TestAppDispose:
         """Disposal from FINISHED clears the window and service references."""
         # Arrange
         initialized_app = initialized_app_context.app_context.app
-        lifecycle_mock = initialized_app_context.app_context.lifecycle_mock
+        lifecycle_transition_spy = initialized_app_context.app_context.lifecycle_transition_spy
 
         mocker.patch.object(
             initialized_app,
@@ -842,13 +822,18 @@ class TestAppDispose:
 
         initialized_app.run()
         initialized_app.post_run()
-        reset_lifecycle_mock_calls(initialized_app_context.app_context)
 
         # Act
         initialized_app.dispose()
 
         # Assert
-        lifecycle_mock.transition.assert_called_once_with(Transition.DISPOSE)
+        assert initialized_app.state is AppState.DISPOSED
+        assert lifecycle_transition_spy.call_args_list == [
+            call(Transition.INITIALIZE),
+            call(Transition.RUN),
+            call(Transition.FINISH),
+            call(Transition.DISPOSE),
+        ]
         assert initialized_app.localization is None
         assert initialized_app._config is None  # pyright: ignore[reportPrivateUsage]
         assert initialized_app.settings is None
@@ -864,13 +849,17 @@ class TestAppDispose:
         """Disposal from INITIALIZED clears all service references and becomes terminal."""
         # Arrange
         initialized_app = initialized_app_context.app_context.app
-        lifecycle_mock = initialized_app_context.app_context.lifecycle_mock
+        lifecycle_transition_spy = initialized_app_context.app_context.lifecycle_transition_spy
 
         # Act
         initialized_app.dispose()
 
         # Assert
-        lifecycle_mock.transition.assert_called_once_with(Transition.DISPOSE)
+        assert initialized_app.state is AppState.DISPOSED
+        assert lifecycle_transition_spy.call_args_list == [
+            call(Transition.INITIALIZE),
+            call(Transition.DISPOSE),
+        ]
         assert initialized_app.localization is None
         assert initialized_app._config is None  # pyright: ignore[reportPrivateUsage]
         assert initialized_app.settings is None
@@ -884,12 +873,12 @@ class TestAppDispose:
         self,
         app_context: AppContext,
     ) -> None:
-        """Repeated disposal returns without changing app state."""
+        """Repeated disposal just returns without changing the app state or any services."""
         # Arrange
         app = app_context.app
-        lifecycle_mock = app_context.lifecycle_mock
-        lifecycle_mock.state = AppState.FINISHED
+        lifecycle_transition_spy = app_context.lifecycle_transition_spy
 
+        assert app.state is AppState.CREATED
         assert app.localization is None
         assert app._config is None  # pyright: ignore[reportPrivateUsage]
         assert app.settings is None
@@ -897,12 +886,13 @@ class TestAppDispose:
 
         # Act
         app.dispose()
-        lifecycle_mock.state = AppState.DISPOSED
+        assert app.state is AppState.DISPOSED
         app.dispose()
 
         # Assert
-        assert lifecycle_mock.transition.call_count == 1
         assert app.state is AppState.DISPOSED
+        lifecycle_transition_spy.assert_called_once_with(Transition.DISPOSE)
+
         assert app.localization is None
         assert app._config is None  # pyright: ignore[reportPrivateUsage]
         assert app.settings is None
@@ -911,7 +901,7 @@ class TestAppDispose:
     # -------------------------------------------------------------------------
     @pytest.mark.scenario_invalid_input
     @pytest.mark.technique_state_transition
-    def test_disposed_state_allows_reinitialization(
+    def test_disposed_state_allows_initialization(
         self,
         initialized_app_context: InitializedAppContext,
         dependency_mocks: AppDependencyMocks,
@@ -921,22 +911,25 @@ class TestAppDispose:
         # Arrange
         initialized_app = initialized_app_context.app_context.app
         dependency_mocks = initialized_app_context.dependency_mocks
-        lifecycle_mock = initialized_app_context.app_context.lifecycle_mock
-        lifecycle_mock.state = AppState.FINISHED
+        lifecycle_transition_spy = initialized_app_context.app_context.lifecycle_transition_spy
 
         initialized_app.dispose()
+        assert initialized_app.state is AppState.DISPOSED
         assert initialized_app.localization is None
         assert initialized_app._config is None  # pyright: ignore[reportPrivateUsage]
         assert initialized_app.settings is None
         assert initialized_app.main_window is None
 
-        reset_lifecycle_mock_calls(initialized_app_context.app_context)
-
         # Act
         initialized_app.initialize(app_config)
 
         # Assert
-        lifecycle_mock.transition.assert_called_once_with(Transition.INITIALIZE)
+        assert initialized_app.state is AppState.INITIALIZED
+        assert lifecycle_transition_spy.call_args_list == [
+            call(Transition.INITIALIZE),
+            call(Transition.DISPOSE),
+            call(Transition.INITIALIZE),
+        ]
         assert initialized_app.localization is dependency_mocks.localization
         assert initialized_app._config is app_config  # pyright: ignore[reportPrivateUsage]
         assert initialized_app.settings is dependency_mocks.settings
@@ -953,7 +946,7 @@ class TestAppDispose:
         """Rejected disposal while running preserves existing application services."""
         # Arrange
         initialized_app = initialized_app_context.app_context.app
-        lifecycle_mock = initialized_app_context.app_context.lifecycle_mock
+        lifecycle_transition_spy = initialized_app_context.app_context.lifecycle_transition_spy
 
         mocker.patch.object(
             initialized_app,
@@ -962,24 +955,26 @@ class TestAppDispose:
             return_value=2,
         )
         initialized_app.run()
-        error = LifecycleTransitionNotAllowedError(
-            Transition.DISPOSE,
-            AppState.RUNNING,
-        )
-        lifecycle_mock.transition.side_effect = error
 
         localization_before = initialized_app.localization
         app_config_before = initialized_app._config  # pyright: ignore[reportPrivateUsage]
         settings_before = initialized_app.settings
         main_window_before = initialized_app.main_window
-        reset_lifecycle_mock_calls(initialized_app_context.app_context)
 
-        # Act / Assert
+        # Act
         with pytest.raises(LifecycleTransitionNotAllowedError) as exc_info:
             initialized_app.dispose()
 
-        assert exc_info.value is error
-        lifecycle_mock.transition.assert_called_once_with(Transition.DISPOSE)
+        # Assert
+        assert exc_info.value.state is AppState.RUNNING
+        assert exc_info.value.transition is Transition.DISPOSE
+        assert initialized_app.state is AppState.RUNNING
+        assert lifecycle_transition_spy.call_args_list == [
+            call(Transition.INITIALIZE),
+            call(Transition.RUN),
+            call(Transition.DISPOSE),
+        ]
+
         assert initialized_app.localization is localization_before
         assert initialized_app._config is app_config_before  # pyright: ignore[reportPrivateUsage]
         assert initialized_app.settings is settings_before

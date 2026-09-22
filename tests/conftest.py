@@ -106,19 +106,18 @@ def app(qapp: QApplication) -> Generator[App]:
     """Provide a clean PackY application and restore clean lifecycle state afterward."""
     # Setup
     assert isinstance(qapp, App)
+    assert qapp.state is AppState.CREATED
 
     try:
-        assert qapp.state is AppState.CREATED
         yield qapp
     finally:
         # Teardown
         if qapp.state is AppState.RUNNING:
             qapp.post_run()
             assert qapp.state is AppState.FINISHED
-
         qapp.dispose()
         assert qapp.state is AppState.DISPOSED
-        qapp._lifecycle._state = AppState.CREATED # pyright: ignore[reportPrivateUsage] Forces the app to be in the first state to restore it to its initial state.
+        qapp._lifecycle = AppLifecycle() # pyright: ignore[reportAttributeAccessIssue, reportPrivateUsage]
 
 # -----------------------------------------------------------------------------
 @pytest.fixture
