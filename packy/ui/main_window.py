@@ -251,19 +251,23 @@ class MainWindow(QMainWindow):
     @override
     def closeEvent(self, event: QCloseEvent) -> None:
         QtCore.qDebug(f"Closing {self.objectName()}.")
-        # close_button = QMessageBox.question(
-        #     self, self.windowTitle(), "Are you sure?\n",
-        #     QMessageBox.StandardButton.Cancel | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Yes,
-        #     QMessageBox.StandardButton.Yes,
-        # )
-        # if close_button == QMessageBox.StandardButton.Yes:
-        if self._batch_workspace.close_current_batch():
+        close_button = QMessageBox.question(
+            self,
+            self.windowTitle(),
+            "Are you sure?\n",
+            QMessageBox.StandardButton.Cancel
+            | QMessageBox.StandardButton.No
+            | QMessageBox.StandardButton.Yes,
+            QMessageBox.StandardButton.Yes,
+        )
+        if (
+            close_button == QMessageBox.StandardButton.Yes
+            and self._batch_workspace.close_current_batch()
+        ):
             super().closeEvent(event)
             event.accept()
         else:
             event.ignore()
-        # else:
-        #     event.ignore()
 
     # -------------------------------------------------------------------------
     @Slot(Batch, result=None)
