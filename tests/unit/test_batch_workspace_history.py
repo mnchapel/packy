@@ -63,7 +63,7 @@ def workspace_history(
     # Setup
     parent = QObject()
     history = BatchWorkspaceHistory(
-        max_recent_batches=2,
+        max_recent_batches=3,
         settings=user_settings_mock,
         parent=parent,
     )
@@ -110,6 +110,7 @@ class TestWorkspaceHistoryRecentlyOpened:
         newest_batch_path = (tmp_path / "newest.json").resolve()
         recent_batches_paths = [
             (tmp_path / "current.json").resolve(),
+            (tmp_path / "older.json").resolve(),
             (tmp_path / "oldest.json").resolve(),
         ]
         workspace_history._recent_batches = list(recent_batches_paths)  # pyright: ignore[reportPrivateUsage]
@@ -154,6 +155,7 @@ class TestWorkspaceHistoryLatestOpened:
         # Arrange
         recent_batches_paths = [
             (tmp_path / "current.json").resolve(),
+            (tmp_path / "older.json").resolve(),
             (tmp_path / "oldest.json").resolve(),
         ]
         workspace_history._recent_batches = list(recent_batches_paths)  # pyright: ignore[reportPrivateUsage]
@@ -191,7 +193,7 @@ class TestWorkspaceHistoryAddRecentlyOpened:
     @pytest.mark.technique_equivalence_partitioning
     @pytest.mark.technique_state_transition
     @pytest.mark.technique_branch
-    def test_new_path_becomes_latest_and_is_persisted(
+    def test_new_path_becomes_latest_and_emits_change(
         self,
         user_settings_mock: NonCallableMagicMock,
         workspace_history: BatchWorkspaceHistory,
@@ -199,32 +201,45 @@ class TestWorkspaceHistoryAddRecentlyOpened:
         qtbot: QtBot,
         tmp_path: Path,
     ) -> None:
-        """Adding the first path makes it latest, persists it, and emits it."""
+        """Adding a new path moves it to the front of the recent history and emits the change."""
         # Arrange
-        new_batch_path = (tmp_path / "newest.json").resolve()
+        first_batch_path = (tmp_path / "first.json").resolve()
+        second_batch_path = (tmp_path / "second.json").resolve()
+        third_batch_path = (tmp_path / "third.json").resolve()
 
-        def capture_recent_batches_signal(recent_batch_paths: list[Path]) -> bool:
-            return recent_batch_paths == [new_batch_path]
-
-        # Act
-        with qtbot.waitSignal(
-            workspace_history.recent_batches_changed,
-            check_params_cb=capture_recent_batches_signal,
-        ):
-            workspace_history.add_recently_opened(new_batch_path)
-
-        # Assert
-        assert workspace_history.recently_opened == (new_batch_path,)
-        assert workspace_history.latest_opened == new_batch_path
-        assert user_settings_mock.method_calls == [
-            mocker.call.begin_group(WorkspaceSettings.SETTINGS_GROUP),
-            mocker.call.set_value(
-                WorkspaceSettings.RECENT_BATCHES,
-                [new_batch_path],
-                workspace_history.recent_batches_changed.emit,
-            ),
-            mocker.call.end_group(),
+        recent_batch_paths_history = [
+            (first_batch_path, [first_batch_path]),
+            (second_batch_path, [second_batch_path, first_batch_path]),
+            (third_batch_path, [third_batch_path, second_batch_path, first_batch_path]),
         ]
+
+        # Act / Assert
+        for new_batch_path, expected_recent_batch_paths in recent_batch_paths_history:
+            user_settings_mock.reset_mock()
+
+            def capture_recent_batches_signal(
+                recent_batch_paths: list[Path],
+                expected: list[Path] = expected_recent_batch_paths,
+            ) -> bool:
+                return recent_batch_paths == expected
+
+            with qtbot.waitSignal(
+                workspace_history.recent_batches_changed,
+                check_params_cb=capture_recent_batches_signal,
+            ):
+                workspace_history.add_recently_opened(new_batch_path)
+
+            assert workspace_history.recently_opened == tuple(expected_recent_batch_paths)
+            assert workspace_history.latest_opened == new_batch_path
+            assert user_settings_mock.method_calls == [
+                mocker.call.begin_group(WorkspaceSettings.SETTINGS_GROUP),
+                mocker.call.set_value(
+                    WorkspaceSettings.RECENT_BATCHES,
+                    expected_recent_batch_paths,
+                    workspace_history.recent_batches_changed.emit,
+                ),
+                mocker.call.end_group(),
+            ]
 
     # -------------------------------------------------------------------------
     @pytest.mark.scenario_alternate_path
@@ -281,8 +296,10 @@ class TestWorkspaceHistoryAddRecentlyOpened:
         # Arrange
         newest_batch_path = (tmp_path / "newest.json").resolve()
         current_batch_path = (tmp_path / "current.json").resolve()
+        older_batch_path = (tmp_path / "older.json").resolve()
         oldest_batch_path = (tmp_path / "oldest.json").resolve()
         workspace_history.add_recently_opened(oldest_batch_path)
+        workspace_history.add_recently_opened(older_batch_path)
         workspace_history.add_recently_opened(current_batch_path)
 
         user_settings_mock.reset_mock()
@@ -291,14 +308,18 @@ class TestWorkspaceHistoryAddRecentlyOpened:
         workspace_history.add_recently_opened(newest_batch_path)
 
         # Assert
-        assert workspace_history.recently_opened == (newest_batch_path, current_batch_path)
+        assert workspace_history.recently_opened == (
+            newest_batch_path,
+            current_batch_path,
+            older_batch_path,
+        )
         assert workspace_history.latest_opened == newest_batch_path
         assert oldest_batch_path not in workspace_history.recently_opened
         assert user_settings_mock.method_calls == [
             mocker.call.begin_group(WorkspaceSettings.SETTINGS_GROUP),
             mocker.call.set_value(
                 WorkspaceSettings.RECENT_BATCHES,
-                [newest_batch_path, current_batch_path],
+                [newest_batch_path, current_batch_path, older_batch_path],
                 workspace_history.recent_batches_changed.emit,
             ),
             mocker.call.end_group(),
@@ -322,8 +343,11 @@ class TestWorkspaceHistoryClearRecentlyOpened:
     ) -> None:
         """Clearing populated history persists and emits the resulting empty state."""
         # Arrange
-        new_batch_path = (tmp_path / "newest.json").resolve()
-        workspace_history._recent_batches = [new_batch_path]  # pyright: ignore[reportPrivateUsage]
+        workspace_history._recent_batches = [  # pyright: ignore[reportPrivateUsage]
+            (tmp_path / "current.json").resolve(),
+            (tmp_path / "older.json").resolve(),
+            (tmp_path / "oldest.json").resolve(),
+        ]
         user_settings_mock.reset_mock()
 
         def capture_recent_batches_signal(recent_batch_paths: list[Path]) -> bool:
@@ -369,7 +393,8 @@ class TestWorkspaceHistoryLoadFromSettings:
         """Loading stored paths replaces public history and emits the loaded order."""
         # Arrange
         recent_batches_paths = [
-            (tmp_path / "newest.json").resolve(),
+            (tmp_path / "current.json").resolve(),
+            (tmp_path / "older.json").resolve(),
             (tmp_path / "oldest.json").resolve(),
         ]
         user_settings_mock.value.return_value = recent_batches_paths
@@ -451,7 +476,8 @@ class TestWorkspaceHistorySaveToSettings:
         """Saving writes current paths and routes confirmed changes through the signal."""
         # Arrange
         recent_batches_paths = [
-            (tmp_path / "newest.json").resolve(),
+            (tmp_path / "current.json").resolve(),
+            (tmp_path / "older.json").resolve(),
             (tmp_path / "oldest.json").resolve(),
         ]
         workspace_history._recent_batches = list(recent_batches_paths)  # pyright: ignore[reportPrivateUsage]
