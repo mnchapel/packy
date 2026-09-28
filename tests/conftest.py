@@ -7,14 +7,12 @@ See LICENSE.md file for more information.
 """
 
 # Local application
-import packy.core.app as app_module
 from packy.core.app import App
 from packy.core.app_config import AppConfig
-from packy.core.logger import Logger
+from packy.core.app_lifecycle import AppLifecycle, AppState
 
 # Third-party
 import pytest
-from PySide6 import QtCore
 from PySide6.QtCore import QSettings
 from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox
 
@@ -25,7 +23,6 @@ from typing import TYPE_CHECKING, Final
 if TYPE_CHECKING:
     # Third-party
     from pytest_mock import MockerFixture
-    from pytestqt.qtbot import QtBot
 
     # Standard library
     from collections.abc import Generator
@@ -117,7 +114,8 @@ def app(qapp: QApplication) -> Generator[App]:
             assert qapp.state is AppState.FINISHED
         qapp.dispose()
         assert qapp.state is AppState.DISPOSED
-        qapp._lifecycle = AppLifecycle() # pyright: ignore[reportAttributeAccessIssue, reportPrivateUsage]
+        qapp._lifecycle = AppLifecycle()  # pyright: ignore[reportAttributeAccessIssue, reportPrivateUsage] Forces the app to be in the first state to be in a fresh state for the next tests.
+
 
 # -----------------------------------------------------------------------------
 @pytest.fixture
@@ -135,71 +133,6 @@ def app_config(mocker: MockerFixture, tmp_path: Path) -> AppConfig:
         MAX_RECENT_BATCHES=3,
         VERSION="1.2.3",
     )
-
-
-# -----------------------------------------------------------------------------
-@pytest.fixture
-def initialized_app(
-    app: App,
-    app_config: AppConfig,
-) -> App:
-    """Provide an initialized PackY application."""
-    app.initialize(app_config)
-    assert app.state is AppState.INITIALIZED
-    return app
-
-
-# -----------------------------------------------------------------------------
-@pytest.fixture
-def launched_app(
-    qapp: QApplication,
-    app_config: AppConfig,
-    mocker: MockerFixture,
-    qtbot: QtBot,
-) -> Generator[App]:
-    """Run a fully initialized application with a logger and a main window."""
-    # Setup
-    assert isinstance(qapp, App)
-    mocker.patch.object(
-        app_module,
-        "AppConfig",
-        autospec=True,
-        spec_set=True,
-        return_value=app_config,
-    )
-    app_exec_mock: MagicMock = mocker.patch.object(
-        qapp,
-        "exec",
-        autospec=True,
-        return_value=0,
-    )
-
-    try:
-        # Initialize logging
-        has_started = Logger.start(app_config.LOG_FILE_PATH)
-        if not has_started:
-            QtCore.qWarning("Debug logger cannot be started!")
-            pytest.fail("Debug logger cannot be started")
-
-        # Launch application
-        qapp.dispose()
-        qapp.initialize(app_config)
-        exit_code = qapp.run()
-        assert exit_code == 0
-        app_exec_mock.assert_called_once_with()
-
-        window = qapp.main_window
-        assert window is not None
-        qtbot.waitUntil(window.isVisible)
-
-        yield qapp
-    finally:
-        # Teardown
-        qapp.dispose()
-        has_stopped = Logger.stop()
-        if not has_stopped:
-            QtCore.qWarning("Debug logger cannot be stopped!")
-            pytest.fail("Debug logger cannot be stopped")
 
 
 # -----------------------------------------------------------------------------

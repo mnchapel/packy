@@ -12,15 +12,25 @@ See LICENSE.md file for more information.
 # Future library
 from __future__ import annotations
 
+# Local application
+from packy.widgets.radio_group_widget import RadioGroupWidget
+
 # Third-party
 from PySide6.QtCore import QObject
 from PySide6.QtGui import QAction
-from PySide6.QtWidgets import QGroupBox, QMainWindow, QMenu, QPushButton
+from PySide6.QtWidgets import (
+    QComboBox,
+    QGroupBox,
+    QMainWindow,
+    QMenu,
+    QPushButton,
+    QTableView,
+)
 
 # Standard library
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING, Final, TypeVar
 
 if TYPE_CHECKING:
     # Third-party
@@ -42,12 +52,22 @@ type ObjectSnapshots = dict[ObjectName, QObjectState]
 ### Object inspection configuration
 ###############################################################################
 # -----------------------------------------------------------------------------
+TQObject = TypeVar("TQObject", bound=QObject)
+
+
 @dataclass(frozen=True, slots=True)
 class QObjectState:
     """Captured state of a QObject."""
 
     qobject: QObject
     properties: PropertySnapshot
+
+    def as_type(self, object_type: type[TQObject]) -> TQObject:
+        """Return the QObject with the requested type."""
+        assert isinstance(self.qobject, object_type), (
+            f"Expected {object_type.__name__}, got {type(self.qobject).__name__}"
+        )
+        return self.qobject
 
     def __getitem__(self, property_name: PropertyName) -> object:
         """Return the value of the requested property."""
@@ -66,6 +86,41 @@ class ObjectConfiguration:
 # -----------------------------------------------------------------------------
 OBJECT_CONFIGURATIONS: Final[Mapping[type[QObject], ObjectConfiguration]] = MappingProxyType(
     {
+        QAction: ObjectConfiguration(
+            property_names=(
+                "enabled",
+                "visible",
+                "checked",
+            ),
+            observed_names=(
+                "action_new_batch",
+                "action_open_batch",
+                "action_save_batch",
+                "action_save_batch_as",
+                "action_close_batch",
+                "action_exit",
+            ),
+        ),
+        QComboBox: ObjectConfiguration(
+            property_names=("currentIndex",),
+            observed_names=(
+                "compression_method",
+                "compression_level",
+            ),
+        ),
+        QGroupBox: ObjectConfiguration(
+            property_names=(
+                "enabled",
+                "visible",
+                "checked",
+            ),
+            observed_names=(
+                "statistics_group",
+                "file_selection_group",
+                "output_group",
+                "archiver_config_group",
+            ),
+        ),
         QMainWindow: ObjectConfiguration(
             property_names=(
                 "visible",
@@ -74,24 +129,12 @@ OBJECT_CONFIGURATIONS: Final[Mapping[type[QObject], ObjectConfiguration]] = Mapp
                 "windowModified",
             ),
         ),
-        QAction: ObjectConfiguration(
-            property_names=(
-                "enabled",
-                "visible",
-                "checked",
-            ),
-            observed_names=(
-                "action_save_batch",
-                "action_save_batch_as",
-                "action_close_batch",
-            ),
-        ),
         QMenu: ObjectConfiguration(
             property_names=(
                 "enabled",
                 "visible",
             ),
-            observed_names=("open_recent_menu",),
+            observed_names=("menu_open_recent",),
         ),
         QPushButton: ObjectConfiguration(
             property_names=(
@@ -109,17 +152,16 @@ OBJECT_CONFIGURATIONS: Final[Mapping[type[QObject], ObjectConfiguration]] = Mapp
                 "cancel_jobs_button",
             ),
         ),
-        QGroupBox: ObjectConfiguration(
+        QTableView: ObjectConfiguration(
             property_names=(
                 "enabled",
                 "visible",
-                "checked",
             ),
-            observed_names=(
-                "statistics_group",
-                "file_selection_group",
-                "output_group",
-            ),
+            observed_names=("job_queue_table_view",),
+        ),
+        RadioGroupWidget: ObjectConfiguration(
+            property_names=("selected_button",),
+            observed_names=("FormatGroupWidget",),
         ),
     },
 )
