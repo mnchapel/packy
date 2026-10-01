@@ -117,13 +117,13 @@ class TestWorkspaceHistoryRecentlyOpened:
         original_recent_batches = workspace_history.recently_opened
 
         # Act
-        workspace_history._recent_batches.append(newest_batch_path)  # pyright: ignore[reportPrivateUsage]
+        workspace_history._recent_batches.insert(0, newest_batch_path)  # pyright: ignore[reportPrivateUsage]
 
         # Assert
         assert original_recent_batches == tuple(recent_batches_paths)
         assert workspace_history.recently_opened == (
-            *recent_batches_paths,
             newest_batch_path,
+            *recent_batches_paths,
         )
 
     # -------------------------------------------------------------------------
