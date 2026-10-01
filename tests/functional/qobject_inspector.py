@@ -30,12 +30,9 @@ from PySide6.QtWidgets import (
 # Standard library
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Final, TypeVar
+from typing import TYPE_CHECKING, Final, TypeVar, overload
 
 if TYPE_CHECKING:
-    # Third-party
-    from PySide6.QtCore import QObject
-
     # Standard library
     from collections.abc import Iterator, Mapping
 
@@ -49,10 +46,11 @@ type ObjectSnapshots = dict[ObjectName, QObjectState]
 
 
 ###############################################################################
-### Object inspection configuration
+### Captured QObject states
 ###############################################################################
 # -----------------------------------------------------------------------------
 TQObject = TypeVar("TQObject", bound=QObject)
+TProperty = TypeVar("TProperty")
 
 
 @dataclass(frozen=True, slots=True)
@@ -69,11 +67,45 @@ class QObjectState:
         )
         return self.qobject
 
-    def __getitem__(self, property_name: PropertyName) -> object:
+    @overload
+    def __getitem__(self, key: PropertyName) -> object: ...
+
+    @overload
+    def __getitem__[TProperty](
+        self,
+        key: tuple[PropertyName, type[TProperty]],
+    ) -> TProperty: ...
+
+    def __getitem__[TProperty](
+        self,
+        key: PropertyName | tuple[PropertyName, type[TProperty]],
+    ) -> object:
         """Return the value of the requested property."""
-        return self.properties[property_name]
+        if isinstance(key, tuple):
+            property_name, property_type = key
+            return self.property_as(property_name, property_type)
+
+        return self.properties[key]
+
+    def property_as(
+        self,
+        property_name: PropertyName,
+        property_type: type[TProperty],
+    ) -> TProperty:
+        """Return a property value with runtime type validation."""
+        value = self.properties[property_name]
+
+        assert isinstance(value, property_type), (
+            f"Expected property {property_name!r} to be "
+            f"{property_type.__name__}, got {type(value).__name__}"
+        )
+
+        return value
 
 
+###############################################################################
+### Object inspection configuration
+###############################################################################
 # -----------------------------------------------------------------------------
 @dataclass(frozen=True, slots=True)
 class ObjectConfiguration:
